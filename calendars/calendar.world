@@ -1,0 +1,22 @@
+/*
+ * World wide calendar files, except national calendars
+ *
+ * $FreeBSD: head/usr.bin/calendar/calendars/calendar.world 110933 2003-02-15 10:57:20Z seanc $
+ */
+
+#ifndef _calendar_world_
+#define _calendar_world_
+
+#include <calendar.birthday>
+#include <calendar.christian>
+#include <calendar.computer>
+#include <calendar.dragonfly>
+#include <calendar.fictional>
+#include <calendar.history>
+#include <calendar.holiday>
+#include <calendar.judaic>
+#include <calendar.music>
+#include <calendar.space>
+#include <calendar.ushistory>
+
+#endif /* !_calendar_world_ */
