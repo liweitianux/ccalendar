@@ -290,7 +290,7 @@ double
 depression_moment(double tapprox, double latitude, double longitude,
 		  double alpha, bool morning)
 {
-	double eps = 30.0 / 3600 / 24;  /* accuracy of 30 seconds */
+	const double eps = 30.0 / 3600 / 24;  /* accuracy of 30 seconds */
 	double t = approx_depression_moment(tapprox, latitude, longitude,
 					    alpha, morning);
 	if (isnan(t))
