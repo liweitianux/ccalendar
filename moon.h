@@ -37,6 +37,8 @@
 #ifndef MOON_H_
 #define MOON_H_
 
+#include "basics.h"
+
 extern const double mean_synodic_month;
 
 double	lunar_altitude(double t, double latitude, double longitude);
