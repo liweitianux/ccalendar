@@ -42,6 +42,7 @@
 #include <stddef.h>
 
 #include "basics.h"
+#include "sun.h"
 #include "utils.h"
 
 /*

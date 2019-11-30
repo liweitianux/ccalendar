@@ -45,6 +45,7 @@
 
 #include "basics.h"
 #include "gregorian.h"
+#include "moon.h"
 #include "sun.h"
 #include "utils.h"
 
