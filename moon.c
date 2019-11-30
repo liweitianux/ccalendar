@@ -40,6 +40,7 @@
  */
 
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -618,12 +619,11 @@ lunar_altitude_topocentric(double t, double latitude, double longitude)
  * Ref: Sec.(14.7), Eq.(14.82)
  */
 double
-lunar_altitude_observed(double t, double latitude, double longitude,
-			double elevation)
+lunar_altitude_observed(double t, struct location *loc)
 {
 	double moon_radius = 16.0 / 60.0;  /* 16 arcminutes */
-	return (lunar_altitude_topocentric(t, latitude, longitude) +
-		refraction(elevation) + moon_radius);
+	return (lunar_altitude_topocentric(t, loc->latitude, loc->longitude) +
+		refraction(loc->elevation) + moon_radius);
 }
 
 /*
@@ -656,8 +656,18 @@ lunar_phase(double t)
 double
 new_moon_before(double t)
 {
-	// p.406
-	return t;
+	double t0 = nth_new_moon(0);
+	double phi = lunar_phase(t);
+	int n = (int)lround((t - t0) / mean_synodic_month - phi / 360.0);
+
+	int k = n - 1;
+	double t1 = nth_new_moon(k);
+	while (t1 < t) {
+		k++;
+		t1 = nth_new_moon(k);
+	}
+
+	return nth_new_moon(k-1);
 }
 
 /*
@@ -667,6 +677,111 @@ new_moon_before(double t)
 double
 new_moon_atafter(double t)
 {
-	// p.406
-	return t;
+	double t0 = nth_new_moon(0);
+	double phi = lunar_phase(t);
+	int n = (int)lround((t - t0) / mean_synodic_month - phi / 360.0);
+
+	double t1 = nth_new_moon(n);
+	while (t1 < t) {
+		n++;
+		t1 = nth_new_moon(n);
+	}
+
+	return t1;
+}
+
+/*
+ * Calculate the moment of moonrise in standard time on fixed date $rd
+ * at location $loc.
+ * NOTE: Return an NaN if no moonrise.
+ * Ref: Sec.(14.7), Eq.(14.83)
+ */
+double
+moonrise(int rd, struct location *loc)
+{
+	double t = (double)rd - loc->zone;  /* universal time */
+	bool waning = lunar_phase(t) > 180.0;
+	/* lunar altitude at midnight */
+	double alt = lunar_altitude_observed(t, loc);
+	double offset = alt / (4.0 * (90.0 - fabs(loc->latitude)));
+
+	/* approximate rising time */
+	double t_approx = t;
+	if (waning) {
+		t_approx -= offset;
+		if (offset > 0)
+			t_approx += 1;
+	} else {
+		t_approx += 0.5 + offset;
+	}
+
+	/* binary search to determine the rising time */
+	const double eps = 30.0 / 3600 / 24;  /* accuracy of 30 seconds */
+	double a = t_approx - 6.0/24.0;
+	double b = t_approx + 6.0/24.0;
+	double t_rise;
+	do {
+		t_rise = (a + b) / 2.0;
+		if (lunar_altitude_observed(t_rise, loc) > 0)
+			b = t_rise;
+		else
+			a = t_rise;
+	} while (fabs(a - b) >= eps);
+
+	if (t_rise < t + 1) {
+		t_rise += loc->zone;  /* standard time */
+		/* may be just before to midnight */
+		return (t_rise > (double)rd) ? t_rise : (double)rd;
+	} else {
+		/* no moonrise on this day */
+		return NAN;
+	}
+}
+
+/*
+ * Calculate the moment of moonset in standard time on fixed date $rd
+ * at location $loc.
+ * NOTE: Return an NaN if no moonset.
+ * Ref: Sec.(14.7), Eq.(14.84)
+ */
+double
+moonset(int rd, struct location *loc)
+{
+	double t = (double)rd - loc->zone;  /* universal time */
+	bool waxing = lunar_phase(t) < 180.0;
+	/* lunar altitude at midnight */
+	double alt = lunar_altitude_observed(t, loc);
+	double offset = alt / (4.0 * (90.0 - fabs(loc->latitude)));
+
+	/* approximate setting time */
+	double t_approx = t;
+	if (waxing) {
+		t_approx += offset;
+		if (offset <= 0)
+			t_approx += 1;
+	} else {
+		t_approx += 0.5 - offset;
+	}
+
+	/* binary search to determine the setting time */
+	const double eps = 30.0 / 3600 / 24;  /* accuracy of 30 seconds */
+	double a = t_approx - 6.0/24.0;
+	double b = t_approx + 6.0/24.0;
+	double t_set;
+	do {
+		t_set = (a + b) / 2.0;
+		if (lunar_altitude_observed(t_set, loc) < 0)
+			b = t_set;
+		else
+			a = t_set;
+	} while (fabs(a - b) >= eps);
+
+	if (t_set < t + 1) {
+		t_set += loc->zone;  /* standard time */
+		/* may be just before to midnight */
+		return (t_set > (double)rd) ? t_set : (double)rd;
+	} else {
+		/* no moonrise on this day */
+		return NAN;
+	}
 }

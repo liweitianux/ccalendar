@@ -43,10 +43,12 @@ double	lunar_altitude(double t, double latitude, double longitude);
 double	lunar_distance(double t);
 double	lunar_latitude(double t);
 double	lunar_longitude(double t);
+
 double	lunar_phase(double t);
 double	new_moon_atafter(double t);
 double	new_moon_before(double t);
 
-/* TODO: rise, set, phase */
+double	moonrise(int rd, struct location *loc);
+double	moonset(int rd, struct location *loc);
 
 #endif
