@@ -37,6 +37,8 @@
 #ifndef SUN_H_
 #define SUN_H_
 
+#include "basics.h"
+
 extern const double mean_tropical_year;
 
 double	aberration(double t);
@@ -46,6 +48,8 @@ double	estimate_prior_solar_longitude(double lambda, double t);
 double	solar_longitude(double t);
 double	solar_altitude(double t, double latitude, double longitude);
 
-/* TODO: sunrise, sunset */
+double	sunrise(int rd, struct location *loc);
+double	sunset(int rd, struct location *loc);
+/* TODO: next solstice/equinox */
 
 #endif

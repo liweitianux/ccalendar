@@ -39,6 +39,8 @@
  * 2018, Cambridge University Press
  */
 
+#include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "basics.h"
@@ -205,25 +207,118 @@ solar_altitude(double t, double latitude, double longitude)
 }
 
 /*
- * Ref: Sec.(14.7), Eq.(14.68)
+ * Calculate the sine of angle between positions of Sun at local time $t
+ * and when its depression angle is $alpha degrees at location ($latitude,
+ * $longitude).
+ * Ref: Sec.(14.7), Eq.(14.69)
  */
-double
-approx_depression_moment(double t)
+static double
+sine_offset(double t, double latitude, double longitude, double alpha)
 {
-	// TODO
-	return 0.0;
+	double ut = t - longitude / 360.0;  /* local -> universal time */
+	double lambda = solar_longitude(ut);
+	double delta = declination(ut, 0, lambda);
+
+	return (tan_deg(latitude) * tan_deg(delta) +
+		sin_deg(alpha) / cos_deg(delta) / cos_deg(latitude));
 }
 
 /*
- * Calculate the moment, in local mean time, when the depression angle
- * of the geometric center of Sun is $alpha degrees below (or above if
- * the $alpha is negative) the geometric horizon at sea level at a given
- * location around a given moment $t.
+ * Approximate the moment in local time near the given moment $t when
+ * the depression angle of Sun is $alpha (negative if above horizon) at
+ * location ($latitude, $longitude).  If $morning is true, then searching
+ * for the morning event; otherwise for the evening event.
+ * NOTE: Return an NaN if the depression angle cannot be reached.
  * Ref: Sec.(14.7), Eq.(14.68)
  */
 double
-depression_moment(double t)
+approx_depression_moment(double t, double latitude, double longitude,
+			 double alpha, bool morning)
 {
-	// TODO
-	return 0.0;
+	double t2 = floor(t);  /* midnight */
+	if (alpha < 0)
+		t2 += 0.5;  /* midday */
+	else if (morning == false)
+		t2 += 1.0;  /* next day */
+
+	double try = sine_offset(t, latitude, longitude, alpha);
+	double value = ((fabs(try) > 1) ?
+			sine_offset(t2, latitude, longitude, alpha) :
+			try);
+
+	if (fabs(value) > 1) {
+		return NAN;
+	} else {
+		double offset = mod3_f(arcsin_deg(value) / 360.0, -0.5, 0.5);
+		double t3 = floor(t);
+		if (morning)
+			t3 += 6.0/24.0 - offset;
+		else
+			t3 += 18.0/24.0 + offset;
+		return local_from_apparent(t3, longitude);
+	}
+}
+
+/*
+ * Calculate the moment in local time near the given moment $tapprox when
+ * the depression angle of Sun is $alpha (negative if above horizon) at
+ * location ($latitude, $longitude).  If $morning is true, then searching
+ * for the morning event; otherwise for the evening event.
+ * NOTE: Return an NaN if the depression angle cannot be reached.
+ * Ref: Sec.(14.7), Eq.(14.70)
+ */
+double
+depression_moment(double tapprox, double latitude, double longitude,
+		  double alpha, bool morning)
+{
+	double eps = 30.0 / 3600 / 24;  /* accuracy of 30 seconds */
+	double t = approx_depression_moment(tapprox, latitude, longitude,
+					    alpha, morning);
+	if (isnan(t))
+		return NAN;
+	else if (fabs(t - tapprox) < eps)
+		return t;
+	else
+		return depression_moment(t, latitude, longitude,
+					 alpha, morning);
+}
+
+/*
+ * Calculate the moment of sunrise in standard time on fixed date $rd at
+ * location $loc.
+ * NOTE: Return an NaN if no sunrise.
+ * Ref: Sec.(14.7), Eq.(14.72,14.76)
+ */
+double
+sunrise(int rd, struct location *loc)
+{
+	double sun_radius = 16.0 / 60.0;  /* 16 arcminutes */
+	double alpha = refraction(loc->elevation) + sun_radius;
+	double tapprox = (double)rd + (6.0/24.0);
+	double lt = depression_moment(tapprox, loc->latitude, loc->longitude,
+				      alpha, true);
+	if (isnan(lt))
+		return NAN;
+	else
+		return lt - loc->longitude / 360.0 + loc->zone;
+}
+
+/*
+ * Calculate the moment of sunset in standard time on fixed date $rd at
+ * location $loc.
+ * NOTE: Return an NaN if no sunset.
+ * Ref: Sec.(14.7), Eq.(14.74,14.77)
+ */
+double
+sunset(int rd, struct location *loc)
+{
+	double sun_radius = 16.0 / 60.0;  /* 16 arcminutes */
+	double alpha = refraction(loc->elevation) + sun_radius;
+	double tapprox = (double)rd + (18.0/24.0);
+	double lt = depression_moment(tapprox, loc->latitude, loc->longitude,
+				      alpha, false);
+	if (isnan(lt))
+		return NAN;
+	else
+		return lt - loc->longitude / 360.0 + loc->zone;
 }
