@@ -166,6 +166,25 @@ solar_longitude(double t)
 }
 
 /*
+ * Calculate the moment (in universal time) of the first time at or after
+ * the given moment $t when the solar longitude will be $lambda degree.
+ * Ref: Sec.(14.5), Eq.(14.36)
+ */
+double
+solar_longitude_atafter(double lambda, double t)
+{
+	double rate = mean_tropical_year / 360.0;
+	double lon = solar_longitude(t);
+	double tau = t + rate * mod_f(lambda - lon, 360);
+
+	/* estimate range (within 5 days) */
+	double a = (t > tau - 5) ? t : tau - 5;
+	double b = tau + 5;
+
+	return invert_angular(solar_longitude, lambda, a, b);
+}
+
+/*
  * Calculate the approximate moment at or before the given moment $t when
  * the solar longitude just exceeded the given degree $lambda.
  * Ref: Sec.(14.5), Eq.(14.42)

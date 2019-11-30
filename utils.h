@@ -62,4 +62,6 @@ double	arctan_deg(double y, double x);
 
 double	angle2deg(int deg, int min, double sec);
 
+double	invert_angular(double (*f)(double), double y, double a, double b);
+
 #endif

@@ -196,3 +196,24 @@ angle2deg(int deg, int min, double sec)
 {
 	return deg + min/60.0 + sec/3600.0;
 }
+
+/*
+ * Use bisection search to find the inverse of the given angular function
+ * $f(x) at value $y (degrees) within time interval [$a, $b].
+ * Ref: Sec.(1.8), Eq.(1.36)
+ */
+double
+invert_angular(double (*f)(double), double y, double a, double b)
+{
+	double x;
+
+	do {
+		x = (a + b) / 2.0;
+		if (mod_f(f(x) - y, 360) < 180.0)
+			b = x;
+		else
+			a = x;
+	} while (fabs(a-b) >= eps);
+
+	return x;
+}

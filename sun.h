@@ -46,10 +46,11 @@ double	nutation(double t);
 
 double	estimate_prior_solar_longitude(double lambda, double t);
 double	solar_longitude(double t);
+double	solar_longitude_atafter(double lambda, double t);
+
 double	solar_altitude(double t, double latitude, double longitude);
 
 double	sunrise(int rd, struct location *loc);
 double	sunset(int rd, struct location *loc);
-/* TODO: next solstice/equinox */
 
 #endif
