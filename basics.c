@@ -265,7 +265,7 @@ double
 refraction(double elevation)
 {
 	double h = (elevation > 0) ? elevation : 0.0;
-	double radius = 6.732e6;  /* Earth radius in meters */
+	double radius = 6.372e6;  /* Earth radius in meters */
 	/* depression of visible horizon */
 	double dip = arccos_deg(radius / (radius + h));
 	/* depression contributed by an elevation of $h */
