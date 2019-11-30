@@ -53,7 +53,7 @@
 double
 ephemeris_correction(double t)
 {
-	int rd = (int)t;
+	int rd = (int)floor(t);
 	int year = gregorian_year_from_fixed(rd);
 	int y2000 = year - 2000;
 	int y1700 = year - 1700;
