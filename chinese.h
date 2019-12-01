@@ -47,36 +47,6 @@ struct chinese_date {
 	int	day;
 };
 
-enum major_solar_term {
-	YUSHUI = 1,	/* 雨水; 330° (solar longitude) */
-	CHUNFEN,	/* 春分; 0°; Spring Equinox */
-	GUYU,		/* 谷雨; 30° */
-	XIAOMAN,	/* 小满; 60° */
-	XIAZHI,		/* 夏至; 90°; Summer Solstice */
-	DASHU,		/* 大暑; 120° */
-	CHUSHU,		/* 处暑; 150° */
-	QIUFEN,		/* 秋分; 180°; Autumnal Equinox */
-	SHUANGJIANG,	/* 霜降; 210° */
-	XIAOXUE,	/* 小雪; 240° */
-	DONGZHI,	/* 冬至; 270°; Winter Solstice */
-	DAHAN,		/* 大寒; 300° */
-};
-
-enum minor_solar_term {
-	LICHUN = 1,	/* 立春; 315° (solar longitude) */
-	JINGZHE,	/* 惊蛰; 345° */
-	QINGMING,	/* 清明; 15° */
-	LIXIA,		/* 立夏; 45° */
-	MANGZHONG,	/* 芒种; 75° */
-	XIAOSHU,	/* 小暑; 105° */
-	LIQIU,		/* 立秋; 135° */
-	BAILU,		/* 白露; 165° */
-	HANLU,		/* 寒露; 195° */
-	LIDONG,		/* 立冬; 225° */
-	DAXUE,		/* 大雪; 255° */
-	XIAOHAN,	/* 小寒; 285° */
-};
-
 int	chinese_new_year(int year);
 
 struct chinese_date	chinese_from_fixed(int rd);

@@ -369,7 +369,7 @@ static const struct branch {
 
 /* Chinese names of months and days */
 static const char *months[] = {
-	"一", "二", "三", "四", "五", "六",
+	"正", "二", "三", "四", "五", "六",
 	"七", "八", "九", "十", "冬", "腊",
 };
 static const char *mdays[] = {
@@ -378,6 +378,39 @@ static const char *mdays[] = {
 	"十三", "十四", "十五", "十六", "十七", "十八",
 	"十九", "二十", "廿一", "廿二", "廿三", "廿四",
 	"廿五", "廿六", "廿七", "廿八", "廿九", "三十",
+};
+
+/* 24 major and minor solar terms (节气) */
+static const struct solar_term {
+	const char	*name;
+	const char	*zhname;
+	bool		major;  /* whether a major solar term */
+	int		longitude;  /* longitude of Sun */
+} SOLAR_TERMS[] = {
+	{ "Lìchūn",      "立春", false, 315 },
+	{ "Yǔshuǐ",      "雨水", true,  330 },
+	{ "Jīngzhé",     "惊蛰", false, 345 },
+	{ "Chūnfēn",     "春分", true,  0   },
+	{ "Qīngmíng",    "清明", false, 15  },
+	{ "Gǔyǔ",        "谷雨", true,  30  },
+	{ "Lìxià",       "立夏", false, 45  },
+	{ "Xiǎomǎn",     "小满", true,  60  },
+	{ "Mángzhòng",   "芒种", false, 75  },
+	{ "Xiàzhì",      "夏至", true,  90  },
+	{ "Xiǎoshǔ",     "小暑", false, 105 },
+	{ "Dàshǔ",       "大暑", true,  120 },
+	{ "Lìqiū",       "立秋", false, 135 },
+	{ "Chǔshǔ",      "处暑", true,  150 },
+	{ "Báilù",       "白露", false, 165 },
+	{ "Qiūfēn",      "秋分", true,  180 },
+	{ "Hánlù",       "寒露", false, 195 },
+	{ "Shuāngjiàng", "霜降", true,  210 },
+	{ "Lìdōng",      "立冬", false, 225 },
+	{ "Xiǎoxuě",     "小雪", true,  240 },
+	{ "Dàxuě",       "大雪", false, 255 },
+	{ "Dōngzhì",     "冬至", true,  270 },
+	{ "Xiǎohán",     "小寒", false, 285 },
+	{ "Dàhán",       "大寒", true,  300 },
 };
 
 /*
@@ -398,4 +431,28 @@ show_chinese_calendar(int rd)
 	printf("Chinese calendar: year %s%s [%s], %smonth %d, day %d\n",
 	       stem.name, branch.name, branch.zodiac,
 	       date.leap ? "leap " : "", date.month, date.day);
+
+	/* calculate solar terms of this year from February 1 */
+	struct g_date gdate = gregorian_from_fixed(rd);
+	gdate.month = 2;
+	gdate.day = 1;
+	int feb1 = fixed_from_gregorian(&gdate);
+
+	const double zone = chinese_zone(rd);
+	const struct solar_term *term;
+	double t_term, t_day;
+	int lambda, day, hh, mm;
+	for (size_t i = 0; i < nitems(SOLAR_TERMS); i++) {
+		term = &SOLAR_TERMS[i];
+		lambda = term->longitude;
+		t_term = solar_longitude_atafter(lambda, feb1) + zone;
+		day = (int)floor(t_term);
+		gdate = gregorian_from_fixed(day);
+		t_day = t_term - day;
+		hh = (int)(t_day * 24);
+		mm = lround(t_day * 24*60) % 60;
+		printf("%s (%-13s): %3d°, %4d-%02d-%02d %02d:%02d\n",
+		       term->zhname, term->name, lambda,
+		       gdate.year, gdate.month, gdate.day, hh, mm);
+	}
 }
