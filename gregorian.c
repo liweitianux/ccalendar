@@ -76,7 +76,7 @@ fixed_from_gregorian(struct g_date date)
 		  div_floor(date.year - 1, 400) +
 		  div_floor(date.month * 367 - 362, 12));
 	/* correct for the assumption that February always has 30 days */
-	if (date.month <= FEBRUARY)
+	if (date.month <= 2)
 		return rd + date.day;
 	else if (gregorian_leap_year(date.year))
 		return rd + date.day - 1;
@@ -91,7 +91,7 @@ fixed_from_gregorian(struct g_date date)
 int
 gregorian_new_year(int year)
 {
-	struct g_date date = { year, JANUARY, 1 };
+	struct g_date date = { year, 1, 1 };
 	return fixed_from_gregorian(date);
 }
 
@@ -143,7 +143,7 @@ gregorian_from_fixed(int rd)
 	date.year = gregorian_year_from_fixed(rd);
 
 	int pdays = rd - gregorian_new_year(date.year);
-	struct g_date d31 = { date.year, MARCH, 1 };
+	struct g_date d31 = { date.year, 3, 1 };
 	if (rd < fixed_from_gregorian(d31))
 		correction = 0;
 	else if (gregorian_leap_year(date.year))

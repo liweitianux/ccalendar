@@ -122,7 +122,7 @@ main(void)
 	printf("ra = %.12lf; dec = %.12lf\n", ra, dec);
 	printf("sidereal_time = %.12lf\n", st);
 
-	struct g_date zh_epoch_date = { -2636, FEBRUARY, 15 };
+	struct g_date zh_epoch_date = { -2636, 2, 15 };
 	int zh_epoch = fixed_from_gregorian(zh_epoch_date);
 	printf("\nchinese_epoch: RD (%d) <-> Gregorian (%d, %d, %d)\n",
 			zh_epoch, zh_epoch_date.year,

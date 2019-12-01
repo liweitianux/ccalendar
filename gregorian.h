@@ -39,35 +39,10 @@
 #ifndef GREGORIAN_H_
 #define GREGORIAN_H_
 
-enum month {
-	JANUARY = 1,
-	FEBRUARY,
-	MARCH,
-	APRIL,
-	MAY,
-	JUNE,
-	JULY,
-	AUGUST,
-	SEPTEMBER,
-	OCTOBER,
-	NOVEMBER,
-	DECEMBER,
-};
-
-enum day_of_week {
-	SUNDAY = 0,
-	MONDAY,
-	TUESDAY,
-	WEDNESDAY,
-	THURSDAY,
-	FRIDAY,
-	SATURDAY,
-};
-
 struct g_date {
-	int		year;
-	enum month	month;
-	int		day;
+	int	year;
+	int	month;	/* [1, 12] */
+	int	day;
 };
 
 int	fixed_from_gregorian(struct g_date date);

@@ -113,11 +113,11 @@ midnight_in_china(int rd)
 }
 
 /*
- * Calculate the last Chinese major solar term (zhōngqì) before the fixed
- * date $rd.
+ * Calculate the last Chinese major solar term (zhōngqì) in range of [1, 12]
+ * before the fixed date $rd.
  * Ref: Sec.(19.1), Eq.(19.1)
  */
-enum major_solar_term
+int
 current_major_solar_term(int rd)
 {
 	double ut = midnight_in_china(rd);
@@ -255,7 +255,7 @@ chinese_new_year_onbefore(int rd)
 int
 chinese_new_year(int year)
 {
-	struct g_date date = { year, JULY, 1 };
+	struct g_date date = { year, 7, 1 };
 	int july1 = fixed_from_gregorian(date);
 	return chinese_new_year_onbefore(july1);
 }

@@ -41,8 +41,8 @@
 
 struct chinese_date {
 	int	cycle;
-	int	year;
-	int	month;
+	int	year;	/* year in the $cycle: [1, 60] */
+	int	month;	/* [1, 12] */
 	bool	leap;	/* whether $month is a leap month */
 	int	day;
 };
