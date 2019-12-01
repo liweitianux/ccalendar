@@ -309,7 +309,7 @@ depression_moment(double tapprox, double latitude, double longitude,
  * Ref: Sec.(14.7), Eq.(14.72,14.76)
  */
 double
-sunrise(int rd, struct location *loc)
+sunrise(int rd, const struct location *loc)
 {
 	double sun_radius = 16.0 / 60.0;  /* 16 arcminutes */
 	double alpha = refraction(loc->elevation) + sun_radius;
@@ -329,7 +329,7 @@ sunrise(int rd, struct location *loc)
  * Ref: Sec.(14.7), Eq.(14.74,14.77)
  */
 double
-sunset(int rd, struct location *loc)
+sunset(int rd, const struct location *loc)
 {
 	double sun_radius = 16.0 / 60.0;  /* 16 arcminutes */
 	double alpha = refraction(loc->elevation) + sun_radius;

@@ -50,7 +50,7 @@ double	lunar_phase(double t);
 double	new_moon_atafter(double t);
 double	new_moon_before(double t);
 
-double	moonrise(int rd, struct location *loc);
-double	moonset(int rd, struct location *loc);
+double	moonrise(int rd, const struct location *loc);
+double	moonset(int rd, const struct location *loc);
 
 #endif

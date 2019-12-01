@@ -50,7 +50,7 @@ double	solar_longitude_atafter(double lambda, double t);
 
 double	solar_altitude(double t, double latitude, double longitude);
 
-double	sunrise(int rd, struct location *loc);
-double	sunset(int rd, struct location *loc);
+double	sunrise(int rd, const struct location *loc);
+double	sunset(int rd, const struct location *loc);
 
 #endif

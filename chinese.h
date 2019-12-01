@@ -80,6 +80,6 @@ enum minor_solar_term {
 int	chinese_new_year(int year);
 
 struct chinese_date	chinese_from_fixed(int rd);
-int	fixed_from_chinese(struct chinese_date *date);
+int	fixed_from_chinese(const struct chinese_date *date);
 
 #endif

@@ -619,7 +619,7 @@ lunar_altitude_topocentric(double t, double latitude, double longitude)
  * Ref: Sec.(14.7), Eq.(14.82)
  */
 double
-lunar_altitude_observed(double t, struct location *loc)
+lunar_altitude_observed(double t, const struct location *loc)
 {
 	double moon_radius = 16.0 / 60.0;  /* 16 arcminutes */
 	return (lunar_altitude_topocentric(t, loc->latitude, loc->longitude) +
@@ -697,7 +697,7 @@ new_moon_atafter(double t)
  * Ref: Sec.(14.7), Eq.(14.83)
  */
 double
-moonrise(int rd, struct location *loc)
+moonrise(int rd, const struct location *loc)
 {
 	double t = (double)rd - loc->zone;  /* universal time */
 	bool waning = lunar_phase(t) > 180.0;
@@ -745,7 +745,7 @@ moonrise(int rd, struct location *loc)
  * Ref: Sec.(14.7), Eq.(14.84)
  */
 double
-moonset(int rd, struct location *loc)
+moonset(int rd, const struct location *loc)
 {
 	double t = (double)rd - loc->zone;  /* universal time */
 	bool waxing = lunar_phase(t) < 180.0;

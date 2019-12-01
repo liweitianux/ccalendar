@@ -51,7 +51,7 @@ int	mod1(int x, int y);
 int	mod3(int x, int a, int b);
 double	mod3_f(double x, double a, double b);
 
-double	poly(double x, double *coefs, size_t n);
+double	poly(double x, const double *coefs, size_t n);
 
 double	sin_deg(double deg);
 double	cos_deg(double deg);

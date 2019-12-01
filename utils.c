@@ -115,7 +115,7 @@ mod3_f(double x, double a, double b)
  * Calculate the polynomial: c[0] + c[1] * x + ... + c[n-1] * x^(n-1)
  */
 double
-poly(double x, double *coefs, size_t n)
+poly(double x, const double *coefs, size_t n)
 {
 	double p = 0.0;
 	double t = 1.0;

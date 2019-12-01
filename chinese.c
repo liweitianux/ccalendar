@@ -308,7 +308,7 @@ chinese_from_fixed(int rd)
  * Ref: Sec.(19.3), Eq.(19.17)
  */
 int
-fixed_from_chinese(struct chinese_date *date)
+fixed_from_chinese(const struct chinese_date *date)
 {
 	int midyear = (int)floor(epoch + mean_tropical_year *
 				 ((date->cycle - 1) * 60 + date->year - 0.5));
