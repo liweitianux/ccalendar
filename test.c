@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "basics.h"
 #include "chinese.h"
@@ -138,6 +139,24 @@ main(void)
 				rd, zh_date.cycle, zh_date.year, zh_date.month,
 				zh_date.leap ? '+' : ' ', zh_date.day, rd2, rd==rd2);
 	}
+
+	time_t tt;
+	struct tm tm;
+
+	printf("\n-----------------------------------------------------------\n");
+	time(&tt);
+	localtime_r(&tt, &tm);
+	date = (struct g_date){ tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday };
+	rd = fixed_from_gregorian(&date);
+	zh_date = chinese_from_fixed(rd);
+	printf("%7d\t(%4d, %2d, %2d)\t(%2d, %2d, %2d%c, %2d)\n",
+			rd, date.year, date.month, date.day,
+			zh_date.cycle, zh_date.year, zh_date.month,
+			zh_date.leap ? '+' : ' ', zh_date.day);
+
+	printf("\n-----------------------------------------------------------\n");
+	show_chinese_calendar(rd);
+	show_chinese_calendar(601716);
 
 	return 0;
 }

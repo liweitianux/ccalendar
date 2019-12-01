@@ -82,4 +82,6 @@ int	chinese_new_year(int year);
 struct chinese_date	chinese_from_fixed(int rd);
 int	fixed_from_chinese(const struct chinese_date *date);
 
+void	show_chinese_calendar(int rd);
+
 #endif

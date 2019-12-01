@@ -55,6 +55,7 @@
 #include <err.h>
 #include <math.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "basics.h"
 #include "chinese.h"
@@ -324,4 +325,77 @@ fixed_from_chinese(const struct chinese_date *date)
 	}
 
 	return newmoon + date->day - 1;
+}
+
+/**************************************************************************/
+
+/* celestial stem, tiāngān (天干) */
+static const struct stem {
+	const char *name;
+	const char *zhname;
+} STEMS[] = {
+	{ "Jiǎ",  "甲" },
+	{ "Yǐ",   "乙" },
+	{ "Bǐng", "丙" },
+	{ "Dīng", "丁" },
+	{ "Wù",   "戊" },
+	{ "Jǐ",   "己" },
+	{ "Gēng", "庚" },
+	{ "Xīn",  "辛" },
+	{ "Rén",  "壬" },
+	{ "Guǐ",  "癸" },
+};
+
+/* terrestrial branch, dìzhī (地支) */
+static const struct branch {
+	const char *name;
+	const char *zhname;
+	const char *zodiac;
+	const char *zhzodiac;
+} BRANCHES[] = {
+	{ "Zǐ",   "子", "Rat",     "鼠" },
+	{ "Chǒu", "丑", "Ox",      "牛" },
+	{ "Yín",  "寅", "Tiger",   "虎" },
+	{ "Mǎo",  "卯", "Rabbit",  "兔" },
+	{ "Chén", "辰", "Dragon",  "龙" },
+	{ "Sì",   "巳", "Snake",   "蛇" },
+	{ "Wǔ",   "午", "Horse",   "马" },
+	{ "Wèi",  "未", "Goat",    "羊" },
+	{ "Shēn", "申", "Monkey",  "猴" },
+	{ "Yǒu",  "酉", "Rooster", "鸡" },
+	{ "Xū",   "戌", "Dog",     "狗" },
+	{ "Hài",  "亥", "Pig",     "猪" },
+};
+
+/* Chinese names of months and days */
+static const char *months[] = {
+	"一", "二", "三", "四", "五", "六",
+	"七", "八", "九", "十", "冬", "腊",
+};
+static const char *mdays[] = {
+	"初一", "初二", "初三", "初四", "初五", "初六",
+	"初七", "初八", "初九", "初十", "十一", "十二",
+	"十三", "十四", "十五", "十六", "十七", "十八",
+	"十九", "二十", "廿一", "廿二", "廿三", "廿四",
+	"廿五", "廿六", "廿七", "廿八", "廿九", "三十",
+};
+
+/*
+ * Print the Chinese calendar of the year containing the given fixed date
+ * $rd.
+ */
+void
+show_chinese_calendar(int rd)
+{
+	const struct chinese_date date = chinese_from_fixed(rd);
+	struct stem stem = STEMS[mod1(date.year, 10) - 1];
+	struct branch branch = BRANCHES[mod1(date.year, 12) - 1];
+
+	printf("农历: %s%s年 [%s], %s%s月%s\n",
+	       stem.zhname, branch.zhname, branch.zhzodiac,
+	       date.leap ? "闰" : "", months[date.month - 1],
+	       mdays[date.day - 1]);
+	printf("Chinese calendar: year %s%s [%s], %smonth %d, day %d\n",
+	       stem.name, branch.name, branch.zodiac,
+	       date.leap ? "leap " : "", date.month, date.day);
 }
