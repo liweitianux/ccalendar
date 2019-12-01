@@ -29,7 +29,7 @@ main(void)
 	for (size_t i = 0; i < nitems(rds); i++) {
 		rd = rds[i];
 		date = gregorian_from_fixed(rd);
-		rd2 = fixed_from_gregorian(date);
+		rd2 = fixed_from_gregorian(&date);
 		c = julian_centuries(rd);
 		printf("%7d\t(%4d, %2d, %2d)\t%7d\t%d\t%10.6lf\n",
 				rd, date.year, date.month, date.day, rd2,
@@ -123,7 +123,7 @@ main(void)
 	printf("sidereal_time = %.12lf\n", st);
 
 	struct g_date zh_epoch_date = { -2636, 2, 15 };
-	int zh_epoch = fixed_from_gregorian(zh_epoch_date);
+	int zh_epoch = fixed_from_gregorian(&zh_epoch_date);
 	printf("\nchinese_epoch: RD (%d) <-> Gregorian (%d, %d, %d)\n",
 			zh_epoch, zh_epoch_date.year,
 			zh_epoch_date.month, zh_epoch_date.day);

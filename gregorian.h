@@ -45,8 +45,9 @@ struct g_date {
 	int	day;
 };
 
-int	fixed_from_gregorian(struct g_date date);
-int	gregorian_date_difference(struct g_date date1, struct g_date date2);
+int	fixed_from_gregorian(const struct g_date *date);
+int	gregorian_date_difference(const struct g_date *date1,
+				  const struct g_date *date2);
 struct g_date	gregorian_from_fixed(int rd);
 bool	gregorian_leap_year(int year);
 int	gregorian_new_year(int year);

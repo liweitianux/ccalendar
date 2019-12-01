@@ -256,7 +256,7 @@ int
 chinese_new_year(int year)
 {
 	struct g_date date = { year, 7, 1 };
-	int july1 = fixed_from_gregorian(date);
+	int july1 = fixed_from_gregorian(&date);
 	return chinese_new_year_onbefore(july1);
 }
 

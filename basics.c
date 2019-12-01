@@ -81,7 +81,7 @@ ephemeris_correction(double t)
 	double c_other = (-20.0 + 32.0 * y1820 * y1820) / 86400.0;
 	struct g_date date1 = { 1900, 1, 1 };
 	struct g_date date2 = { year, 7, 1 };
-	double c = gregorian_date_difference(date1, date2) / 36525.0;
+	double c = gregorian_date_difference(&date1, &date2) / 36525.0;
 
 	if (year > 2150) {
 		return c_other;

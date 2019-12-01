@@ -68,20 +68,20 @@ gregorian_leap_year(int year)
  * Ref: Sec.(2.2), Eq.(2.17)
  */
 int
-fixed_from_gregorian(struct g_date date)
+fixed_from_gregorian(const struct g_date *date)
 {
-	int rd = ((epoch - 1) + 365 * (date.year - 1) +
-		  div_floor(date.year - 1, 4) -
-		  div_floor(date.year - 1, 100) +
-		  div_floor(date.year - 1, 400) +
-		  div_floor(date.month * 367 - 362, 12));
+	int rd = ((epoch - 1) + 365 * (date->year - 1) +
+		  div_floor(date->year - 1, 4) -
+		  div_floor(date->year - 1, 100) +
+		  div_floor(date->year - 1, 400) +
+		  div_floor(date->month * 367 - 362, 12));
 	/* correct for the assumption that February always has 30 days */
-	if (date.month <= 2)
-		return rd + date.day;
-	else if (gregorian_leap_year(date.year))
-		return rd + date.day - 1;
+	if (date->month <= 2)
+		return rd + date->day;
+	else if (gregorian_leap_year(date->year))
+		return rd + date->day - 1;
 	else
-		return rd + date.day - 2;
+		return rd + date->day - 2;
 }
 
 /*
@@ -92,7 +92,7 @@ int
 gregorian_new_year(int year)
 {
 	struct g_date date = { year, 1, 1 };
-	return fixed_from_gregorian(date);
+	return fixed_from_gregorian(&date);
 }
 
 /*
@@ -124,7 +124,8 @@ gregorian_year_from_fixed(int rd)
  * Ref: Sec.(2.2), Eq.(2.24)
  */
 int
-gregorian_date_difference(struct g_date date1, struct g_date date2)
+gregorian_date_difference(const struct g_date *date1,
+			  const struct g_date *date2)
 {
 	return fixed_from_gregorian(date2) - fixed_from_gregorian(date1);
 }
@@ -144,7 +145,7 @@ gregorian_from_fixed(int rd)
 
 	int pdays = rd - gregorian_new_year(date.year);
 	struct g_date d31 = { date.year, 3, 1 };
-	if (rd < fixed_from_gregorian(d31))
+	if (rd < fixed_from_gregorian(&d31))
 		correction = 0;
 	else if (gregorian_leap_year(date.year))
 		correction = 1;
@@ -153,7 +154,7 @@ gregorian_from_fixed(int rd)
 	date.month = div_floor(12 * (pdays + correction) + 373, 367);
 
 	struct g_date d1 = { date.year, date.month, 1 };
-	date.day = rd - fixed_from_gregorian(d1) + 1;
+	date.day = rd - fixed_from_gregorian(&d1) + 1;
 
 	return date;
 }
