@@ -432,12 +432,20 @@ show_chinese_calendar(int rd)
 	       stem.name, branch.name, branch.zodiac,
 	       date.leap ? "leap " : "", date.month, date.day);
 
-	/* calculate solar terms of this year from February 1 */
-	struct g_date gdate = gregorian_from_fixed(rd);
+	/* the following Chinese New Year */
+	int newyear = chinese_new_year_onbefore(
+			chinese_new_year_onbefore(rd) + 370);
+	struct g_date gdate = gregorian_from_fixed(newyear);
+	printf("春节 (Chinese New Year): %4d-%02d-%02d\n",
+	       gdate.year, gdate.month, gdate.day);
+
+	/* 1st solar term (Lìchūn) is generally around February 4 */
+	gdate = gregorian_from_fixed(rd);
 	gdate.month = 2;
 	gdate.day = 1;
 	int feb1 = fixed_from_gregorian(&gdate);
 
+	printf("------------------------------------------\n");
 	const double zone = chinese_zone(rd);
 	const struct solar_term *term;
 	double t_term, t_day;
