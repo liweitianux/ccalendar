@@ -433,14 +433,15 @@ show_chinese_calendar(int rd)
 	       date.leap ? "leap " : "", date.month, date.day);
 
 	/* the following Chinese New Year */
+	struct g_date gdate;
 	int newyear = chinese_new_year_onbefore(
 			chinese_new_year_onbefore(rd) + 370);
-	struct g_date gdate = gregorian_from_fixed(newyear);
+	gregorian_from_fixed(newyear, &gdate);
 	printf("春节 (Chinese New Year): %4d-%02d-%02d\n",
 	       gdate.year, gdate.month, gdate.day);
 
 	/* 1st solar term (Lìchūn) is generally around February 4 */
-	gdate = gregorian_from_fixed(rd);
+	gregorian_from_fixed(rd, &gdate);
 	gdate.month = 2;
 	gdate.day = 1;
 	int feb1 = fixed_from_gregorian(&gdate);
@@ -455,7 +456,7 @@ show_chinese_calendar(int rd)
 		lambda = term->longitude;
 		t_term = solar_longitude_atafter(lambda, feb1) + zone;
 		day = (int)floor(t_term);
-		gdate = gregorian_from_fixed(day);
+		gregorian_from_fixed(day, &gdate);
 		t_day = t_term - day;
 		hh = (int)(t_day * 24);
 		mm = lround(t_day * 24*60) % 60;

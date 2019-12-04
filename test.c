@@ -29,7 +29,7 @@ main(void)
 	printf("R.D.\t(Y, M, D)\tRD2\tEq?\tJcen\n");
 	for (size_t i = 0; i < nitems(rds); i++) {
 		rd = rds[i];
-		date = gregorian_from_fixed(rd);
+		gregorian_from_fixed(rd, &date);
 		rd2 = fixed_from_gregorian(&date);
 		c = julian_centuries(rd);
 		printf("%7d\t(%4d, %2d, %2d)\t%7d\t%d\t%10.6lf\n",
