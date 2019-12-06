@@ -49,7 +49,7 @@ struct chinese_date {
 
 int	chinese_new_year(int year);
 
-struct chinese_date	chinese_from_fixed(int rd);
+void	chinese_from_fixed(int rd, struct chinese_date *date);
 int	fixed_from_chinese(const struct chinese_date *date);
 
 void	show_chinese_calendar(int rd);

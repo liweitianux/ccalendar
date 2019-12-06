@@ -266,8 +266,8 @@ chinese_new_year(int year)
  * to the fixed date $rd.
  * Ref: Sec.(19.3), Eq.(19.16)
  */
-struct chinese_date
-chinese_from_fixed(int rd)
+void
+chinese_from_fixed(int rd, struct chinese_date *date)
 {
 	/* prior and following winter solstice */
 	int s1 = chinese_winter_solstice_onbefore(rd);
@@ -287,20 +287,17 @@ chinese_from_fixed(int rd)
 	if (leap_year && chinese_prior_leap_month(m12, m))
 		month--;
 	month = mod1(month, 12);
-
 	bool leap_month = (leap_year &&
 			   chinese_no_major_solar_term(m) &&
 			   !chinese_prior_leap_month(m12, m_prev));
-
 	int elapsed_years = (int)floor(1.5 - month/12.0 +
 				       (rd - epoch) / mean_tropical_year);
-	int cycle = div_floor(elapsed_years - 1, 60) + 1;
-	int year = mod1(elapsed_years, 60);
 
-	int day = rd - m + 1;
-
-	struct chinese_date date = { cycle, year, month, leap_month, day };
-	return date;
+	date->cycle = div_floor(elapsed_years - 1, 60) + 1;
+	date->year = mod1(elapsed_years, 60);
+	date->month = month;
+	date->leap = leap_month;
+	date->day = rd - m + 1;
 }
 
 /*
@@ -318,7 +315,8 @@ fixed_from_chinese(const struct chinese_date *date)
 	/* new moon before the given date */
 	int newmoon = chinese_new_moon_onafter(
 			newyear + (date->month - 1) * 29);
-	struct chinese_date date2 = chinese_from_fixed(newmoon);
+	struct chinese_date date2;
+	chinese_from_fixed(newmoon, &date2);
 	if (date->month != date2.month || date->leap != date2.leap) {
 		/* there was a prior leap month, so get the next month */
 		newmoon = chinese_new_moon_onafter(newmoon + 1);
@@ -420,7 +418,8 @@ static const struct solar_term {
 void
 show_chinese_calendar(int rd)
 {
-	const struct chinese_date date = chinese_from_fixed(rd);
+	struct chinese_date date;
+	chinese_from_fixed(rd, &date);
 	struct stem stem = STEMS[mod1(date.year, 10) - 1];
 	struct branch branch = BRANCHES[mod1(date.year, 12) - 1];
 

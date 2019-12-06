@@ -133,7 +133,7 @@ main(void)
 	printf("\nR.D.\t(C, Y, M, L, D)\t\tRD2\tEq?\n");
 	for (size_t i = 0; i < nitems(rds); i++) {
 		rd = rds[i];
-		zh_date = chinese_from_fixed(rd);
+		chinese_from_fixed(rd, &zh_date);
 		rd2 = fixed_from_chinese(&zh_date);
 		printf("%7d\t(%2d, %2d, %2d%c, %2d)\t%7d\t%d\n",
 				rd, zh_date.cycle, zh_date.year, zh_date.month,
@@ -148,7 +148,7 @@ main(void)
 	localtime_r(&tt, &tm);
 	date = (struct g_date){ tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday };
 	rd = fixed_from_gregorian(&date);
-	zh_date = chinese_from_fixed(rd);
+	chinese_from_fixed(rd, &zh_date);
 	printf("%7d\t(%4d, %2d, %2d)\t(%2d, %2d, %2d%c, %2d)\n",
 			rd, date.year, date.month, date.day,
 			zh_date.cycle, zh_date.year, zh_date.month,
