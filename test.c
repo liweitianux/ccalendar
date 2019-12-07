@@ -13,6 +13,9 @@
 int
 main(void)
 {
+	char buf[256];
+	int n;
+
 	/*
 	int rds[] = { -214193, -61387, 25469, 49217, 171307, 210155,
 		      253427, 369740, 400085, 434355, 452605, 470160,
@@ -56,7 +59,7 @@ main(void)
 	}
 
 	/* Location of Jerusalem (Eq. 14.4) */
-	struct location jerusalem = {
+	const struct location jerusalem = {
 		.latitude = 31.78,
 		.longitude = 35.24,
 		.elevation = 740.0,
@@ -67,16 +70,13 @@ main(void)
 	for (size_t i = 0; i < nitems(rds); i++) {
 		rd = rds[i];
 		t_sunset = sunset(rd, &jerusalem) - (double)rd;
-		int h, m, s;
-		h = (int)(t_sunset * 24);
-		m = (int)(t_sunset * 24*60) % 60;
-		s = (int)(t_sunset * 24*60*60) % 60;
-		printf("%7d\t%.8lf\t\t%02d:%02d:%02d\n",
-				rd, t_sunset, h, m, s);
+		n = snprintf(buf, sizeof(buf), "%7d\t%.8lf\t\t", rd, t_sunset);
+		n += format_time(buf + n, sizeof(buf) - n, t_sunset);
+		printf("%s\n", buf);
 	}
 
 	/* Location of Mecca (Eq. 14.3) */
-	struct location mecca = {
+	const struct location mecca = {
 		.latitude = angle2deg(21, 25, 24),
 		.longitude = angle2deg(39, 49, 24),
 		.elevation = 298.0,
@@ -103,16 +103,23 @@ main(void)
 		t_newmoon = new_moon_atafter(t);
 		t_moonrise = moonrise(rd, &mecca) - (double)rd;
 		t_moonset = moonset(rd, &mecca) - (double)rd;
-		int h1, m1, s1;
-		h1 = (int)(t_moonrise * 24);
-		m1 = (int)(t_moonrise * 24*60) % 60;
-		s1 = (int)(t_moonrise * 24*60*60) % 60;
-		int h2, m2, s2;
-		h2 = (int)(t_moonset * 24);
-		m2 = (int)(t_moonset * 24*60) % 60;
-		s2 = (int)(t_moonset * 24*60*60) % 60;
-		printf("%7d\t%16.8lf\t%10.8lf\t%02d:%02d:%02d\t%10.8lf\t%02d:%02d:%02d\n",
-				rd, t_newmoon, t_moonrise, h1, m1, s1, t_moonset, h2, m2, s2);
+		n = snprintf(buf, sizeof(buf), "%7d\t%16.8lf\t", rd, t_newmoon);
+		if (isnan(t_moonrise)) {
+			n += snprintf(buf + n, sizeof(buf) - n, "%10s\t%8s",
+					"(null)", "(null)");
+		} else {
+			n += snprintf(buf + n, sizeof(buf) - n, "%10.8lf\t", t_moonrise);
+			n += format_time(buf + n, sizeof(buf) - n, t_moonrise);
+		}
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", "\t");
+		if (isnan(t_moonset)) {
+			n += snprintf(buf + n, sizeof(buf) - n, "%10s\t%8s",
+					"(null)", "(null)");
+		} else {
+			n += snprintf(buf + n, sizeof(buf) - n, "%10.8lf\t", t_moonset);
+			n += format_time(buf + n, sizeof(buf) - n, t_moonset);
+		}
+		printf("%s\n", buf);
 	}
 
 	double ob = obliquity(rd);

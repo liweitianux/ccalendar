@@ -449,26 +449,25 @@ show_chinese_calendar(int rd)
 	gdate.day = 1;
 	int feb1 = fixed_from_gregorian(&gdate);
 
-	const double zone = chinese_zone(rd);
-	int hzone = (int)(zone * 24);
-	int mzone = lround(zone * 24*60) % 60;
-
 	printf("------------------------------------------\n");
+	const double zone = chinese_zone(rd);
 	const struct solar_term *term;
-	double t_term, t_day;
-	int lambda, day, hh, mm;
+	double t_term;
+	int lambda, n;
+	char buf[128];
+
 	for (size_t i = 0; i < nitems(SOLAR_TERMS); i++) {
 		term = &SOLAR_TERMS[i];
 		lambda = term->longitude;
 		t_term = solar_longitude_atafter(lambda, feb1) + zone;
-		day = (int)floor(t_term);
-		gregorian_from_fixed(day, &gdate);
-		t_day = t_term - day;
-		hh = (int)(t_day * 24);
-		mm = lround(t_day * 24*60) % 60;
-		printf("%s (%-13s): %3d°, %4d-%02d-%02d %02d:%02d %+03d:%02d\n",
-		       term->zhname, term->name, lambda,
-		       gdate.year, gdate.month, gdate.day, hh, mm,
-		       hzone, mzone);
+		gregorian_from_fixed((int)floor(t_term), &gdate);
+		n = snprintf(buf, sizeof(buf),
+			     "%s (%-13s): %3d°, %4d-%02d-%02d ",
+			     term->zhname, term->name, lambda,
+			     gdate.year, gdate.month, gdate.day);
+		n += format_time(buf + n, sizeof(buf) - n, t_term);
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
+		n += format_zone(buf + n, sizeof(buf) - n, zone);
+		printf("%s\n", buf);
 	}
 }
