@@ -41,12 +41,15 @@
 
 extern const double mean_synodic_month;
 
-double	lunar_altitude(double t, double latitude, double longitude);
 double	lunar_distance(double t);
 double	lunar_latitude(double t);
 double	lunar_longitude(double t);
 
+double	lunar_altitude(double t, double latitude, double longitude);
+double	lunar_altitude_observed(double t, const struct location *loc);
+
 double	lunar_phase(double t);
+double	lunar_phase_atafter(double phi, double t);
 double	new_moon_atafter(double t);
 double	new_moon_before(double t);
 

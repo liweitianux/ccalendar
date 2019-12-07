@@ -650,6 +650,25 @@ lunar_phase(double t)
 }
 
 /*
+ * Calculate the moment of the next time at or after the given moment $t
+ * when the phase of the moon is $phi degree.
+ * Ref: Sec.(14.6), Eq.(14.58)
+ */
+double
+lunar_phase_atafter(double phi, double t)
+{
+	double rate = mean_synodic_month / 360.0;
+	double phase = lunar_phase(t);
+	double tau = t + rate * mod_f(phi - phase, 360);
+
+	/* estimate range (within 2 days) */
+	double a = (t > tau - 2) ? t : tau - 2;
+	double b = tau + 2;
+
+	return invert_angular(lunar_phase, phi, a, b);
+}
+
+/*
  * Calculate the moment of the new moon before the given moment $t.
  * Ref: Sec.(14.6), Eq.(14.46)
  */
