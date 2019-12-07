@@ -161,10 +161,24 @@ main(void)
 			zh_date.cycle, zh_date.year, zh_date.month,
 			zh_date.leap ? '+' : ' ', zh_date.day);
 
+	const struct location shanghai = {
+		.latitude = angle2deg(31, 13, 43),
+		.longitude = angle2deg(121, 28, 29),
+		.elevation = 4.0,
+		.zone = 8.0/24.0,
+	};
+
 	printf("\n-----------------------------------------------------------\n");
 	show_chinese_calendar(rd);
+	printf("...........................................................\n");
+	show_sun_info(rd, &shanghai);
+
 	printf("\n-----------------------------------------------------------\n");
-	show_chinese_calendar(601716);
+	date = (struct g_date){ 2033, 12, 25 };
+	rd = fixed_from_gregorian(&date);
+	show_chinese_calendar(rd);
+	printf("...........................................................\n");
+	show_sun_info(rd, &shanghai);
 
 	return 0;
 }
