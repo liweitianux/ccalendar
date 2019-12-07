@@ -53,6 +53,6 @@ double	solar_altitude(double t, double latitude, double longitude);
 double	sunrise(int rd, const struct location *loc);
 double	sunset(int rd, const struct location *loc);
 
-void	show_sun_info(int rd, const struct location *loc);
+void	show_sun_info(double t, const struct location *loc);
 
 #endif

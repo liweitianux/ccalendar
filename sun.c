@@ -359,19 +359,26 @@ static const struct solar_event {
 };
 
 /*
- * Print Sun information of the year containing the given fixed date $rd.
+ * Print Sun information at the given moment $t (in standard time)
+ * and events in the year.
  */
 void
-show_sun_info(int rd, const struct location *loc)
+show_sun_info(double t, const struct location *loc)
 {
 	struct g_date date;
 	char buf[128];
 	int n;
 
+	int rd = (int)floor(t);
 	gregorian_from_fixed(rd, &date);
 	printf("Gregorian date: %4d-%02d-%02d\n",
 	       date.year, date.month, date.day);
 
+	n = snprintf(buf, sizeof(buf), "%s", "Time: ");
+	n += format_time(buf + n, sizeof(buf) - n, t);
+	n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
+	n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	printf("%s\n", buf);
 
 	n = snprintf(buf, sizeof(buf), "%s", "Location: ");
 	n += format_location(buf + n, sizeof(buf) - n, loc);
@@ -413,8 +420,6 @@ show_sun_info(int rd, const struct location *loc)
 			     event->name, lambda,
 			     date.year, date.month, date.day);
 		n += format_time(buf + n, sizeof(buf) - n, t);
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
-		n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
 		printf("%s\n", buf);
 	}
 }
