@@ -64,4 +64,7 @@ double	angle2deg(int deg, int min, double sec);
 
 double	invert_angular(double (*f)(double), double y, double a, double b);
 
+int	format_time(char *buf, size_t size, double t);
+int	format_zone(char *buf, size_t size, double zone);
+
 #endif
