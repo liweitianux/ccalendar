@@ -156,10 +156,14 @@ main(void)
 	date = (struct g_date){ tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday };
 	rd = fixed_from_gregorian(&date);
 	chinese_from_fixed(rd, &zh_date);
-	printf("%7d\t(%4d, %2d, %2d)\t(%2d, %2d, %2d%c, %2d)\n",
-			rd, date.year, date.month, date.day,
+	printf("R.D.: %d\n", rd);
+	printf("Gregorian: %4d-%02d-%02d\n", date.year, date.month, date.day);
+	printf("Chinese: cycle=%2d, year=%2d, month=%2d%s, day=%2d\n",
 			zh_date.cycle, zh_date.year, zh_date.month,
-			zh_date.leap ? '+' : ' ', zh_date.day);
+			zh_date.leap ? "(leap)" : "", zh_date.day);
+
+	double t_day = (tm.tm_hour + tm.tm_min/60.0 + tm.tm_sec/3600.0) / 24.0;
+	printf("Time: %02d:%02d:%02d\n", tm.tm_hour, tm.tm_min, tm.tm_sec);
 
 	const struct location shanghai = {
 		.latitude = angle2deg(31, 13, 43),
@@ -170,15 +174,15 @@ main(void)
 
 	printf("\n-----------------------------------------------------------\n");
 	show_chinese_calendar(rd);
-	printf("...........................................................\n");
-	show_sun_info(rd, &shanghai);
+	printf("\n...........................................................\n");
+	show_sun_info(rd+t_day, &shanghai);
 
 	printf("\n-----------------------------------------------------------\n");
 	date = (struct g_date){ 2033, 12, 25 };
 	rd = fixed_from_gregorian(&date);
 	show_chinese_calendar(rd);
-	printf("...........................................................\n");
-	show_sun_info(rd, &shanghai);
+	printf("\n...........................................................\n");
+	show_sun_info(rd+t_day, &shanghai);
 
 	return 0;
 }
