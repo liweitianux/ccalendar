@@ -449,8 +449,11 @@ show_chinese_calendar(int rd)
 	gdate.day = 1;
 	int feb1 = fixed_from_gregorian(&gdate);
 
-	printf("------------------------------------------\n");
 	const double zone = chinese_zone(rd);
+	int hzone = (int)(zone * 24);
+	int mzone = lround(zone * 24*60) % 60;
+
+	printf("------------------------------------------\n");
 	const struct solar_term *term;
 	double t_term, t_day;
 	int lambda, day, hh, mm;
@@ -463,8 +466,9 @@ show_chinese_calendar(int rd)
 		t_day = t_term - day;
 		hh = (int)(t_day * 24);
 		mm = lround(t_day * 24*60) % 60;
-		printf("%s (%-13s): %3d°, %4d-%02d-%02d %02d:%02d\n",
+		printf("%s (%-13s): %3d°, %4d-%02d-%02d %02d:%02d %+03d:%02d\n",
 		       term->zhname, term->name, lambda,
-		       gdate.year, gdate.month, gdate.day, hh, mm);
+		       gdate.year, gdate.month, gdate.day, hh, mm,
+		       hzone, mzone);
 	}
 }
