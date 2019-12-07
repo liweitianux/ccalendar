@@ -40,6 +40,7 @@
  */
 
 #include <math.h>
+#include <stdio.h>
 
 #include "basics.h"
 #include "gregorian.h"
@@ -274,4 +275,41 @@ refraction(double elevation)
 	double avg = 34.0 / 60.0;
 
 	return avg + dip + dip2;
+}
+
+/*
+ * Format the given time $t to 'HH:MM:SS' style.
+ */
+int
+format_time(char *buf, size_t size, double t)
+{
+	int hh, mm, ss, i;
+
+	t -= floor(t);
+	i = lround(t * 24*60*60);
+
+	hh = i / (60*60);
+	i %= 60*60;
+	mm = i / 60;
+	ss = i % 60;
+
+	return snprintf(buf, size, "%02d:%02d:%02d", hh, mm, ss);
+}
+
+/*
+ * Format the given timezone (in fraction of days) $zone to '[+-]HH:MM' style.
+ */
+int
+format_zone(char *buf, size_t size, double zone)
+{
+	bool positive;
+	int hh, mm, i;
+
+	positive = (zone >= 0);
+	i = lround(fabs(zone) * 24*60);
+	hh = i / 60;
+	mm = i % 60;
+
+	return snprintf(buf, size, "%c%02d:%02d",
+			(positive ? '+' : '-'), hh, mm);
 }

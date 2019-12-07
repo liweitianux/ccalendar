@@ -61,4 +61,7 @@ double	right_ascension(double t, double beta, double lambda);
 
 double	refraction(double elevation);
 
+int	format_time(char *buf, size_t size, double t);
+int	format_zone(char *buf, size_t size, double zone);
+
 #endif
