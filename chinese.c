@@ -423,6 +423,11 @@ show_chinese_calendar(int rd)
 	struct stem stem = STEMS[mod1(date.year, 10) - 1];
 	struct branch branch = BRANCHES[mod1(date.year, 12) - 1];
 
+	struct g_date gdate;
+	gregorian_from_fixed(rd, &gdate);
+	printf("公历 (Gregorian): %4d-%02d-%02d\n",
+	       gdate.year, gdate.month, gdate.day);
+
 	printf("农历: %s%s年 [%s], %s%s月%s\n",
 	       stem.zhname, branch.zhname, branch.zhzodiac,
 	       date.leap ? "闰" : "", months[date.month - 1],
@@ -432,7 +437,6 @@ show_chinese_calendar(int rd)
 	       date.leap ? "leap " : "", date.month, date.day);
 
 	/* the following Chinese New Year */
-	struct g_date gdate;
 	int newyear = chinese_new_year_onbefore(
 			chinese_new_year_onbefore(rd) + 370);
 	gregorian_from_fixed(newyear, &gdate);
