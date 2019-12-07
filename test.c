@@ -176,6 +176,8 @@ main(void)
 	show_chinese_calendar(rd);
 	printf("\n...........................................................\n");
 	show_sun_info(rd+t_day, &shanghai);
+	printf("\n...........................................................\n");
+	show_moon_info(rd+t_day, &shanghai);
 
 	printf("\n-----------------------------------------------------------\n");
 	date = (struct g_date){ 2033, 12, 25 };
@@ -183,6 +185,8 @@ main(void)
 	show_chinese_calendar(rd);
 	printf("\n...........................................................\n");
 	show_sun_info(rd+t_day, &shanghai);
+	printf("\n...........................................................\n");
+	show_moon_info(rd+t_day, &shanghai);
 
 	return 0;
 }

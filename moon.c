@@ -42,6 +42,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "basics.h"
@@ -802,5 +803,140 @@ moonset(int rd, const struct location *loc)
 	} else {
 		/* no moonrise on this day */
 		return NAN;
+	}
+}
+
+/**************************************************************************/
+
+/*
+ * Print moon information at the given moment $t (in standard time)
+ * and events in the year.
+ */
+void
+show_moon_info(double t, const struct location *loc)
+{
+	struct g_date date;
+	char buf[128];
+	int n;
+
+	int rd = (int)floor(t);
+	double t_u = t - loc->zone;  /* universal time */
+
+	gregorian_from_fixed(rd, &date);
+	printf("Gregorian date: %4d-%02d-%02d\n",
+	       date.year, date.month, date.day);
+
+	n = snprintf(buf, sizeof(buf), "%s", "Time: ");
+	n += format_time(buf + n, sizeof(buf) - n, t);
+	n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
+	n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	printf("%s\n", buf);
+
+	n = snprintf(buf, sizeof(buf), "%s", "Location: ");
+	n += format_location(buf + n, sizeof(buf) - n, loc);
+	printf("%s\n", buf);
+
+	/*
+	 * Lunar phase
+	 */
+
+	double eps = 1e-5;
+	double phi = lunar_phase(t_u);
+	bool waxing = (phi <= 180);
+	bool crescent = (phi <= 90 || phi > 270);
+	const char *phase_name;
+	if (fabs(phi) < eps || fabs(phi - 360) < eps)
+		phase_name = "New Moon";
+	else if (fabs(phi - 90) < eps)
+		phase_name = "First Quarter";
+	else if (fabs(phi - 180) < eps)
+		phase_name = "Full Moon";
+	else if (fabs(phi - 270) < eps)
+		phase_name = "Last Quarter";
+	else
+		phase_name = NULL;
+
+	n = snprintf(buf, sizeof(buf), "Moon phase: %.2lf° ", phi);
+	if (phase_name) {
+		n += snprintf(buf + n, sizeof(buf) - n, "(%s)", phase_name);
+	} else {
+		n += snprintf(buf + n, sizeof(buf) - n, "(%s %s)",
+			      (waxing ? "Waxing" : "Waning"),
+			      (crescent ? "Crescent" : "Gibbous"));
+	}
+	printf("%s\n", buf);
+
+	/*
+	 * Moon position
+	 */
+	double lon = lunar_longitude(t_u);
+	double alt = lunar_altitude_observed(t_u, loc);
+	printf("Moon position: %.4lf° (longitude), %.4lf° (altitude)\n",
+	       lon, alt);
+
+	/*
+	 * Moon rise and set
+	 */
+
+	double moments[2] = { moonrise(rd, loc), moonset(rd, loc) };
+	const char *names[2] = { "Moonrise", "Moonset" };
+	if (!isnan(moments[0]) && !isnan(moments[1]) &&
+	    moments[0] > moments[1]) {
+		double t_tmp = moments[0];
+		moments[0] = moments[1];
+		moments[1] = t_tmp;
+		const char *p = names[0];
+		names[0] = names[1];
+		names[1] = p;
+	}
+	for (size_t i = 0; i < nitems(moments); i++) {
+		n = snprintf(buf, sizeof(buf), "%-8s: ", names[i]);
+		if (isnan(moments[i]))
+			n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
+		else
+			n += format_time(buf + n, sizeof(buf) - n, moments[i]);
+		printf("%s\n", buf);
+	}
+
+	/*
+	 * Moon phases in the year
+	 */
+
+	struct g_date date2 = { date.year, 1, 1 };
+	double t_begin = fixed_from_gregorian(&date2) - loc->zone;
+	date2.year++;
+	double t_end = fixed_from_gregorian(&date2) - loc->zone;
+
+	printf("\nLunar events in year %d:\n", date.year);
+	printf("%19s   %19s   %19s   %19s\n",
+	       "New Moon", "First Quarter", "Full Moon", "Last Quarter");
+
+	double t_newmoon = t_begin;
+	while ((t_newmoon = new_moon_atafter(t_newmoon)) < t_end) {
+		t_newmoon += loc->zone;  /* to standard time */
+		gregorian_from_fixed((int)floor(t_newmoon), &date2);
+		n = snprintf(buf, sizeof(buf), "%4d-%02d-%02d ",
+			     date2.year, date2.month, date2.day);
+		n += format_time(buf + n, sizeof(buf) - n, t_newmoon);
+		printf("%s", buf);
+
+		/*
+		 * first quarter, full moon, last quarter
+		 */
+		double t_event = t_newmoon;
+		int phi_events[] = { 90, 180, 270 };
+		for (size_t i = 0; i < nitems(phi_events); i++) {
+			t_event = lunar_phase_atafter(phi_events[i], t_event);
+			t_event += loc->zone;
+			gregorian_from_fixed((int)floor(t_event), &date2);
+			n = snprintf(buf, sizeof(buf), "%4d-%02d-%02d ",
+				     date2.year, date2.month, date2.day);
+			n += format_time(buf + n, sizeof(buf) - n, t_event);
+			printf("   %s", buf);
+		}
+		printf("\n");
+
+		/* go to the next new moon */
+		t_newmoon += 28;
 	}
 }

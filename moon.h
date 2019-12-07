@@ -56,4 +56,6 @@ double	new_moon_before(double t);
 double	moonrise(int rd, const struct location *loc);
 double	moonset(int rd, const struct location *loc);
 
+void	show_moon_info(double t, const struct location *loc);
+
 #endif
