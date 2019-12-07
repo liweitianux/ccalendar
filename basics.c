@@ -313,3 +313,32 @@ format_zone(char *buf, size_t size, double zone)
 	return snprintf(buf, size, "%c%02d:%02d",
 			(positive ? '+' : '-'), hh, mm);
 }
+
+/*
+ * Format the location to style: 'dd°mm'ss" [NS], dd°mm'ss" [EW], mm.m m'
+ */
+int
+format_location(char *buf, size_t size, const struct location *loc)
+{
+	int d1, d2, m1, m2, s1, s2, i;
+	bool north, east;
+
+	north = (loc->latitude >= 0);
+	i = lround(fabs(loc->latitude) * 60*60);
+	d1 = i / (60*60);
+	i %= 60*60;
+	m1 = i / 60;
+	s1 = i % 60;
+
+	east = (loc->longitude >= 0);
+	i = lround(fabs(loc->longitude) * 60*60);
+	d2 = i / (60*60);
+	i %= 60*60;
+	m2 = i / 60;
+	s2 = i % 60;
+
+	return snprintf(buf, size, "%d°%d'%d\" %c, %d°%d'%d\" %c, %.1lf m",
+			d1, m1, s1, (north ? 'N' : 'S'),
+			d2, m2, s2, (east ? 'E' : 'W'),
+			loc->elevation);
+}

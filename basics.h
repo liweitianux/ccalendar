@@ -63,5 +63,6 @@ double	refraction(double elevation);
 
 int	format_time(char *buf, size_t size, double t);
 int	format_zone(char *buf, size_t size, double zone);
+int	format_location(char *buf, size_t size, const struct location *loc);
 
 #endif
