@@ -449,13 +449,13 @@ show_chinese_calendar(int rd)
 	gdate.day = 1;
 	int feb1 = fixed_from_gregorian(&gdate);
 
-	printf("------------------------------------------\n");
 	const double zone = chinese_zone(rd);
 	const struct solar_term *term;
 	double t_term;
 	int lambda, n;
 	char buf[128];
 
+	printf("\n二十四节气 (solar terms):\n");
 	for (size_t i = 0; i < nitems(SOLAR_TERMS); i++) {
 		term = &SOLAR_TERMS[i];
 		lambda = term->longitude;

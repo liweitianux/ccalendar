@@ -402,6 +402,7 @@ show_sun_info(int rd, const struct location *loc)
 	const struct solar_event *event;
 	int lambda, day_approx;
 
+	printf("\nSolar events in year %d:\n", date.year);
 	for (size_t i = 0; i < nitems(SOLAR_EVENTS); i++) {
 		event = &SOLAR_EVENTS[i];
 		lambda = event->longitude;
