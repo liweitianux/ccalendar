@@ -365,39 +365,36 @@ void
 show_sun_info(int rd, const struct location *loc)
 {
 	struct g_date date;
+	char buf[128];
+	int n;
+
 	gregorian_from_fixed(rd, &date);
 	printf("Gregorian date: %4d-%02d-%02d\n",
 	       date.year, date.month, date.day);
 
-	char buf[128];
-	int n;
-	double t;
 
 	n = snprintf(buf, sizeof(buf), "%s", "Location: ");
 	n += format_location(buf + n, sizeof(buf) - n, loc);
 	printf("%s\n", buf);
 
-	n = snprintf(buf, sizeof(buf), "%s", "Sunrise: ");
-	t = sunrise(rd, loc);
-	if (isnan(t)) {
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
-	} else {
-		n += format_time(buf + n, sizeof(buf) - n, t);
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
-		n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
-	}
-	printf("%s\n", buf);
+	/*
+	 * Sun rise and set
+	 */
 
-	n = snprintf(buf, sizeof(buf), "%s", "Sunset: ");
-	t = sunset(rd, loc);
-	if (isnan(t)) {
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
-	} else {
-		n += format_time(buf + n, sizeof(buf) - n, t);
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
-		n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	double moments[2] = { sunrise(rd, loc), sunset(rd, loc) };
+	const char *names[2] = { "Sunrise", "Sunset" };
+	for (size_t i = 0; i < nitems(moments); i++) {
+		n = snprintf(buf, sizeof(buf), "%-7s: ", names[i]);
+		if (isnan(moments[i]))
+			n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
+		else
+			n += format_time(buf + n, sizeof(buf) - n, moments[i]);
+		printf("%s\n", buf);
 	}
-	printf("%s\n", buf);
+
+	/*
+	 * Equinoxes and solstices
+	 */
 
 	const struct solar_event *event;
 	int lambda, day_approx;
