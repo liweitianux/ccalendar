@@ -385,6 +385,15 @@ show_sun_info(double t, const struct location *loc)
 	printf("%s\n", buf);
 
 	/*
+	 * Sun position
+	 */
+	double t_u = t - loc->zone;  /* universal time */
+	double lon = solar_longitude(t_u);
+	double alt = solar_altitude(t_u, loc->latitude, loc->longitude);
+	printf("Sun position: %.4lf° (longitude), %.4lf° (altitude)\n",
+	       lon, alt);
+
+	/*
 	 * Sun rise and set
 	 */
 
