@@ -42,8 +42,10 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "basics.h"
+#include "gregorian.h"
 #include "sun.h"
 #include "utils.h"
 
@@ -340,4 +342,81 @@ sunset(int rd, const struct location *loc)
 		return NAN;
 	else
 		return lt - loc->longitude / 360.0 + loc->zone;
+}
+
+/**************************************************************************/
+
+/* Equinoxes and solstices */
+static const struct solar_event {
+	const char	*name;
+	int		longitude;  /* longitude of Sun */
+	int		month;  /* month of the event */
+} SOLAR_EVENTS[] = {
+	{ "March Equinox",       0,  3 },
+	{ "June Solstice",      90,  6 },
+	{ "September Equinox", 180,  9 },
+	{ "December Solstice", 270, 12 },
+};
+
+/*
+ * Print Sun information of the year containing the given fixed date $rd.
+ */
+void
+show_sun_info(int rd, const struct location *loc)
+{
+	struct g_date date;
+	gregorian_from_fixed(rd, &date);
+	printf("Gregorian date: %4d-%02d-%02d\n",
+	       date.year, date.month, date.day);
+
+	char buf[128];
+	int n;
+	double t;
+
+	n = snprintf(buf, sizeof(buf), "%s", "Location: ");
+	n += format_location(buf + n, sizeof(buf) - n, loc);
+	printf("%s\n", buf);
+
+	n = snprintf(buf, sizeof(buf), "%s", "Sunrise: ");
+	t = sunrise(rd, loc);
+	if (isnan(t)) {
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
+	} else {
+		n += format_time(buf + n, sizeof(buf) - n, t);
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
+		n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	}
+	printf("%s\n", buf);
+
+	n = snprintf(buf, sizeof(buf), "%s", "Sunset: ");
+	t = sunset(rd, loc);
+	if (isnan(t)) {
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
+	} else {
+		n += format_time(buf + n, sizeof(buf) - n, t);
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
+		n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	}
+	printf("%s\n", buf);
+
+	const struct solar_event *event;
+	int lambda, day_approx;
+
+	for (size_t i = 0; i < nitems(SOLAR_EVENTS); i++) {
+		event = &SOLAR_EVENTS[i];
+		lambda = event->longitude;
+		date.month = event->month;
+		date.day = 1;
+		day_approx = fixed_from_gregorian(&date);
+		t = solar_longitude_atafter(lambda, day_approx) + loc->zone;
+		gregorian_from_fixed((int)floor(t), &date);
+		n = snprintf(buf, sizeof(buf),
+			     "%-17s: %3d°, %4d-%02d-%02d ",
+			     event->name, lambda,
+			     date.year, date.month, date.day);
+		n += format_time(buf + n, sizeof(buf) - n, t);
+		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
+		n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+		printf("%s\n", buf);
+	}
 }
