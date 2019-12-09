@@ -243,6 +243,13 @@ token(char *line, FILE *out, bool *skip)
 }
 
 static bool
+locale_day_first(void)
+{
+	char *d_fmt = nl_langinfo(D_FMT);
+	return (strstr(d_fmt, "%d") < strstr(d_fmt, "%m"));
+}
+
+static bool
 cal_parse(FILE *in, FILE *out)
 {
 	char *line = NULL;
@@ -250,7 +257,7 @@ cal_parse(FILE *in, FILE *out)
 	size_t linecap = 0;
 	ssize_t linelen;
 	ssize_t l;
-	static int d_first = -1;
+	static bool d_first;
 	static int count = 0;
 	int i;
 	int month[MAXCOUNT];
@@ -270,6 +277,8 @@ cal_parse(FILE *in, FILE *out)
 
 	if (in == NULL)
 		return (false);
+
+	d_first = locale_day_first();
 
 	while ((linelen = getline(&line, &linecap, in)) > 0) {
 		if (*line == '#') {
@@ -301,7 +310,7 @@ cal_parse(FILE *in, FILE *out)
 		/* Parse special definitions: LANG, Easter, Paskha etc */
 		if (strncmp(buf, "LANG=", 5) == 0) {
 			setlocale(LC_ALL, buf + 5);
-			d_first = (*nl_langinfo(D_MD_ORDER) == 'd');
+			d_first = locale_day_first();
 			setnnames();
 			continue;
 		}
@@ -372,9 +381,6 @@ cal_parse(FILE *in, FILE *out)
 		/* Find the last tab */
 		while (pp[1] == '\t')
 			pp++;
-
-		if (d_first < 0)
-			d_first = (*nl_langinfo(D_MD_ORDER) == 'd');
 
 		for (i = 0; i < count; i++) {
 			tm.tm_mon = month[i] - 1;
