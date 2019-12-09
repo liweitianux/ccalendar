@@ -37,7 +37,6 @@
 #include <err.h>
 #include <errno.h>
 #include <locale.h>
-#include <login_cap.h>
 #include <pwd.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -45,6 +44,9 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#ifdef BSD
+#include <login_cap.h>
+#endif
 
 #include "calendar.h"
 
@@ -77,11 +79,15 @@ main(int argc, char *argv[])
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
+#ifdef BSD
 			if (getuid()) {
 				errno = EPERM;
 				err(1, NULL);
 			}
 			doall = true;
+#else
+			errx(1, "not supported on non-BSD systems");
+#endif
 			break;
 
 		case 'W': /* we don't need no steenking Fridays */
@@ -165,6 +171,7 @@ main(int argc, char *argv[])
 	}
 
 	if (doall) {
+#ifdef BSD
 		while ((pw = getpwent()) != NULL) {
 			pid_t pid;
 
@@ -186,6 +193,9 @@ main(int argc, char *argv[])
 				exit(0);
 			}
 		}
+#else
+			errx(1, "not supported on non-BSD systems");
+#endif
 	} else {
 		cal();
 	}
