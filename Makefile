@@ -8,6 +8,16 @@ SRCS=	calendar.c locale.c events.c dates.c parsedata.c io.c day.c \
 DPADD=	${LIBM} ${LIBUTIL}
 LDADD=	-lm -lutil
 
+CSTD=	c99
+CFLAGS+=-Wall -Wextra \
+	-Wmissing-include-dirs -Wsystem-headers -Wformat-security -Winit-self \
+	-Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith \
+	-Wold-style-definition -Wreturn-type -Wcast-qual -Wwrite-strings \
+	-Wswitch -Wshadow -Wcast-align -Wunused-parameter -Wchar-subscripts \
+	-Winline -Wnested-externs -Wredundant-decls -Wno-pointer-sign \
+	-Wno-format-overflow -Wno-format-truncation -Wno-stringop-truncation \
+	-Wno-stringop-overflow
+
 .if !defined(NO_SHARE)
 INTER=		de_AT.UTF-8 \
 		de_DE.UTF-8 \
