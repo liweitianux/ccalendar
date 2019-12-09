@@ -50,6 +50,10 @@
 #define	DAYSPERYEAR	365
 #define	DAYSPERLEAPYEAR	366
 
+#ifndef nitems
+#define nitems(x)	(sizeof(x) / sizeof((x)[0]))
+#endif
+
 /* Not yet categorized */
 
 extern struct passwd *pw;

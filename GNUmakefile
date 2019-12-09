@@ -11,7 +11,8 @@ CFLAGS+=	-Wduplicated-cond -Wduplicated-branches \
 		-Wrestrict -Wnull-dereference \
 #CFLAGS+=	-Wconversion
 
-CFLAGS+=	$(shell pkg-config --cflags libbsd-overlay)
+CFLAGS+=	$(shell pkg-config --cflags libbsd-overlay) \
+		-D__uintptr_t=uintptr_t
 LIBS=		$(shell pkg-config --libs   libbsd-overlay) -lm
 
 all: $(PROG)
