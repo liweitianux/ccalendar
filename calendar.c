@@ -66,14 +66,12 @@ main(int argc, char *argv[])
 	int	f_dayAfter = 0;		/* days after current date */
 	int	f_dayBefore = 0;	/* days before current date */
 	int	Friday = 5;		/* day before weekend */
-
-	int ch;
+	int	ch;
 	time_t	f_time;
 	struct tm tp1, tp2;
 
-	time(&f_time);  /* default to current time */
-
 	setlocale(LC_ALL, "");
+	f_time = time(NULL);
 	UTCOffset = get_utcoffset();
 	EastLongitude = UTCOffset * 15;
 

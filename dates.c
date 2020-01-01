@@ -28,10 +28,10 @@
  * $FreeBSD: head/usr.bin/calendar/dates.c 326276 2017-11-27 15:37:16Z pfg $
  */
 
+#include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <err.h>
 #include <time.h>
 
 #include "calendar.h"

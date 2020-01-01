@@ -55,7 +55,7 @@ settimes(time_t now, int before, int after, int friday,
 
 	/* Friday displays Monday's events */
 	if (after == 0 && before == 0 && friday != -1)
-		after = tp.tm_wday == friday ? 3 : 1;
+		after = (tp.tm_wday == friday) ? 3 : 1;
 
 	t = now - SECSPERDAY * before;
 	localtime_r(&t, tp1);

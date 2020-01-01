@@ -80,7 +80,8 @@ event_continue(struct event *e, char *txt)
 	free(e->text);
 	asprintf(&e->text, "%s\n%s", text, txt);
 	if (e->text == NULL)
-		errx(1, "event_continue: cannot allocate memory");
+		err(1, "%s:asprintf", __func__);
+
 	free(text);
 }
 
