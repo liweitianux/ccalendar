@@ -32,6 +32,7 @@
  * $FreeBSD: head/usr.bin/calendar/calendar.c 326025 2017-11-20 19:49:47Z pfg $
  */
 
+#include <sys/param.h>
 #include <sys/types.h>
 
 #include <err.h>
