@@ -65,10 +65,6 @@ double	angle2deg(int deg, int min, double sec);
 
 double	invert_angular(double (*f)(double), double y, double a, double b);
 
-bool	parse_timezone(const char *s, long *result);
-bool	parse_location(const char *s, double *latitude, double *longitude,
-		       double *elevation);
-
 void *	xcalloc(size_t number, size_t size);
 char *	xstrdup(const char *str);
 

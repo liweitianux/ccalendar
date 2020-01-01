@@ -56,6 +56,9 @@ static int determinestyle(char *date, int *flags, char *month, int *imonth,
 	char *year, int *iyear);
 static void remember(int *rememberindex, int *y, int *m, int *d, char **ed,
 	int yy, int mm, int dd, char *extra);
+static const char *parse_int_ranged(const char *s, size_t len, int min,
+	int max, int *result);
+static bool parse_angle(const char *s, double *result);
 
 /*
  * Expected styles:
@@ -1112,4 +1115,156 @@ dodebug(char *what)
 		}
 		return;
 	}
+}
+
+
+/*
+ * Parse the specified length of a string to an integer and check its range.
+ * Return the pointer to the next character of the parsed string on success,
+ * otherwise return NULL.
+ */
+static const char *
+parse_int_ranged(const char *s, size_t len, int min, int max, int *result)
+{
+	if (strlen(s) < len)
+		return NULL;
+
+	const char *end = s + len;
+	int v = 0;
+	while (s < end) {
+		if (isdigit((unsigned char)*s) == 0)
+			return NULL;
+		v = 10 * v + (*s - '0');
+		s++;
+	}
+
+	if (v < min || v > max)
+		return NULL;
+
+	*result = v;
+	return end;
+}
+
+/*
+ * Parse the timezone string (format: ±hh:mm, ±hhmm, or ±hh) to the number
+ * of seconds east of UTC.
+ * Return true on success, otherwise false.
+ */
+bool
+parse_timezone(const char *s, long *result)
+{
+	if (*s != '+' && *s != '-')
+		return false;
+	char sign = *s++;
+
+	int hh = 0;
+	int mm = 0;
+	if ((s = parse_int_ranged(s, 2, 0, 23, &hh)) == NULL)
+		return false;
+	if (*s != '\0') {
+		if (*s == ':')
+			s++;
+		if ((s = parse_int_ranged(s, 2, 0, 59, &mm)) == NULL)
+			return false;
+	}
+	if (*s != '\0')
+		return false;
+
+	long offset = hh * 3600L + mm * 60L;
+	*result = (sign == '+') ? offset : -offset;
+
+	return true;
+}
+
+/*
+ * Parse a angle/coordinate string in format of a signle float number or
+ * [+-]d:m:s, where 'd' and 'm' are degrees and minutes of integer type,
+ * and 's' is seconds of float type.
+ * Return true on success, otherwise false.
+ */
+static bool
+parse_angle(const char *s, double *result)
+{
+	char sign = '+';
+	if (*s == '+' || *s == '-')
+		sign = *s++;
+
+	char *endp;
+	double v;
+	v = strtod(s, &endp);
+	if (s == endp || *endp != '\0') {
+		/* try to parse in format: d:m:s */
+		int deg = 0;
+		int min = 0;
+		double sec = 0.0;
+		switch (sscanf(s, "%d:%d:%lf", &deg, &min, &sec)) {
+		case 3:
+		case 2:
+		case 1:
+			if (min < 0 || min > 60 || sec < 0 || sec > 60)
+				return false;
+			v = deg + min / 60.0 + sec / 3600.0;
+			break;
+		default:
+			return false;
+		}
+	}
+
+	*result = (sign == '+') ? v : -v;
+	return true;
+}
+
+/*
+ * Parse location of format: latitude,longitude[,elevation]
+ * where 'latitude' and 'longitude' can be represented as a float number or
+ * in '[+-]d:m:s' format, and 'elevation' is optional and should be a
+ * positive float number.
+ * Return true on success, otherwise false.
+ */
+bool
+parse_location(const char *s, double *latitude, double *longitude,
+	       double *elevation)
+{
+	char *ds = xstrdup(s);
+	const char *sep = ",";
+	char *p;
+	double v;
+
+	p = strtok(ds, sep);
+	if (parse_angle(p, &v) && fabs(v) <= 90) {
+		*latitude = v;
+	} else {
+		warnx("%s: invalid latitude: '%s'", __func__, p);
+		return false;
+	}
+
+	p = strtok(NULL, sep);
+	if (p == NULL) {
+		warnx("%s: missing longitude", __func__);
+		return false;
+	}
+	if (parse_angle(p, &v) && fabs(v) <= 180) {
+		*longitude = v;
+	} else {
+		warnx("%s: invalid longitude: '%s'", __func__, p);
+		return false;
+	}
+
+	p = strtok(NULL, sep);
+	if (p != NULL) {
+		char *endp;
+		v = strtod(p, &endp);
+		if (p == endp || *endp != '\0' || v < 0) {
+			warnx("%s: invalid elevation: '%s'", __func__, p);
+			return false;
+		}
+		*elevation = v;
+	}
+
+	if ((p = strtok(NULL, sep)) != NULL) {
+		warnx("%s: unknown value: '%s'", __func__, p);
+		return false;
+	}
+
+	return true;
 }
