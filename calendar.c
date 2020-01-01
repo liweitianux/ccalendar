@@ -157,7 +157,7 @@ main(int argc, char *argv[])
 	 * This will only affect moon and sun related events anyway.
 	 */
 	if (setenv("TZ", "UTC", 1) != 0)
-		errx(1, "setenv: %s", strerror(errno));
+		err(1, "setenv");
 	tzset();
 
 	if (debug)
