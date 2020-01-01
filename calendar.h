@@ -57,7 +57,6 @@
 
 /* Not yet categorized */
 
-extern bool doall;
 extern bool debug;		/* show parsing of the input */
 extern int year1, year2;
 extern time_t t1, t2;
@@ -127,7 +126,7 @@ time_t	Mktime(char *);
 
 /* io.c */
 extern struct iovec header[];
-void	cal(void);
+void	cal(bool doall);
 
 /* ostern.c / paskha.c */
 int	paskha(int);

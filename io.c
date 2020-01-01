@@ -82,6 +82,7 @@ const char *calendarFile = "calendar"; /* default calendar file */
 static const char *calendarHomes[] = {".calendar", "/usr/share/calendar"};
 static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
 
+static bool allmode = false; /* whether run for all users */
 static char path[MAXPATHLEN];
 
 static StringList *definitions = NULL;
@@ -124,7 +125,7 @@ cal_fopen(const char *file)
 	char cwdpath[MAXPATHLEN];
 	unsigned int i;
 
-	if (!doall) {
+	if (!allmode) {
 		home = getenv("HOME");
 		if (home == NULL || *home == '\0')
 			errx(1, "Cannot get home directory");
@@ -412,11 +413,13 @@ cal_parse(FILE *in, FILE *out)
 }
 
 void
-cal(void)
+cal(bool doall)
 {
 	FILE *fpin;
 	FILE *fpout;
 	int i;
+
+	allmode = doall;
 
 	for (i = 0; i < MAXCOUNT; i++)
 		extradata[i] = xcalloc(1, 20);
@@ -444,7 +447,7 @@ opencalin(void)
 
 	/* open up calendar file */
 	if ((fpin = fopen(calendarFile, "r")) == NULL) {
-		if (doall) {
+		if (allmode) {
 			if (chdir(calendarHomes[0]) != 0)
 				return (NULL);
 			if (stat(calendarNoMail, &sbuf) == 0)
@@ -470,7 +473,7 @@ opencalout(void)
 	int fd;
 
 	/* not reading all calendar files, just set output to stdout */
-	if (!doall)
+	if (!allmode)
 		return (stdout);
 
 	/* set output to a temporary file, so if no output don't send mail */
@@ -489,7 +492,7 @@ closecal(FILE *fp)
 	int nread, pdes[2], status;
 	char buf[1024];
 
-	if (!doall)
+	if (!allmode)
 		return;
 
 	rewind(fp);

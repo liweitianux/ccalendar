@@ -52,7 +52,6 @@
 #include "calendar.h"
 #include "parsedata.h"
 
-bool		doall = false;
 bool		debug = false;
 static char	*DEBUG = NULL;
 double		UTCOffset;
@@ -64,6 +63,7 @@ static double	get_utcoffset(void);
 int
 main(int argc, char *argv[])
 {
+	bool	doall = false;
 	int	f_dayAfter = 0;		/* days after current date */
 	int	f_dayBefore = 0;	/* days before current date */
 	int	Friday = 5;		/* day before weekend */
