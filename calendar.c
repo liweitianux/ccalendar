@@ -54,7 +54,6 @@ struct passwd	*pw;
 bool		doall = false;
 bool		debug = false;
 static char	*DEBUG = NULL;
-static time_t	f_time = 0;
 double		UTCOffset;
 double		EastLongitude;
 
@@ -69,7 +68,10 @@ main(int argc, char *argv[])
 	int	Friday = 5;		/* day before weekend */
 
 	int ch;
+	time_t	f_time;
 	struct tm tp1, tp2;
+
+	time(&f_time);  /* default to current time */
 
 	setlocale(LC_ALL, "");
 	UTCOffset = get_utcoffset();
@@ -126,7 +128,7 @@ main(int argc, char *argv[])
 			UTCOffset = EastLongitude / 15;
 			break;
 
-		case 't': /* other date, for tests */
+		case 't': /* specify date */
 			f_time = Mktime(optarg);
 			break;
 
@@ -146,10 +148,6 @@ main(int argc, char *argv[])
 
 	if (argc)
 		usage();
-
-	/* use current time */
-	if (f_time <= 0)
-		time(&f_time);
 
 	settimes(f_time, f_dayBefore, f_dayAfter, Friday, &tp1, &tp2);
 	generatedates(&tp1, &tp2);
