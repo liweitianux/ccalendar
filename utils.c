@@ -239,7 +239,7 @@ parse_int_ranged(const char *s, size_t len, int min, int max, int *result)
 	const char *end = s + len;
 	int v = 0;
 	while (s < end) {
-		if (isdigit(*s) == 0)
+		if (isdigit((unsigned char)*s) == 0)
 			return NULL;
 		v = 10 * v + (*s - '0');
 		s++;
