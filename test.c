@@ -1,7 +1,10 @@
+#include <err.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "basics.h"
 #include "chinese.h"
@@ -10,8 +13,8 @@
 #include "sun.h"
 #include "utils.h"
 
-int
-main(void)
+static void
+test1(void)
 {
 	char buf[256];
 	int n;
@@ -187,6 +190,62 @@ main(void)
 	show_sun_info(rd+t_day, &shanghai);
 	printf("\n...........................................................\n");
 	show_moon_info(rd+t_day, &shanghai);
+}
+
+
+static long get_utcoffset(void);
+
+static void
+usage(const char *progname)
+{
+	fprintf(stderr, "usage: %s [-T] [-U timezone]\n", progname);
+	exit(2);
+}
+
+int
+main(int argc, char *argv[])
+{
+	int ch;
+	long utcoffset = get_utcoffset();
+	bool run_test = false;
+	const char *progname = argv[0];
+
+	while ((ch = getopt(argc, argv, "TU:")) != -1) {
+		switch (ch) {
+		case 'T':
+			run_test = true;
+			break;
+		case 'U':
+			if (!parse_timezone(optarg, &utcoffset))
+				errx(1, "invalid timezone: '%s'", optarg);
+			break;
+		case '?':
+		default:
+			usage(progname);
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
+	if (argc)
+		usage(progname);
+
+	printf("UTC offset: %ld [seconds]\n", utcoffset);
+
+	if (run_test)
+		test1();
 
 	return 0;
+}
+
+/* Return the seconds east of UTC */
+static long
+get_utcoffset(void)
+{
+	time_t t;
+	struct tm tm;
+
+	time(&t);
+	localtime_r(&t, &tm);
+	return tm.tm_gmtoff;
 }
