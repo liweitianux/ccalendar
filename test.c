@@ -193,12 +193,22 @@ test1(void)
 }
 
 
-static long get_utcoffset(void);
+/* Return the seconds east of UTC */
+static long
+get_utcoffset(void)
+{
+	time_t t;
+	struct tm tm;
+
+	time(&t);
+	localtime_r(&t, &tm);
+	return tm.tm_gmtoff;
+}
 
 static void
 usage(const char *progname)
 {
-	fprintf(stderr, "usage: %s [-T] [-U timezone]\n", progname);
+	fprintf(stderr, "usage: %s [-L location] [-T] [-U timezone]\n", progname);
 	exit(2);
 }
 
@@ -208,10 +218,17 @@ main(int argc, char *argv[])
 	int ch;
 	long utcoffset = get_utcoffset();
 	bool run_test = false;
+	double latitude = 0.0;
+	double longitude = 0.0;
+	double elevation = 0.0;
 	const char *progname = argv[0];
 
-	while ((ch = getopt(argc, argv, "TU:")) != -1) {
+	while ((ch = getopt(argc, argv, "hL:TU:")) != -1) {
 		switch (ch) {
+		case 'L':
+			if (!parse_location(optarg, &latitude, &longitude, &elevation))
+				errx(1, "invalid location: '%s'", optarg);
+			break;
 		case 'T':
 			run_test = true;
 			break;
@@ -219,6 +236,7 @@ main(int argc, char *argv[])
 			if (!parse_timezone(optarg, &utcoffset))
 				errx(1, "invalid timezone: '%s'", optarg);
 			break;
+		case 'h':
 		case '?':
 		default:
 			usage(progname);
@@ -231,21 +249,11 @@ main(int argc, char *argv[])
 		usage(progname);
 
 	printf("UTC offset: %ld [seconds]\n", utcoffset);
+	printf("Location: (latitude=%lf°, longitude=%lf°, elevation=%lfm)\n",
+			latitude, longitude, elevation);
 
 	if (run_test)
 		test1();
 
 	return 0;
-}
-
-/* Return the seconds east of UTC */
-static long
-get_utcoffset(void)
-{
-	time_t t;
-	struct tm tm;
-
-	time(&t);
-	localtime_r(&t, &tm);
-	return tm.tm_gmtoff;
 }
