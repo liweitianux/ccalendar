@@ -45,6 +45,8 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "utils.h"
@@ -277,6 +279,102 @@ parse_timezone(const char *s, long *result)
 
 	long offset = hh * 3600L + mm * 60L;
 	*result = (sign == '+') ? offset : -offset;
+
+	return true;
+}
+
+/*
+ * Parse a angle/coordinate string in format of a signle float number or
+ * [+-]d:m:s, where 'd' and 'm' are degrees and minutes of integer type,
+ * and 's' is seconds of float type.
+ * Return true on success, otherwise false.
+ */
+static bool
+parse_angle(const char *s, double *result)
+{
+	char sign = '+';
+	if (*s == '+' || *s == '-')
+		sign = *s++;
+
+	char *endp;
+	double v;
+	v = strtod(s, &endp);
+	if (s == endp || *endp != '\0') {
+		/* try to parse in format: d:m:s */
+		int deg = 0;
+		int min = 0;
+		double sec = 0.0;
+		switch (sscanf(s, "%d:%d:%lf", &deg, &min, &sec)) {
+		case 3:
+		case 2:
+		case 1:
+			if (min < 0 || min > 60 || sec < 0 || sec > 60)
+				return false;
+			v = deg + min / 60.0 + sec / 3600.0;
+			break;
+		default:
+			return false;
+		}
+	}
+
+	*result = (sign == '+') ? v : -v;
+	return true;
+}
+
+/*
+ * Parse location of format: latitude,longitude[,elevation]
+ * where 'latitude' and 'longitude' can be represented as a float number or
+ * in '[+-]d:m:s' format, and 'elevation' is optional and should be a
+ * positive float number.
+ * Return true on success, otherwise false.
+ */
+bool
+parse_location(const char *s, double *latitude, double *longitude,
+	       double *elevation)
+{
+	char *ds = strdup(s);
+	if (ds == NULL)
+		err(1, "%s:strdup", __func__);
+
+	double v;
+	char *p;
+	char *sep = ",";
+
+	p = strtok(ds, sep);
+	if (parse_angle(p, &v) && fabs(v) <= 90) {
+		*latitude = v;
+	} else {
+		warnx("%s: invalid latitude: '%s'", __func__, p);
+		return false;
+	}
+
+	p = strtok(NULL, sep);
+	if (p == NULL) {
+		warnx("%s: missing longitude", __func__);
+		return false;
+	}
+	if (parse_angle(p, &v) && fabs(v) <= 180) {
+		*longitude = v;
+	} else {
+		warnx("%s: invalid longitude: '%s'", __func__, p);
+		return false;
+	}
+
+	p = strtok(NULL, sep);
+	if (p != NULL) {
+		char *endp;
+		v = strtod(p, &endp);
+		if (p == endp || *endp != '\0' || v < 0) {
+			warnx("%s: invalid elevation: '%s'", __func__, p);
+			return false;
+		}
+		*elevation = v;
+	}
+
+	if ((p = strtok(NULL, sep)) != NULL) {
+		warnx("%s: unknown value: '%s'", __func__, p);
+		return false;
+	}
 
 	return true;
 }
