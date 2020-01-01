@@ -332,13 +332,10 @@ bool
 parse_location(const char *s, double *latitude, double *longitude,
 	       double *elevation)
 {
-	char *ds = strdup(s);
-	if (ds == NULL)
-		err(1, "%s:strdup", __func__);
-
-	double v;
+	char *ds = xstrdup(s);
+	const char *sep = ",";
 	char *p;
-	char *sep = ",";
+	double v;
 
 	p = strtok(ds, sep);
 	if (parse_angle(p, &v) && fabs(v) <= 90) {
