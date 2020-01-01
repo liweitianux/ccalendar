@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -37,6 +37,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #ifndef nitems
@@ -63,5 +64,7 @@ double	arctan_deg(double y, double x);
 double	angle2deg(int deg, int min, double sec);
 
 double	invert_angular(double (*f)(double), double y, double a, double b);
+
+bool	parse_timezone(const char *s, long *result);
 
 #endif

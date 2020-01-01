@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -39,10 +39,13 @@
  * 2018, Cambridge University Press
  */
 
+#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "utils.h"
 
@@ -216,4 +219,64 @@ invert_angular(double (*f)(double), double y, double a, double b)
 	} while (fabs(a-b) >= eps);
 
 	return x;
+}
+
+/**************************************************************************/
+
+/*
+ * Parse the specified length of a string to an integer and check its range.
+ * Return the pointer to the next character of the parsed string on success,
+ * otherwise return NULL.
+ */
+static const char *
+parse_int_ranged(const char *s, size_t len, int min, int max, int *result)
+{
+	if (strlen(s) < len)
+		return NULL;
+
+	const char *end = s + len;
+	int v = 0;
+	while (s < end) {
+		if (isdigit(*s) == 0)
+			return NULL;
+		v = 10 * v + (*s - '0');
+		s++;
+	}
+
+	if (v < min || v > max)
+		return NULL;
+
+	*result = v;
+	return end;
+}
+
+/*
+ * Parse the timezone string (format: ±hh:mm, ±hhmm, or ±hh) to the number
+ * of seconds east of UTC.
+ * Return true on success, otherwise false.
+ */
+bool
+parse_timezone(const char *s, long *result)
+{
+	if (*s != '+' && *s != '-')
+		return false;
+	char sign = *s++;
+
+	int hh = 0;
+	int mm = 0;
+	if ((s = parse_int_ranged(s, 2, 0, 23, &hh)) == NULL)
+		return false;
+	if (*s != '\0') {
+		if (*s == ':')
+			s++;
+		if ((s = parse_int_ranged(s, 2, 0, 59, &mm)) == NULL)
+			return false;
+	}
+	if (*s != '\0')
+		return false;
+
+	long offset = hh * 3600L + mm * 60L;
+	*result = (sign == '+') ? offset : -offset;
+
+	return true;
 }
