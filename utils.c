@@ -378,3 +378,27 @@ parse_location(const char *s, double *latitude, double *longitude,
 
 	return true;
 }
+
+/*
+ * Like calloc(3) but exit if allocation fails.
+ */
+void *
+xcalloc(size_t number, size_t size)
+{
+	void *ptr = calloc(number, size);
+	if (ptr == NULL)
+		errx(1, "xcalloc(%zu, %zu): out of memory", number, size);
+	return ptr;
+}
+
+/*
+ * Like strdup(3) but exit if fail.
+ */
+char *
+xstrdup(const char *str)
+{
+	char *p = strdup(str);
+	if (p == NULL)
+		errx(1, "xstrdup: out of memory (length: %zu)", strlen(str));
+	return p;
+}

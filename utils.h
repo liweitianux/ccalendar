@@ -69,4 +69,7 @@ bool	parse_timezone(const char *s, long *result);
 bool	parse_location(const char *s, double *latitude, double *longitude,
 		       double *elevation);
 
+void *	xcalloc(size_t number, size_t size);
+char *	xstrdup(const char *str);
+
 #endif
