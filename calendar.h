@@ -35,6 +35,7 @@
 #include <sys/uio.h>
 
 #include <stdbool.h>
+#include <time.h>
 
 #define	SECSPERDAY	(24 * 60 * 60)
 #define	SECSPERHOUR	(60 * 60)
