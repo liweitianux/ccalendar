@@ -73,8 +73,9 @@ settimes(time_t now, int before, int after, int friday,
 	setnnames();
 }
 
-/* convert Day[/Month][/Year] into unix time (since 1970)
- * Day: two digits, Month: two digits, Year: digits
+/*
+ * Parse 'day[.month[.year]]' into unix time (since 1970)
+ * day: two digits; month: two digits; year: digits
  */
 time_t
 Mktime(char *dp)

@@ -41,7 +41,7 @@ struct cal_year {
 	int easter;	/* Julian day */
 	int paskha;	/* Julian day */
 	int cny;	/* Julian day */
-	int firstdayofweek; /* 0 .. 6 */
+	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
 	struct cal_month *months;
 	struct cal_year	*nextyear;
 };
