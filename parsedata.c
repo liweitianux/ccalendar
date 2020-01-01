@@ -36,6 +36,7 @@
 #include <err.h>
 
 #include "calendar.h"
+#include "parsedata.h"
 #include "utils.h"
 
 static char *showflags(int flags);

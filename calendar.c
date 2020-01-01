@@ -49,6 +49,7 @@
 #endif
 
 #include "calendar.h"
+#include "parsedata.h"
 
 struct passwd	*pw;
 bool		doall = false;

@@ -70,38 +70,6 @@ extern double EastLongitude;
 
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
 
-/* Flags to determine the returned values by determinestyle() in parsedata.c */
-#define	F_NONE			0x00000
-#define	F_MONTH			0x00001
-#define	F_DAYOFWEEK		0x00002
-#define	F_DAYOFMONTH		0x00004
-#define	F_MODIFIERINDEX		0x00008
-#define	F_MODIFIEROFFSET	0x00010
-#define	F_SPECIALDAY		0x00020
-#define	F_ALLMONTH		0x00040
-#define	F_ALLDAY		0x00080
-#define	F_VARIABLE		0x00100
-#define	F_EASTER		0x00200
-#define	F_CNY			0x00400
-#define	F_PASKHA		0x00800
-#define	F_NEWMOON		0x01000
-#define	F_FULLMOON		0x02000
-#define	F_MAREQUINOX		0x04000
-#define	F_SEPEQUINOX		0x08000
-#define	F_JUNSOLSTICE		0x10000
-#define	F_DECSOLSTICE		0x20000
-#define	F_YEAR			0x40000
-
-#define	STRING_EASTER		"Easter"
-#define	STRING_PASKHA		"Paskha"
-#define	STRING_CNY		"ChineseNewYear"
-#define STRING_NEWMOON		"NewMoon"
-#define STRING_FULLMOON		"FullMoon"
-#define STRING_MAREQUINOX	"MarEquinox"
-#define STRING_SEPEQUINOX	"SepEquinox"
-#define STRING_JUNSOLSTICE	"JunSolstice"
-#define STRING_DECSOLSTICE	"DecSolstice"
-
 #define	MAXCOUNT		125	/* Random number of maximum number of
 					 * repeats of an event. Should be 52
 					 * (number of weeks per year), if you
@@ -110,12 +78,6 @@ extern double EastLongitude;
 					 * more than this you are using this
 					 * program wrong.
 					 */
-
-/*
- * All the astronomical calculations are carried out for the meridian 120
- * degrees east of Greenwich.
- */
-#define UTCOFFSET_CNY		8.0
 
 /* events.c */
 /*
@@ -163,10 +125,6 @@ void	setnsequences(char *);
 extern char dayname[];
 void	settimes(time_t, int before, int after, int friday, struct tm *tp1, struct tm *tp2);
 time_t	Mktime(char *);
-
-/* parsedata.c */
-int	parsedaymonth(char *, int *, int *, int *, int *, char **);
-void	dodebug(char *type);
 
 /* io.c */
 extern struct iovec header[];
