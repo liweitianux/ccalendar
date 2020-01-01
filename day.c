@@ -41,7 +41,6 @@
 #include "calendar.h"
 
 static time_t		time1, time2;
-const struct tm		tm0;
 char			dayname[100];
 int			year1, year2;
 
@@ -81,16 +80,11 @@ time_t
 Mktime(char *dp)
 {
 	time_t t;
+	struct tm tm;
 	int d, m, y;
-	struct tm tm, tp;
 
-	(void)time(&t);
-	localtime_r(&t, &tp);
-
-	tm = tm0;
-	tm.tm_mday = tp.tm_mday;
-	tm.tm_mon = tp.tm_mon;
-	tm.tm_year = tp.tm_year;
+	time(&t);
+	localtime_r(&t, &tm);
 
 	switch (sscanf(dp, "%d.%d.%d", &d, &m, &y)) {
 	case 3:

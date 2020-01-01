@@ -100,15 +100,16 @@ createdate(int y, int m, int d)
 	}
 
 	if (py == NULL) {
-		struct tm td;
+		struct tm td = { 0 };
 		time_t t;
+
 		py = (struct cal_year *)calloc(1, sizeof(struct cal_year));
 		py->year = y + 1900;
 		py->easter = easter(y);
 		py->paskha = paskha(y);
 
-		td = tm0;
 		td.tm_year = y;
+		td.tm_mon = 0;
 		td.tm_mday = 1;
 		t = mktime(&td);
 		localtime_r(&t, &td);
