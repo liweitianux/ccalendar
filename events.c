@@ -35,6 +35,7 @@
 #include <string.h>
 
 #include "calendar.h"
+#include "utils.h"
 
 struct event *
 event_add(int year, int month, int day, char *date, int var, char *txt,
@@ -49,21 +50,16 @@ event_add(int year, int month, int day, char *date, int var, char *txt,
 	 * - Copy the human readable and language specific date
 	 * - Copy the text of the event
 	 */
-	e = (struct event *)calloc(1, sizeof(struct event));
-	if (e == NULL)
-		errx(1, "event_add: cannot allocate memory");
+	e = xcalloc(1, sizeof(struct event));
 	e->month = month;
 	e->day = day;
 	e->var = var;
-	e->date = strdup(date);
-	if (e->date == NULL)
-		errx(1, "event_add: cannot allocate memory");
-	e->text = strdup(txt);
-	if (e->text == NULL)
-		errx(1, "event_add: cannot allocate memory");
+	e->date = xstrdup(date);
+	e->text = xstrdup(txt);
 	e->extra = NULL;
 	if (extra != NULL && extra[0] != '\0')
-		e->extra = strdup(extra);
+		e->extra = xstrdup(extra);
+
 	addtodate(e, year, month, day);
 	return (e);
 }
@@ -80,10 +76,7 @@ event_continue(struct event *e, char *txt)
 	 * - Store the old text + \n + new text
 	 * - Destroy the saved copy.
 	 */
-	text = strdup(e->text);
-	if (text == NULL)
-		errx(1, "event_continue: cannot allocate memory");
-
+	text = xstrdup(e->text);
 	free(e->text);
 	asprintf(&e->text, "%s\n%s", text, txt);
 	if (e->text == NULL)

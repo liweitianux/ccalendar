@@ -1,7 +1,7 @@
 PROG=		calendar
 MAN=		calendar.1
 SRCS=		calendar.c dates.c day.c events.c io.c locale.c ostern.c \
-		parsedata.c paskha.c pom.c sunpos.c
+		parsedata.c paskha.c pom.c sunpos.c utils.c
 OBJS=		$(SRCS:.c=.o)
 
 CFLAGS=		-O2 -pipe -std=c99 -pedantic -D_GNU_SOURCE

@@ -39,6 +39,7 @@
 #include <time.h>
 
 #include "calendar.h"
+#include "utils.h"
 
 const char *fdays[] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
@@ -88,8 +89,7 @@ setnnames(void)
 		buf[l] = '\0';
 		if (ndays[i].name != NULL)
 			free(ndays[i].name);
-		if ((ndays[i].name = strdup(buf)) == NULL)
-			errx(1, "cannot allocate memory");
+		ndays[i].name = xstrdup(buf);
 		ndays[i].len = strlen(buf);
 
 		strftime(buf, sizeof(buf), "%A", &tm);
@@ -100,8 +100,7 @@ setnnames(void)
 		buf[l] = '\0';
 		if (fndays[i].name != NULL)
 			free(fndays[i].name);
-		if ((fndays[i].name = strdup(buf)) == NULL)
-			errx(1, "cannot allocate memory");
+		fndays[i].name = xstrdup(buf);
 		fndays[i].len = strlen(buf);
 	}
 
@@ -116,8 +115,7 @@ setnnames(void)
 		buf[l] = '\0';
 		if (nmonths[i].name != NULL)
 			free(nmonths[i].name);
-		if ((nmonths[i].name = strdup(buf)) == NULL)
-			errx(1, "cannot allocate memory");
+		nmonths[i].name = xstrdup(buf);
 		nmonths[i].len = strlen(buf);
 
 		strftime(buf, sizeof(buf), "%B", &tm);
@@ -128,8 +126,7 @@ setnnames(void)
 		buf[l] = '\0';
 		if (fnmonths[i].name != NULL)
 			free(fnmonths[i].name);
-		if ((fnmonths[i].name = strdup(buf)) == NULL)
-			errx(1, "cannot allocate memory");
+		fnmonths[i].name = xstrdup(buf);
 		fnmonths[i].len = strlen(buf);
 	}
 }
@@ -157,9 +154,9 @@ setnsequences(char *seq)
 	nsequences[i].name = p;
 
 	for (i = 0; i < 5; i++) {
-		nsequences[i].name = strdup(nsequences[i].name);
+		nsequences[i].name = xstrdup(nsequences[i].name);
 		nsequences[i].len = nsequences[i + 1].name - nsequences[i].name;
 	}
-	nsequences[i].name = strdup(nsequences[i].name);
+	nsequences[i].name = xstrdup(nsequences[i].name);
 	nsequences[i].len = strlen(nsequences[i].name);
 }

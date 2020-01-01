@@ -54,6 +54,7 @@
 #include <unistd.h>
 
 #include "calendar.h"
+#include "utils.h"
 
 struct iovec header[] = {
 	{ __DECONST(char *, "From: "), 6 },
@@ -220,7 +221,7 @@ token(char *line, FILE *out, bool *skip)
 			return (T_ERR);
 		}
 
-		sl_add(definitions, strdup(walk));
+		sl_add(definitions, xstrdup(walk));
 		return (T_OK);
 	}
 
@@ -319,8 +320,7 @@ cal_parse(FILE *in, FILE *out)
 		if (strncasecmp(buf, (string), (slen)) == 0 && buf[(slen)]) {	\
 			if (struct_.name != NULL)				\
 				free(struct_.name);				\
-			if ((struct_.name = strdup(buf + (slen))) == NULL)	\
-				errx(1, "cannot allocate memory");		\
+			struct_.name = xstrdup(buf + (slen));			\
 			struct_.len = strlen(buf + (slen));			\
 			continue;						\
 		}
@@ -417,7 +417,7 @@ cal(void)
 	int i;
 
 	for (i = 0; i < MAXCOUNT; i++)
-		extradata[i] = (char *)calloc(1, 20);
+		extradata[i] = xcalloc(1, 20);
 
 	if ((fpin = opencalin()) == NULL)
 		return;

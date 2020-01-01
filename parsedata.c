@@ -36,6 +36,7 @@
 #include <err.h>
 
 #include "calendar.h"
+#include "utils.h"
 
 static char *showflags(int flags);
 static bool isonlydigits(char *s, int nostar);
@@ -487,10 +488,7 @@ parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
 			yearinfo = yearinfo -> next;
 		}
 		if (yearinfo == NULL) {
-			yearinfo = (struct yearinfo *)calloc(1,
-			    sizeof(struct yearinfo));
-			if (yearinfo == NULL)
-				errx(1, "Unable to allocate more years");
+			yearinfo = xcalloc(1, sizeof(struct yearinfo));
 			yearinfo->year = year;
 			yearinfo->next = years;
 			years = yearinfo;

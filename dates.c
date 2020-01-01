@@ -35,6 +35,7 @@
 #include <time.h>
 
 #include "calendar.h"
+#include "utils.h"
 
 struct cal_year {
 	int year;	/* 19xx, 20xx, 21xx */
@@ -103,7 +104,7 @@ createdate(int y, int m, int d)
 		struct tm td = { 0 };
 		time_t t;
 
-		py = (struct cal_year *)calloc(1, sizeof(struct cal_year));
+		py = xcalloc(1, sizeof(struct cal_year));
 		py->year = y + 1900;
 		py->easter = easter(y);
 		py->paskha = paskha(y);
@@ -131,7 +132,7 @@ createdate(int y, int m, int d)
 	}
 
 	if (pm == NULL) {
-		pm = (struct cal_month *)calloc(1, sizeof(struct cal_month));
+		pm = xcalloc(1, sizeof(struct cal_month));
 		pm->year = py;
 		pm->month = m;
 		cumday = cumdaytab[isleap(y)];
@@ -152,7 +153,7 @@ createdate(int y, int m, int d)
 	}
 
 	if (pd == NULL) {	/* Always true */
-		pd = (struct cal_day *)calloc(1, sizeof(struct cal_day));
+		pd = xcalloc(1, sizeof(struct cal_day));
 		pd->month = pm;
 		pd->year = py;
 		pd->dayofmonth = d;

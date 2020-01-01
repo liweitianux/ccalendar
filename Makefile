@@ -3,7 +3,7 @@
 
 PROG=	calendar
 SRCS=	calendar.c locale.c events.c dates.c parsedata.c io.c day.c \
-	ostern.c paskha.c pom.c sunpos.c
+	ostern.c paskha.c pom.c sunpos.c utils.c
 
 DPADD=	${LIBM} ${LIBUTIL}
 LDADD=	-lm -lutil
