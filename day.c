@@ -100,8 +100,8 @@ Mktime(char *dp)
 	}
 
 #ifdef DEBUG
-	fprintf(stderr, "Mktime: %d %d %s\n",
-	    (int)mktime(&tm), (int)t, asctime(&tm));
+	fprintf(stderr, "%s: %ld %ld %s\n", __func__,
+			(long)mktime(&tm), (long)t, asctime(&tm));
 #endif
 	return (mktime(&tm));
 }
