@@ -57,7 +57,6 @@
 
 /* Not yet categorized */
 
-extern struct passwd *pw;
 extern bool doall;
 extern bool debug;		/* show parsing of the input */
 extern int year1, year2;

@@ -483,6 +483,8 @@ static void
 closecal(FILE *fp)
 {
 	struct stat sbuf;
+	struct passwd *pw;
+	uid_t uid;
 	int nread, pdes[2], status;
 	char buf[1024];
 
@@ -516,6 +518,8 @@ closecal(FILE *fp)
 	/* parent -- write to pipe input */
 	close(pdes[0]);
 
+	uid = getuid();
+	pw = getpwuid(uid);
 	header[1].iov_base = header[3].iov_base = pw->pw_name;
 	header[1].iov_len = header[3].iov_len = strlen(pw->pw_name);
 	writev(pdes[1], header, 8);

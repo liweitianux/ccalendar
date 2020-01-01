@@ -52,7 +52,6 @@
 #include "calendar.h"
 #include "parsedata.h"
 
-struct passwd	*pw;
 bool		doall = false;
 bool		debug = false;
 static char	*DEBUG = NULL;
@@ -71,6 +70,7 @@ main(int argc, char *argv[])
 	int	ch;
 	time_t	f_time;
 	struct tm tp1, tp2;
+	struct passwd *pw;
 
 	setlocale(LC_ALL, "");
 	f_time = time(NULL);
