@@ -40,9 +40,8 @@
 
 #include "calendar.h"
 
-static time_t		time1, time2;
-char			dayname[100];
-int			year1, year2;
+char	dayname[100];
+int	year1, year2;
 
 
 void
@@ -50,6 +49,7 @@ settimes(time_t now, int before, int after, int friday,
 	 struct tm *tp1, struct tm *tp2)
 {
 	struct tm tp;
+	time_t t;
 
 	localtime_r(&now, &tp);
 
@@ -57,11 +57,11 @@ settimes(time_t now, int before, int after, int friday,
 	if (after == 0 && before == 0 && friday != -1)
 		after = tp.tm_wday == friday ? 3 : 1;
 
-	time1 = now - SECSPERDAY * before;
-	localtime_r(&time1, tp1);
+	t = now - SECSPERDAY * before;
+	localtime_r(&t, tp1);
 	year1 = 1900 + tp1->tm_year;
-	time2 = now + SECSPERDAY * after;
-	localtime_r(&time2, tp2);
+	t = now + SECSPERDAY * after;
+	localtime_r(&t, tp2);
 	year2 = 1900 + tp2->tm_year;
 
 	setlocale(LC_TIME, "C");
