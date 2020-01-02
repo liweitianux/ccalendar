@@ -447,6 +447,11 @@ addtodate(struct event *e, int year, int month, int day)
 	struct cal_day *d;
 
 	d = find_day(year, month, day);
+	if (d == NULL) {
+		errx(1, "%s: find_day(%d, %d, %d) failed",
+				__func__, year, month, day);
+	}
+
 	e->next = d->events;
 	d->events = e;
 }
