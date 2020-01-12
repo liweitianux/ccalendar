@@ -187,7 +187,7 @@ main(int argc, char *argv[])
 						   LOGIN_SETALL) != 0)
 					errx(1, "setusercontext");
 
-				cal();
+				cal(doall);
 				exit(0);
 			}
 		}
@@ -195,7 +195,7 @@ main(int argc, char *argv[])
 			errx(1, "not supported on non-BSD systems");
 #endif
 	} else {
-		cal();
+		cal(doall);
 	}
 
 	return (0);
