@@ -57,7 +57,6 @@ double		UTCOffset;
 double		EastLongitude;
 
 static void	usage(void) __dead2;
-static double	get_utcoffset(void);
 
 int
 main(int argc, char *argv[])
@@ -68,13 +67,16 @@ main(int argc, char *argv[])
 	int	Friday = 5;		/* day before weekend */
 	int	ch;
 	time_t	f_time;
+	struct tm tm_now = { 0 };
 	struct tm tp1, tp2;
 	struct passwd *pw;
 	const char *debug_type = NULL;
 
 	setlocale(LC_ALL, "");
+	tzset();
 	f_time = time(NULL);
-	UTCOffset = get_utcoffset();
+	localtime_r(&f_time, &tm_now);
+	UTCOffset = tm_now.tm_gmtoff / FSECSPERHOUR;
 	EastLongitude = UTCOffset * 15;
 
 	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hl:t:U:W:?")) != -1) {
@@ -130,6 +132,7 @@ main(int argc, char *argv[])
 
 		case 't': /* specify date */
 			f_time = Mktime(optarg);
+			localtime_r(&f_time, &tm_now);
 			break;
 
 		case 'U': /* Change UTC offset */
@@ -212,24 +215,4 @@ usage(void)
 	    "		     [-t dd[.mm[.year]]] [-U utcoffset] [-W days]"
 	    );
 	exit(1);
-}
-
-
-/*
- * Calculate the timezone difference between here and UTC.
- *
- * Return the offset hour from UTC.
- */
-static double
-get_utcoffset(void)
-{
-	time_t t;
-	struct tm tm;
-	long utcoffset;
-
-	time(&t);
-	localtime_r(&t, &tm);
-	utcoffset = tm.tm_gmtoff;
-
-	return (utcoffset / FSECSPERHOUR);
 }
