@@ -55,6 +55,7 @@
 bool		debug = false;
 double		UTCOffset;
 double		EastLongitude;
+struct tm	tm_now = { 0 };  /* time/date of calendar events to remind */
 
 static void	usage(void) __dead2;
 
@@ -67,7 +68,6 @@ main(int argc, char *argv[])
 	int	Friday = 5;		/* day before weekend */
 	int	ch;
 	time_t	f_time;
-	struct tm tm_now = { 0 };
 	struct tm tp1, tp2;
 	struct passwd *pw;
 	const char *debug_type = NULL;

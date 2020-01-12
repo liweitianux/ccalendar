@@ -35,7 +35,6 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/uio.h>
 #include <sys/wait.h>
 
 #include <assert.h>
@@ -57,17 +56,6 @@
 #include "calendar.h"
 #include "parsedata.h"
 #include "utils.h"
-
-struct iovec header[] = {
-	{ __DECONST(char *, "From: "), 6 },
-	{ NULL, 0 },
-	{ __DECONST(char *, " (Reminder Service)\nTo: "), 24 },
-	{ NULL, 0 },
-	{ __DECONST(char *, "\nSubject: "), 10 },
-	{ NULL, 0 },
-	{ __DECONST(char *, "'s Calendar\nPrecedence: bulk\n"),  29 },
-	{ __DECONST(char *, "Auto-Submitted: auto-generated\n\n"), 32 },
-};
 
 enum {
 	T_OK = 0,
@@ -96,6 +84,7 @@ static FILE	*opencalin(void);
 static FILE	*opencalout(void);
 static int	 token(char *line, FILE *out, bool *skip);
 static void	 trimlr(char **buf);
+static void	 write_mailheader(int fd);
 
 
 static void
@@ -487,8 +476,6 @@ static void
 closecal(FILE *fp)
 {
 	struct stat sbuf;
-	struct passwd *pw;
-	uid_t uid;
 	int nread, pdes[2], status;
 	char buf[1024];
 
@@ -522,11 +509,7 @@ closecal(FILE *fp)
 	/* parent -- write to pipe input */
 	close(pdes[0]);
 
-	uid = getuid();
-	pw = getpwuid(uid);
-	header[1].iov_base = header[3].iov_base = pw->pw_name;
-	header[1].iov_len = header[3].iov_len = strlen(pw->pw_name);
-	writev(pdes[1], header, 8);
+	write_mailheader(pdes[1]);
 	while ((nread = read(fileno(fp), buf, sizeof(buf))) > 0)
 		write(pdes[1], buf, nread);
 	close(pdes[1]);
@@ -536,4 +519,27 @@ done:
 	unlink(path);
 	while (wait(&status) >= 0)
 		;
+}
+
+static void
+write_mailheader(int fd)
+{
+	uid_t uid = getuid();
+	struct passwd *pw = getpwuid(uid);
+	FILE *fp = fdopen(fd, "w");
+	char dayname[32] = { 0 };
+
+	setlocale(LC_TIME, "C");
+	strftime(dayname, sizeof(dayname), "%A, %d %B %Y", &tm_now);
+	setlocale(LC_TIME, "");
+
+	fprintf(fp,
+		"From: %s (Reminder Service)\n"
+		"To: %s\n"
+		"Subject: %s's Calendar\n"
+		"Precedence: bulk\n"
+		"Auto-Submitted: auto-generated\n\n",
+		pw->pw_name, pw->pw_name, dayname);
+	fflush(fp);
+	/* No need to close fp */
 }

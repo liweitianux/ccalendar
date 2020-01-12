@@ -40,7 +40,6 @@
 
 #include "calendar.h"
 
-char	dayname[100];
 int	year1, year2;
 
 
@@ -63,12 +62,6 @@ settimes(time_t now, int before, int after, int friday,
 	t = now + SECSPERDAY * after;
 	localtime_r(&t, tp2);
 	year2 = 1900 + tp2->tm_year;
-
-	setlocale(LC_TIME, "C");
-	header[5].iov_base = dayname;
-	header[5].iov_len = strftime(dayname, sizeof(dayname),
-				     "%A, %d %B %Y", &tp);
-	setlocale(LC_TIME, "");
 }
 
 /*

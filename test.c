@@ -22,6 +22,7 @@
 bool		debug = false;
 double		UTCOffset = 0.0;
 double		EastLongitude = 0.0;
+struct tm	tm_now = { 0 };  /* time/date of calendar events to remind */
 
 
 static void
