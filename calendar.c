@@ -149,6 +149,7 @@ main(int argc, char *argv[])
 	if (argc)
 		usage();
 
+	setnnames();
 	settimes(f_time, f_dayBefore, f_dayAfter, Friday, &tp1, &tp2);
 	generatedates(&tp1, &tp2);
 

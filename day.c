@@ -69,8 +69,6 @@ settimes(time_t now, int before, int after, int friday,
 	header[5].iov_len = strftime(dayname, sizeof(dayname),
 				     "%A, %d %B %Y", &tp);
 	setlocale(LC_TIME, "");
-
-	setnnames();
 }
 
 /*
