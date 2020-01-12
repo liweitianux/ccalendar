@@ -78,7 +78,7 @@
 
 int	parsedaymonth(char *date, int *yearp, int *monthp, int *dayp,
 		      int *flags, char **edp);
-void	dodebug(char *type);
+void	dodebug(const char *type);
 
 bool	parse_timezone(const char *s, long *result);
 bool	parse_location(const char *s, double *latitude, double *longitude,

@@ -53,7 +53,6 @@
 #include "parsedata.h"
 
 bool		debug = false;
-static char	*DEBUG = NULL;
 double		UTCOffset;
 double		EastLongitude;
 
@@ -71,6 +70,7 @@ main(int argc, char *argv[])
 	time_t	f_time;
 	struct tm tp1, tp2;
 	struct passwd *pw;
+	const char *debug_type = NULL;
 
 	setlocale(LC_ALL, "");
 	f_time = time(NULL);
@@ -108,7 +108,7 @@ main(int argc, char *argv[])
 			break;
 
 		case 'D': /* debug output of sun and moon info */
-			DEBUG = optarg;
+			debug_type = optarg;
 			break;
 
 		case 'd': /* debug output of current date */
@@ -163,8 +163,8 @@ main(int argc, char *argv[])
 	if (debug)
 		dumpdates();
 
-	if (DEBUG != NULL) {
-		dodebug(DEBUG);
+	if (debug_type != NULL) {
+		dodebug(debug_type);
 		exit(0);
 	}
 

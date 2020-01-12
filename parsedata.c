@@ -1066,14 +1066,14 @@ floattoday(int year, double f)
 }
 
 void
-dodebug(char *what)
+dodebug(const char *type)
 {
 	int year;
 
 	printf("UTCOffset: %g\n", UTCOffset);
 	printf("EastLongitude: %g\n", EastLongitude);
 
-	if (strcmp(what, "moon") == 0) {
+	if (strcmp(type, "moon") == 0) {
 		double ffullmoon[MAXMOONS], fnewmoon[MAXMOONS];
 		int i;
 
@@ -1094,7 +1094,7 @@ dodebug(char *what)
 		return;
 	}
 
-	if (strcmp(what, "sun") == 0) {
+	if (strcmp(type, "sun") == 0) {
 		double equinoxdays[2], solsticedays[2];
 		for (year = year1; year <= year2; year++) {
 			printf("Sun in %d:\n", year);
