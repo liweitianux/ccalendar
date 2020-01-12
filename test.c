@@ -10,8 +10,19 @@
 #include "chinese.h"
 #include "gregorian.h"
 #include "moon.h"
+#include "parsedata.h"
 #include "sun.h"
 #include "utils.h"
+
+
+/*
+ * globals
+ * for compatible with calendar.c ... files
+ */
+bool		debug = false;
+double		UTCOffset = 0.0;
+double		EastLongitude = 0.0;
+
 
 static void
 test1(void)
