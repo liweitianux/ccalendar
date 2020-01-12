@@ -32,11 +32,10 @@
  * $FreeBSD: head/usr.bin/calendar/calendar.c 326025 2017-11-20 19:49:47Z pfg $
  */
 
-#include <sys/param.h>
 #include <sys/types.h>
 
 #include <err.h>
-#include <errno.h>
+#include <grp.h>
 #include <locale.h>
 #include <pwd.h>
 #include <stdbool.h>
@@ -45,9 +44,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#ifdef BSD
-#include <login_cap.h>
-#endif
 
 #include "calendar.h"
 #include "parsedata.h"
@@ -83,15 +79,9 @@ main(int argc, char *argv[])
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
-#ifdef BSD
-			if (getuid()) {
-				errno = EPERM;
-				err(1, NULL);
-			}
+			if (getuid())
+				errx(1, "must be root to run with '-a'");
 			doall = true;
-#else
-			errx(1, "not supported on non-BSD systems");
-#endif
 			break;
 
 		case 'W': /* we don't need no steenking Fridays */
@@ -173,31 +163,25 @@ main(int argc, char *argv[])
 	}
 
 	if (doall) {
-#ifdef BSD
 		while ((pw = getpwent()) != NULL) {
-			pid_t pid;
-
 			if (chdir(pw->pw_dir) == -1)
 				continue;
 
-			pid = fork();
+			pid_t pid = fork();
 			if (pid < 0)
 				err(1, "fork");
 			if (pid == 0) {
-				login_cap_t *lc;
-
-				lc = login_getpwclass(pw);
-				if (setusercontext(lc, pw, pw->pw_uid,
-						   LOGIN_SETALL) != 0)
-					errx(1, "setusercontext");
+				if (setgid(pw->pw_gid) == -1)
+					err(1, "setgid(%d)", (int)pw->pw_gid);
+				if (initgroups(pw->pw_name, pw->pw_gid) == -1)
+					err(1, "initgroups(%s)", pw->pw_name);
+				if (setuid(pw->pw_uid) == -1)
+					err(1, "setuid(%d)", (int)pw->pw_uid);
 
 				cal(doall);
 				exit(0);
 			}
 		}
-#else
-			errx(1, "not supported on non-BSD systems");
-#endif
 	} else {
 		cal(doall);
 	}
