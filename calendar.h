@@ -32,7 +32,6 @@
  */
 
 #include <sys/types.h>
-#include <sys/uio.h>
 
 #include <stdbool.h>
 #include <time.h>
@@ -126,7 +125,6 @@ void	settimes(time_t now, int before, int after, int friday,
 time_t	Mktime(char *);
 
 /* io.c */
-extern struct iovec header[];
 void	cal(bool doall);
 
 /* ostern.c / paskha.c */
