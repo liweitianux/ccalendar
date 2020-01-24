@@ -84,15 +84,16 @@ extern double EastLongitude;
  * - Use event_continue() to add more text to the last added event
  * - Use event_print_all() to display them in time chronological order
  */
-struct event *event_add(int, int, int, char *, int, char *, char *);
+struct event *event_add(int year, int month, int day, char *date,
+			bool variable, char *txt, char *extra);
 void	event_continue(struct event *events, char *txt);
 void	event_print_all(FILE *fp);
 struct event {
 	int	year;
 	int	month;
 	int	day;
-	int	var;
-	char	*date;
+	bool	variable;  /* Whether a variable event ? */
+	char	*date;  /* human readable */
 	char	*text;
 	char	*extra;
 	struct event *next;

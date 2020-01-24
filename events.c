@@ -38,8 +38,8 @@
 #include "utils.h"
 
 struct event *
-event_add(int year, int month, int day, char *date, int var, char *txt,
-	  char *extra)
+event_add(int year, int month, int day, char *date, bool variable,
+	  char *txt, char *extra)
 {
 	struct event *e;
 
@@ -53,7 +53,7 @@ event_add(int year, int month, int day, char *date, int var, char *txt,
 	e = xcalloc(1, sizeof(struct event));
 	e->month = month;
 	e->day = day;
-	e->var = var;
+	e->variable = variable;
 	e->date = xstrdup(date);
 	e->text = xstrdup(txt);
 	e->extra = NULL;
@@ -102,7 +102,7 @@ event_print_all(FILE *fp)
 		 */
 		while (e != NULL) {
 			fprintf(fp, "%s%c%s%s%s%s\n", e->date,
-			    e->var ? '*' : ' ', e->text,
+			    e->variable ? '*' : ' ', e->text,
 			    e->extra != NULL ? " (" : "",
 			    e->extra != NULL ? e->extra : "",
 			    e->extra != NULL ? ")" : ""

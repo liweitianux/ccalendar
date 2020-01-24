@@ -383,8 +383,8 @@ cal_parse(FILE *in, FILE *out)
 			if (debug)
 				fprintf(stderr, "got %s\n", pp);
 			events[i] = event_add(year[i], month[i], day[i], dbuf,
-			    ((flags &= F_VARIABLE) != 0) ? 1 : 0, pp,
-			    extradata[i]);
+					      ((flags &= F_VARIABLE) != 0),
+					      pp, extradata[i]);
 		}
 	}
 
