@@ -81,7 +81,7 @@ static bool	 cal_parse(FILE *in, FILE *out);
 static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
 static FILE	*opencalout(void);
-static int	 token(char *line, FILE *out, bool *skip);
+static int	 tokenize(char *line, FILE *out, bool *skip);
 static void	 trimlr(char **buf);
 static void	 write_mailheader(int fd);
 
@@ -144,7 +144,7 @@ cal_fopen(const char *file)
 }
 
 static int
-token(char *line, FILE *out, bool *skip)
+tokenize(char *line, FILE *out, bool *skip)
 {
 	char *walk, c, a;
 
@@ -274,7 +274,7 @@ cal_parse(FILE *in, FILE *out)
 
 	while ((linelen = getline(&line, &linecap, in)) > 0) {
 		if (*line == '#') {
-			switch (token(line+1, out, &skip)) {
+			switch (tokenize(line+1, out, &skip)) {
 			case T_ERR:
 				free(line);
 				return (false);
