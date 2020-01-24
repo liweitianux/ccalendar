@@ -195,8 +195,8 @@ usage(void)
 {
 	fprintf(stderr, "%s\n%s\n%s\n",
 	    "usage: calendar [-A days] [-a] [-B days] [-D sun|moon] [-d]",
-	    "		     [-F friday] [-f calendarfile] [-l longitude]",
-	    "		     [-t dd[.mm[.year]]] [-U utcoffset] [-W days]"
+	    "                [-F friday] [-f calendarfile] [-l longitude]",
+	    "                [-t dd[.mm[.year]]] [-U utcoffset] [-W days]"
 	    );
 	exit(1);
 }

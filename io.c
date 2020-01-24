@@ -40,7 +40,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
-#include <errno.h>
 #include <langinfo.h>
 #include <locale.h>
 #include <paths.h>
@@ -358,7 +357,7 @@ cal_parse(FILE *in, FILE *out)
 		p = *pp;
 		*pp = '\0';
 		if ((count = parsedaymonth(buf, year, month, day, &flags,
-		    extradata)) == 0)
+					   extradata)) == 0)
 			continue;
 		*pp = p;
 		if (count < 0) {

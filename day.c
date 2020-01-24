@@ -69,7 +69,7 @@ settimes(time_t now, int before, int after, int friday,
  * day: two digits; month: two digits; year: digits
  */
 time_t
-Mktime(char *dp)
+Mktime(const char *s)
 {
 	time_t t;
 	struct tm tm;
@@ -78,7 +78,7 @@ Mktime(char *dp)
 	time(&t);
 	localtime_r(&t, &tm);
 
-	switch (sscanf(dp, "%d.%d.%d", &d, &m, &y)) {
+	switch (sscanf(s, "%d.%d.%d", &d, &m, &y)) {
 	case 3:
 		if (y > 1900)
 			y -= 1900;

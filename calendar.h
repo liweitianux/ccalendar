@@ -56,7 +56,7 @@
 
 /* Not yet categorized */
 
-extern bool debug;		/* show parsing of the input */
+extern bool debug;
 extern int year1, year2;
 extern time_t t1, t2;
 extern const char *calendarFile;
@@ -68,14 +68,12 @@ extern double EastLongitude;
 
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
 
-#define	MAXCOUNT		125	/* Random number of maximum number of
-					 * repeats of an event. Should be 52
-					 * (number of weeks per year), if you
-					 * want to show two years then it
-					 * should be 104. If you are seeing
-					 * more than this you are using this
-					 * program wrong.
-					 */
+/*
+ * Random number of maximum number of repeats of an event. Should be 52 (number
+ * of weeks per year).  If you want to show two years then it should be 104.
+ * If you are seeing more than this you are using this program wrong.
+ */
+#define	MAXCOUNT	125
 
 /* events.c */
 /*
@@ -123,7 +121,7 @@ void	setnsequences(char *);
 /* day.c */
 void	settimes(time_t now, int before, int after, int friday,
 		 struct tm *tp1, struct tm *tp2);
-time_t	Mktime(char *);
+time_t	Mktime(const char *s);
 
 /* io.c */
 void	cal(bool doall);

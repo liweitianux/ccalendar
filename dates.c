@@ -119,8 +119,8 @@ createdate(int y, int m, int d)
 		if (pyp != NULL)
 			pyp->nextyear = py;
 	}
-	if (pyp == NULL)
-		hyear = py;	/* The very very very first one */
+	if (hyear == NULL)
+		hyear = py;
 
 	pmp = NULL;
 	pm = py->months;
@@ -138,11 +138,11 @@ createdate(int y, int m, int d)
 		cumday = cumdaytab[isleap(y)];
 		pm->firstdayjulian = cumday[m] + 2;
 		pm->firstdayofweek =
-		    (py->firstdayofweek + pm->firstdayjulian -1) % 7;
+		    (py->firstdayofweek + pm->firstdayjulian - 1) % 7;
 		if (pmp != NULL)
 			pmp->nextmonth = pm;
 	}
-	if (pmp == NULL)
+	if (py->months == NULL)
 		py->months = pm;
 
 	pdp = NULL;
@@ -162,7 +162,7 @@ createdate(int y, int m, int d)
 		if (pdp != NULL)
 			pdp->nextday = pd;
 	}
-	if (pdp == NULL)
+	if (pm->days == NULL)
 		pm->days = pd;
 }
 
@@ -411,9 +411,6 @@ find_day(int yy, int mm, int dd)
 	struct cal_year *y;
 	struct cal_month *m;
 	struct cal_day *d;
-
-	if (debug_remember)
-		printf("remember_ymd: %d - %d - %d\n", yy, mm, dd);
 
 	y = hyear;
 	while (y != NULL) {

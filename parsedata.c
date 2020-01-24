@@ -435,7 +435,7 @@ wdayom(int day, int offset, int month, int year)
  */
 int
 parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
-    char **edp)
+	      char **edp)
 {
 	char month[100], dayofmonth[100], dayofweek[100], modifieroffset[100];
 	char syear[100];
@@ -451,7 +451,7 @@ parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
 	 *
 	 * Month:     1-12
 	 * Monthname: Jan .. Dec
-	 * Day:	      1-31
+	 * Day:       1-31
 	 * Weekday:   Mon .. Sun
 	 */
 
@@ -462,8 +462,8 @@ parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
 		    dayofmonth, idayofmonth, dayofweek, idayofweek,
 		    modifieroffset, modifierindex, specialday, syear, iyear);
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
-		&idayofmonth, dayofweek, &idayofweek, modifieroffset,
-		modifierindex, specialday, syear, &iyear) == 0) {
+			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
+			   modifierindex, specialday, syear, &iyear) == 0) {
 		if (debug)
 			printf("Failed!\n");
 		return (0);
