@@ -43,14 +43,7 @@ event_add(int year, int month, int day, char *date, bool variable,
 {
 	struct event *e;
 
-	/*
-	 * Creating a new event:
-	 * - Create a new event
-	 * - Copy the machine readable day and month
-	 * - Copy the human readable and language specific date
-	 * - Copy the text of the event
-	 */
-	e = xcalloc(1, sizeof(struct event));
+	e = xcalloc(1, sizeof(*e));
 	e->month = month;
 	e->day = day;
 	e->variable = variable;
@@ -68,21 +61,14 @@ void
 event_continue(struct event *e, char *txt)
 {
 	char *text;
+	size_t len;
 
-	/*
-	 * Adding text to the event:
-	 * - Save a copy of the old text (unknown length, so strdup())
-	 * - Allocate enough space for old text + \n + new text + 0
-	 * - Store the old text + \n + new text
-	 * - Destroy the saved copy.
-	 */
-	text = xstrdup(e->text);
+	/* Includes a '\n' and a NUL */
+	len = strlen(e->text) + strlen(txt) + 2;
+	text = xcalloc(1, len);
+	snprintf(text, len, "%s\n%s", e->text, txt);
 	free(e->text);
-	asprintf(&e->text, "%s\n%s", text, txt);
-	if (e->text == NULL)
-		err(1, "%s:asprintf", __func__);
-
-	free(text);
+	e->text = text;
 }
 
 void
