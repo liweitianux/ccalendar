@@ -81,6 +81,7 @@ int	monthdaytab[][14] = {
 	{0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30},
 };
 
+static void createdate(int y, int m, int d);
 static struct cal_day *find_day(int yy, int mm, int dd);
 
 static void
@@ -369,7 +370,7 @@ first_dayofweek_of_month(int yy, int mm)
         return (-1);
 }
 
-int
+bool
 walkthrough_dates(struct event **e)
 {
 	static struct cal_year *y = NULL;
@@ -381,28 +382,28 @@ walkthrough_dates(struct event **e)
 		m = y->months;
 		d = m->days;
 		*e = d->events;
-		return (1);
+		return true;
 	}
 	if (d->nextday != NULL) {
 		d = d->nextday;
 		*e = d->events;
-		return (1);
+		return true;
 	}
 	if (m->nextmonth != NULL) {
 		m = m->nextmonth;
 		d = m->days;
 		*e = d->events;
-		return (1);
+		return true;
 	}
 	if (y->nextyear != NULL) {
 		y = y->nextyear;
 		m = y->months;
 		d = m->days;
 		*e = d->events;
-		return (1);
+		return true;
 	}
 
-	return (0);
+	return false;
 }
 
 static struct cal_day *

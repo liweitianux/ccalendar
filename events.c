@@ -76,7 +76,7 @@ event_print_all(FILE *fp)
 {
 	struct event *e;
 
-	while (walkthrough_dates(&e) != 0) {
+	while (walkthrough_dates(&e)) {
 #ifdef DEBUG
 		fprintf(stderr, "event_print_allmonth: %d, day: %d\n",
 		    month, day);
