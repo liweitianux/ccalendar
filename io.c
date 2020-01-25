@@ -257,6 +257,7 @@ cal_parse(FILE *in, FILE *out)
 	int year[MAXCOUNT];
 	bool d_first;
 	bool skip = false;
+	bool locale_changed = false;
 	char dbuf[80];
 	char *pp, p;
 	int flags;
@@ -298,6 +299,7 @@ cal_parse(FILE *in, FILE *out)
 			setlocale(LC_ALL, buf + 5);
 			d_first = locale_day_first();
 			setnnames();
+			locale_changed = true;
 			continue;
 		}
 
@@ -386,8 +388,10 @@ cal_parse(FILE *in, FILE *out)
 	 * the locale (by defining the "LANG" variable) does not interfere the
 	 * following calendar files without the "LANG" definition.
 	 */
-	setlocale(LC_ALL, "");
-	setnnames();
+	if (locale_changed) {
+		setlocale(LC_ALL, "");
+		setnnames();
+	}
 
 	free(line);
 	fclose(in);
