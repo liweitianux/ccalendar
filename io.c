@@ -92,13 +92,13 @@ trimlr(char **buf)
 	char *walk = *buf;
 	char *last;
 
-	while (isspace(*walk))
+	while (isspace((unsigned char)*walk))
 		walk++;
 	if (*walk != '\0') {
 		last = walk + strlen(walk) - 1;
-		while (last > walk && isspace(*last))
+		while (last > walk && isspace((unsigned char)*last))
 			last--;
-		*(last+1) = 0;
+		*(last+1) = '\0';
 	}
 
 	*buf = walk;
