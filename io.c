@@ -69,7 +69,7 @@ const char *calendarFile = "calendar"; /* default calendar file */
 static const char *calendarHomes[] = {".calendar", "/usr/share/calendar"};
 static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
 
-static bool allmode = false; /* whether run for all users */
+static bool allmode = false; /* whether to run for all users */
 static char path[MAXPATHLEN];
 
 static StringList *definitions = NULL;
@@ -244,28 +244,22 @@ locale_day_first(void)
 static bool
 cal_parse(FILE *in, FILE *out)
 {
+	struct tm tm = { 0 };
 	char *line = NULL;
 	char *buf;
 	size_t linecap = 0;
 	ssize_t linelen;
 	ssize_t l;
-	static bool d_first;
 	static int count = 0;
 	int i;
 	int month[MAXCOUNT];
 	int day[MAXCOUNT];
 	int year[MAXCOUNT];
+	bool d_first;
 	bool skip = false;
 	char dbuf[80];
 	char *pp, p;
-	struct tm tm;
 	int flags;
-
-	/* Unused */
-	tm.tm_sec = 0;
-	tm.tm_min = 0;
-	tm.tm_hour = 0;
-	tm.tm_wday = 0;
 
 	if (in == NULL)
 		return (false);
@@ -374,9 +368,9 @@ cal_parse(FILE *in, FILE *out)
 			pp++;
 
 		for (i = 0; i < count; i++) {
+			tm.tm_year = year[i] - 1900;
 			tm.tm_mon = month[i] - 1;
 			tm.tm_mday = day[i];
-			tm.tm_year = year[i] - 1900;
 			strftime(dbuf, sizeof(dbuf),
 			    d_first ? "%e %b" : "%b %e", &tm);
 			if (debug)
@@ -465,7 +459,7 @@ opencalout(void)
 		return (stdout);
 
 	/* set output to a temporary file, so if no output don't send mail */
-	snprintf(path, sizeof(path), "%s/_calXXXXXX", _PATH_TMP);
+	snprintf(path, sizeof(path), "%s/_calendarXXXXXX", _PATH_TMP);
 	if ((fd = mkstemp(path)) < 0)
 		return (NULL);
 	return (fdopen(fd, "w+"));
@@ -501,7 +495,7 @@ closecal(FILE *fp)
 		}
 		close(pdes[1]);
 		execl(_PATH_SENDMAIL, "sendmail", "-i", "-t", "-F",
-		    "\"Reminder Service\"", (char *)NULL);
+		      "\"Reminder Service\"", (char *)NULL);
 		warn(_PATH_SENDMAIL);
 		_exit(1);
 	}

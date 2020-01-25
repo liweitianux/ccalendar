@@ -35,7 +35,7 @@
 #include <sys/types.h>
 
 #include <err.h>
-#include <grp.h>
+#include <grp.h>  /* required on Linux for initgroups() */
 #include <locale.h>
 #include <pwd.h>
 #include <stdbool.h>
@@ -49,8 +49,8 @@
 #include "parsedata.h"
 
 bool		debug = false;
-double		UTCOffset;
-double		EastLongitude;
+double		UTCOffset = 0.0;
+double		EastLongitude = 0.0;
 struct tm	tm_now = { 0 };  /* time/date of calendar events to remind */
 
 static void	usage(void) __dead2;
