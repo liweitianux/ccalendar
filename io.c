@@ -259,7 +259,6 @@ cal_parse(FILE *in, FILE *out)
 	char *buf;
 	size_t linecap = 0;
 	ssize_t linelen;
-	ssize_t l;
 	static int count = 0;
 	int i;
 	int month[MAXCOUNT];
@@ -295,13 +294,8 @@ cal_parse(FILE *in, FILE *out)
 		if (skip)
 			continue;
 
-		buf = line;
-		for (l = linelen;
-		     l > 0 && isspace((unsigned char)buf[l - 1]);
-		     l--)
-			;
-		buf[l] = '\0';
-		if (buf[0] == '\0')
+		buf = trimr(line);
+		if (*buf == '\0')
 			continue;
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
@@ -350,8 +344,7 @@ cal_parse(FILE *in, FILE *out)
 		}
 
 		/* Get rid of leading spaces (non-standard) */
-		while (isspace((unsigned char)buf[0]))
-			memcpy(buf, buf + 1, strlen(buf));
+		buf = triml(buf);
 
 		/* No tab in the line, then not a valid line */
 		if ((pp = strchr(buf, '\t')) == NULL)
