@@ -313,24 +313,25 @@ cal_parse(FILE *in, FILE *out)
 			continue;
 		}
 
-#define	REPLACE(string, slen, struct_) \
-		if (strncasecmp(buf, (string), (slen)) == 0 && buf[(slen)]) {	\
+#define	REPLACE(string, struct_) \
+		if (strncasecmp(buf, (string), strlen(string)) == 0 &&		\
+		    buf[strlen(string)]) {					\
 			if (struct_.name != NULL)				\
 				free(struct_.name);				\
-			struct_.name = xstrdup(buf + (slen));			\
-			struct_.len = strlen(buf + (slen));			\
+			struct_.name = xstrdup(buf + strlen(string));		\
+			struct_.len = strlen(struct_.name);			\
 			continue;						\
 		}
 
-		REPLACE("Easter=", 7, neaster);
-		REPLACE("Paskha=", 7, npaskha);
-		REPLACE("ChineseNewYear=", 15, ncny);
-		REPLACE("NewMoon=", 8, nnewmoon);
-		REPLACE("FullMoon=", 9, nfullmoon);
-		REPLACE("MarEquinox=", 11, nmarequinox);
-		REPLACE("SepEquinox=", 11, nsepequinox);
-		REPLACE("JunSolstice=", 12, njunsolstice);
-		REPLACE("DecSolstice=", 12, ndecsolstice);
+		REPLACE("Easter=", neaster);
+		REPLACE("Paskha=", npaskha);
+		REPLACE("ChineseNewYear=", ncny);
+		REPLACE("NewMoon=", nnewmoon);
+		REPLACE("FullMoon=", nfullmoon);
+		REPLACE("MarEquinox=", nmarequinox);
+		REPLACE("SepEquinox=", nsepequinox);
+		REPLACE("JunSolstice=", njunsolstice);
+		REPLACE("DecSolstice=", ndecsolstice);
 #undef	REPLACE
 
 		if (strncmp(buf, "SEQUENCE=", 9) == 0) {
