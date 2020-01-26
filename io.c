@@ -82,26 +82,37 @@ static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
 static FILE	*opencalout(void);
 static int	 tokenize(char *line, FILE *out, bool *skip);
-static void	 trimlr(char **buf);
+static char	*triml(char *s);
+static char	*trimlr(char *s);
+static char	*trimr(char *s);
 static void	 write_mailheader(int fd);
 
 
-static void
-trimlr(char **buf)
+static char *
+triml(char *s)
 {
-	char *walk = *buf;
-	char *last;
+	while (isspace((unsigned char)*s))
+		s++;
 
-	while (isspace((unsigned char)*walk))
-		walk++;
-	if (*walk != '\0') {
-		last = walk + strlen(walk) - 1;
-		while (last > walk && isspace((unsigned char)*last))
-			last--;
-		*(last+1) = '\0';
-	}
+	return s;
+}
 
-	*buf = walk;
+static char *
+trimr(char *s)
+{
+	size_t l = strlen(s);
+
+	while (l > 0 && isspace((unsigned char) s[l-1]))
+		l--;
+	s[l] = '\0';
+
+	return s;
+}
+
+static char *
+trimlr(char *s)
+{
+	return trimr(triml(s));
 }
 
 static FILE *
@@ -158,8 +169,7 @@ tokenize(char *line, FILE *out, bool *skip)
 
 	if (strncmp(line, "include", 7) == 0) {
 		walk = line + 7;
-
-		trimlr(&walk);
+		walk = trimlr(walk);
 
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
@@ -205,7 +215,7 @@ tokenize(char *line, FILE *out, bool *skip)
 		if (definitions == NULL)
 			definitions = sl_init();
 		walk = line + 6;
-		trimlr(&walk);
+		walk = trimlr(walk);
 
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
@@ -218,7 +228,7 @@ tokenize(char *line, FILE *out, bool *skip)
 
 	if (strncmp(line, "ifndef", 6) == 0) {
 		walk = line + 6;
-		trimlr(&walk);
+		walk = trimlr(walk);
 
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
