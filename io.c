@@ -88,6 +88,12 @@ static char	*trimr(char *s);
 static void	 write_mailheader(int fd);
 
 
+static inline bool
+string_eqn(const char *s1, const char *s2)
+{
+	return (strncmp(s1, s2, strlen(s2)) == 0);
+}
+
 static char *
 triml(char *s)
 {
@@ -162,7 +168,7 @@ tokenize(char *line, FILE *out, bool *skip)
 	if (*skip)
 		return (T_OK);
 
-	if (strncmp(line, "include", 7) == 0) {
+	if (string_eqn(line, "include")) {
 		walk = trimlr(line + strlen("include"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
@@ -203,7 +209,7 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return (T_OK);
 
-	} else if (strncmp(line, "define", 6) == 0) {
+	} else if (string_eqn(line, "define")) {
 		walk = trimlr(line + strlen("define"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
@@ -216,7 +222,7 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return (T_OK);
 
-	} else if (strncmp(line, "ifndef", 6) == 0) {
+	} else if (string_eqn(line, "ifndef")) {
 		walk = trimlr(line + strlen("ifndef"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
@@ -228,7 +234,7 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return (T_OK);
 
-	} else if (strncmp(line, "endif", 5) == 0) {
+	} else if (string_eqn(line, "endif")) {
 		*skip = false;
 		return (T_OK);
 
@@ -293,7 +299,7 @@ cal_parse(FILE *in, FILE *out)
 			continue;
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
-		if (strncmp(buf, "LANG=", 5) == 0) {
+		if (string_eqn(buf, "LANG=")) {
 			setlocale(LC_ALL, buf + 5);
 			d_first = locale_day_first();
 			setnnames();
@@ -322,7 +328,7 @@ cal_parse(FILE *in, FILE *out)
 		REPLACE("DecSolstice=", ndecsolstice);
 #undef	REPLACE
 
-		if (strncmp(buf, "SEQUENCE=", 9) == 0) {
+		if (string_eqn(buf, "SEQUENCE=")) {
 			setnsequences(buf + 9);
 			continue;
 		}
