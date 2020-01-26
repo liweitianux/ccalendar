@@ -73,8 +73,8 @@ static bool allmode = false; /* whether to run for all users */
 static char path[MAXPATHLEN];
 
 static StringList *definitions = NULL;
-static struct event *events[MAXCOUNT];
-static char *extradata[MAXCOUNT];
+static struct event *events[MAXCOUNT] = { NULL };
+static char *extradata[MAXCOUNT] = { NULL };
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in, FILE *out);
@@ -411,9 +411,6 @@ cal(bool doall)
 
 	allmode = doall;
 
-	for (i = 0; i < MAXCOUNT; i++)
-		extradata[i] = xcalloc(1, 20);
-
 	if ((fpin = opencalin()) == NULL)
 		return;
 
@@ -427,6 +424,13 @@ cal(bool doall)
 
 	event_print_all(fpout);
 	closecal(fpout);
+
+	for (i = 0; i < MAXCOUNT; i++) {
+		if (extradata[i]) {
+			free(extradata[i]);
+			extradata[i] = NULL;
+		}
+	}
 }
 
 static FILE *

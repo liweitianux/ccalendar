@@ -320,25 +320,30 @@ allfine:
 }
 
 static void
-remember(int *rememberindex, int *y, int *m, int *d, char **ed, int yy, int mm,
-    int dd, char *extra)
+remember(int *index, int *y, int *m, int *d, char **ed,
+	 int yy, int mm, int dd, char *extra)
 {
-	static int warned = 0;
+	static bool warned = false;
 
-	if (*rememberindex >= MAXCOUNT - 1) {
-		if (warned == 0)
-			warnx("Index > %d, ignored", MAXCOUNT);
-		warned++;
+	if (*index >= MAXCOUNT - 1) {
+		if (!warned)
+			warnx("Event count exceeds %d, ignored", MAXCOUNT);
+		warned = true;
 		return;
 	}
-	y[*rememberindex] = yy;
-	m[*rememberindex] = mm;
-	d[*rememberindex] = dd;
+
+	y[*index] = yy;
+	m[*index] = mm;
+	d[*index] = dd;
+
+	if (ed[*index] != NULL) {
+		free(ed[*index]);
+		ed[*index] = NULL;
+	}
 	if (extra != NULL)
-		strcpy(ed[*rememberindex], extra);
-	else
-		ed[*rememberindex][0] = '\0';
-	*rememberindex += 1;
+		ed[*index] = xstrdup(extra);
+
+	*index += 1;
 }
 
 static void
