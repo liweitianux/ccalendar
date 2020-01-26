@@ -157,33 +157,24 @@ cal_fopen(const char *file)
 static int
 tokenize(char *line, FILE *out, bool *skip)
 {
-	char *walk, c, a;
-
-	if (strncmp(line, "endif", 5) == 0) {
-		*skip = false;
-		return (T_OK);
-	}
+	char *walk;
 
 	if (*skip)
 		return (T_OK);
 
 	if (strncmp(line, "include", 7) == 0) {
-		walk = line + 7;
-		walk = trimlr(walk);
-
+		walk = trimlr(line + strlen("include"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
 			return (T_ERR);
 		}
-
 		if (*walk != '<' && *walk != '\"') {
-			warnx("Excecting '<' or '\"' after #include");
+			warnx("Expecting '<' or '\"' after #include");
 			return (T_ERR);
 		}
 
-		a = *walk;
-		walk++;
-		c = walk[strlen(walk) - 1];
+		char a = *walk;
+		char c = walk[strlen(walk) - 1];
 
 		switch(c) {
 		case '>':
@@ -200,36 +191,33 @@ tokenize(char *line, FILE *out, bool *skip)
 			break;
 		default:
 			warnx("Unterminated include expecting '%c'",
-			    a == '<' ? '>' : '\"' );
+			      (a == '<') ? '>' : '\"' );
 			return (T_ERR);
 		}
+
+		walk++;
 		walk[strlen(walk) - 1] = '\0';
 
 		if (!cal_parse(cal_fopen(walk), out))
 			return (T_ERR);
 
 		return (T_OK);
-	}
 
-	if (strncmp(line, "define", 6) == 0) {
-		if (definitions == NULL)
-			definitions = sl_init();
-		walk = line + 6;
-		walk = trimlr(walk);
-
+	} else if (strncmp(line, "define", 6) == 0) {
+		walk = trimlr(line + strlen("define"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
 			return (T_ERR);
 		}
 
+		if (definitions == NULL)
+			definitions = sl_init();
 		sl_add(definitions, xstrdup(walk));
+
 		return (T_OK);
-	}
 
-	if (strncmp(line, "ifndef", 6) == 0) {
-		walk = line + 6;
-		walk = trimlr(walk);
-
+	} else if (strncmp(line, "ifndef", 6) == 0) {
+		walk = trimlr(line + strlen("ifndef"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
 			return (T_ERR);
@@ -239,9 +227,15 @@ tokenize(char *line, FILE *out, bool *skip)
 			*skip = true;
 
 		return (T_OK);
-	}
 
-	return (T_PROCESS);
+	} else if (strncmp(line, "endif", 5) == 0) {
+		*skip = false;
+		return (T_OK);
+
+	} else {
+		warnx("Unknown token line: %s", line);
+		return (T_ERR);
+	}
 }
 
 static bool
