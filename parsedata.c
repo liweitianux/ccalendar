@@ -50,7 +50,7 @@ static int parseoffset(char *s);
 static char *floattoday(int year, double f);
 static char *floattotime(double f);
 static int wdayom(int day, int offset, int month, int year);
-static int determinestyle(char *date, int *flags, char *month, int *imonth,
+static bool determinestyle(char *date, int *flags, char *month, int *imonth,
 	char *dayofmonth, int *idayofmonth, char *dayofweek, int *idayofweek,
 	char *modifieroffset, char *modifierindex, char *specialday,
 	char *year, int *iyear);
@@ -95,7 +95,7 @@ static bool parse_angle(const char *s, double *result);
  * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear'
  *
  */
-static int
+static bool
 determinestyle(char *date, int *flags,
     char *month, int *imonth, char *dayofmonth, int *idayofmonth,
     char *dayofweek, int *idayofweek, char *modifieroffset,
@@ -121,78 +121,72 @@ determinestyle(char *date, int *flags,
 
 #define CHECKSPECIAL(s1, s2, lens2, type)				\
 	if (s2 != NULL && strncmp(s1, s2, lens2) == 0) {		\
-		*flags |= F_SPECIALDAY;					\
-		*flags |= type;						\
-		*flags |= F_VARIABLE;					\
+		*flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
 		if (strlen(s1) == lens2) {				\
 			strcpy(specialday, s1);				\
-			return (1);					\
+			return (true);					\
 		}							\
 		strncpy(specialday, s1, lens2);				\
 		specialday[lens2] = '\0';				\
 		strcpy(modifieroffset, s1 + lens2);			\
 		*flags |= F_MODIFIEROFFSET;				\
-		return (1);						\
+		return (true);						\
 	}
 
-	if ((p = strchr(date, ' ')) == NULL) {
-		if ((p = strchr(date, '/')) == NULL) {
-			CHECKSPECIAL(date, STRING_CNY, strlen(STRING_CNY),
-			    F_CNY);
-			CHECKSPECIAL(date, ncny.name, ncny.len, F_CNY);
-			CHECKSPECIAL(date, STRING_NEWMOON,
-			    strlen(STRING_NEWMOON), F_NEWMOON);
-			CHECKSPECIAL(date, nnewmoon.name, nnewmoon.len,
-			    F_NEWMOON);
-			CHECKSPECIAL(date, STRING_FULLMOON,
-			    strlen(STRING_FULLMOON), F_FULLMOON);
-			CHECKSPECIAL(date, nfullmoon.name, nfullmoon.len,
-			    F_FULLMOON);
-			CHECKSPECIAL(date, STRING_PASKHA,
-			    strlen(STRING_PASKHA), F_PASKHA);
-			CHECKSPECIAL(date, npaskha.name, npaskha.len, F_PASKHA);
-			CHECKSPECIAL(date, STRING_EASTER,
-			    strlen(STRING_EASTER), F_EASTER);
-			CHECKSPECIAL(date, neaster.name, neaster.len, F_EASTER);
-			CHECKSPECIAL(date, STRING_MAREQUINOX,
-			    strlen(STRING_MAREQUINOX), F_MAREQUINOX);
-			CHECKSPECIAL(date, nmarequinox.name, nmarequinox.len,
-			    F_SEPEQUINOX);
-			CHECKSPECIAL(date, STRING_SEPEQUINOX,
-			    strlen(STRING_SEPEQUINOX), F_SEPEQUINOX);
-			CHECKSPECIAL(date, nsepequinox.name, nsepequinox.len,
-			    F_SEPEQUINOX);
-			CHECKSPECIAL(date, STRING_JUNSOLSTICE,
-			    strlen(STRING_JUNSOLSTICE), F_JUNSOLSTICE);
-			CHECKSPECIAL(date, njunsolstice.name, njunsolstice.len,
-			    F_JUNSOLSTICE);
-			CHECKSPECIAL(date, STRING_DECSOLSTICE,
-			    strlen(STRING_DECSOLSTICE), F_DECSOLSTICE);
-			CHECKSPECIAL(date, ndecsolstice.name, ndecsolstice.len,
-			    F_DECSOLSTICE);
-			if (checkdayofweek(date, &len, &offset, &dow) != 0) {
-				*flags |= F_DAYOFWEEK;
-				*flags |= F_VARIABLE;
-				*idayofweek = offset;
-				if (strlen(date) == len) {
-					strcpy(dayofweek, date);
-					return (1);
-				}
-				strncpy(dayofweek, date, len);
-				dayofweek[len] = '\0';
-				strcpy(modifierindex, date + len);
-				*flags |= F_MODIFIERINDEX;
-				return (1);
+	if ((p = strchr(date, ' ')) == NULL &&
+	    (p = strchr(date, '/')) == NULL) {
+		CHECKSPECIAL(date, STRING_CNY, strlen(STRING_CNY), F_CNY);
+		CHECKSPECIAL(date, ncny.name, ncny.len, F_CNY);
+		CHECKSPECIAL(date, STRING_NEWMOON,
+			     strlen(STRING_NEWMOON), F_NEWMOON);
+		CHECKSPECIAL(date, nnewmoon.name, nnewmoon.len, F_NEWMOON);
+		CHECKSPECIAL(date, STRING_FULLMOON,
+			     strlen(STRING_FULLMOON), F_FULLMOON);
+		CHECKSPECIAL(date, nfullmoon.name, nfullmoon.len, F_FULLMOON);
+		CHECKSPECIAL(date, STRING_PASKHA,
+			     strlen(STRING_PASKHA), F_PASKHA);
+		CHECKSPECIAL(date, npaskha.name, npaskha.len, F_PASKHA);
+		CHECKSPECIAL(date, STRING_EASTER,
+			     strlen(STRING_EASTER), F_EASTER);
+		CHECKSPECIAL(date, neaster.name, neaster.len, F_EASTER);
+		CHECKSPECIAL(date, STRING_MAREQUINOX,
+			     strlen(STRING_MAREQUINOX), F_MAREQUINOX);
+		CHECKSPECIAL(date, nmarequinox.name, nmarequinox.len,
+			     F_SEPEQUINOX);
+		CHECKSPECIAL(date, STRING_SEPEQUINOX,
+			     strlen(STRING_SEPEQUINOX), F_SEPEQUINOX);
+		CHECKSPECIAL(date, nsepequinox.name, nsepequinox.len,
+			     F_SEPEQUINOX);
+		CHECKSPECIAL(date, STRING_JUNSOLSTICE,
+			     strlen(STRING_JUNSOLSTICE), F_JUNSOLSTICE);
+		CHECKSPECIAL(date, njunsolstice.name, njunsolstice.len,
+			     F_JUNSOLSTICE);
+		CHECKSPECIAL(date, STRING_DECSOLSTICE,
+			     strlen(STRING_DECSOLSTICE), F_DECSOLSTICE);
+		CHECKSPECIAL(date, ndecsolstice.name, ndecsolstice.len,
+			     F_DECSOLSTICE);
+
+		if (checkdayofweek(date, &len, &offset, &dow) != 0) {
+			*flags |= (F_DAYOFWEEK | F_VARIABLE);
+			*idayofweek = offset;
+			if (strlen(date) == len) {
+				strcpy(dayofweek, date);
+				return (true);
 			}
-			if (isonlydigits(date, 1)) {
-				/* Assume month number only */
-				*flags |= F_MONTH;
-				*imonth = (int)strtol(date, (char **)NULL, 10);
-				strcpy(month, getmonthname(*imonth));
-				return(1);
-			}
-			return (0);
+			strncpy(dayofweek, date, len);
+			dayofweek[len] = '\0';
+			strcpy(modifierindex, date + len);
+			*flags |= F_MODIFIERINDEX;
+			return (true);
 		}
+		if (isonlydigits(date, 1)) {
+			/* Assume month number only */
+			*flags |= F_MONTH;
+			*imonth = (int)strtol(date, (char **)NULL, 10);
+			strcpy(month, getmonthname(*imonth));
+			return(true);
+		}
+		return (false);
 	}
 
 	/*
@@ -313,10 +307,10 @@ determinestyle(char *date, int *flags,
 
 fail:
 	*p = pold;
-	return (0);
+	return (false);
 allfine:
 	*p = pold;
-	return (1);
+	return (true);
 }
 
 static void
@@ -468,7 +462,7 @@ parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
 		    modifieroffset, modifierindex, specialday, syear, iyear);
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
 			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
-			   modifierindex, specialday, syear, &iyear) == 0) {
+			   modifierindex, specialday, syear, &iyear) == false) {
 		if (debug)
 			printf("Failed!\n");
 		return (0);
