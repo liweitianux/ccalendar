@@ -33,7 +33,6 @@
  */
 
 #include <sys/param.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -480,15 +479,13 @@ opencalout(void)
 static void
 closecal(FILE *fp)
 {
-	struct stat sbuf;
 	int nread, pdes[2], status;
 	char buf[1024];
 
 	if (!allmode)
 		return;
 
-	rewind(fp);
-	if (fstat(fileno(fp), &sbuf) || !sbuf.st_size)
+	if (fseek(fp, 0L, SEEK_END) != 0 || ftell(fp) == 0)
 		goto done;
 	if (pipe(pdes) < 0)
 		goto done;
@@ -515,6 +512,7 @@ closecal(FILE *fp)
 	close(pdes[0]);
 
 	write_mailheader(pdes[1]);
+	rewind(fp);
 	while ((nread = read(fileno(fp), buf, sizeof(buf))) > 0)
 		write(pdes[1], buf, nread);
 	close(pdes[1]);
