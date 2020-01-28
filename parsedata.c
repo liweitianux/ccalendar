@@ -42,7 +42,8 @@
 static char *showflags(int flags);
 static bool isonlydigits(char *s, int nostar);
 static const char *getmonthname(int i);
-static int checkmonth(char *s, size_t *len, size_t *offset, const char **month);
+static bool checkmonth(char *s, size_t *len, size_t *offset,
+		       const char **month);
 static const char *getdayofweekname(int i);
 static int checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow);
 static int indextooffset(char *s);
@@ -210,8 +211,8 @@ determinestyle(char *date, int *flags,
 	}
 
 	/* Check if there is a month-string in the date */
-	if ((checkmonth(p1, &len, &offset, &pmonth) != 0)
-	    || (checkmonth(p2, &len, &offset, &pmonth) != 0 && (p2 = p1))) {
+	if (checkmonth(p1, &len, &offset, &pmonth) ||
+	    (checkmonth(p2, &len, &offset, &pmonth) && (p2 = p1))) {
 		/* p2 is the non-month part */
 		*flags |= F_MONTH;
 		*imonth = offset;
@@ -874,7 +875,7 @@ getmonthname(int i)
 	return (months[i - 1]);
 }
 
-static int
+static bool
 checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 {
 	struct fixs *n;
@@ -886,7 +887,7 @@ checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 			*len = n->len;
 			*month = n->name;
 			*offset = i + 1;
-			return (1);
+			return (true);
 		}
 	}
 	for (i = 0; nmonths[i].name != NULL; i++) {
@@ -895,7 +896,7 @@ checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 			*len = n->len;
 			*month = n->name;
 			*offset = i + 1;
-			return (1);
+			return (true);
 		}
 	}
 	for (i = 0; fmonths[i] != NULL; i++) {
@@ -903,7 +904,7 @@ checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 		if (strncasecmp(s, fmonths[i], *len) == 0) {
 			*month = fmonths[i];
 			*offset = i + 1;
-			return (1);
+			return (true);
 		}
 	}
 	for (i = 0; months[i] != NULL; i++) {
@@ -911,10 +912,10 @@ checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 			*len = 3;
 			*month = months[i];
 			*offset = i + 1;
-			return (1);
+			return (true);
 		}
 	}
-	return (0);
+	return (false);
 }
 
 static const char *
