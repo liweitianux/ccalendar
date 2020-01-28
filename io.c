@@ -69,7 +69,6 @@ static const char *calendarHomes[] = {".calendar", "/usr/share/calendar"};
 static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
 
 static bool allmode = false; /* whether to run for all users */
-static char path[MAXPATHLEN];
 
 static StringList *definitions = NULL;
 static struct event *events[MAXCOUNT] = { NULL };
@@ -79,7 +78,6 @@ static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in, FILE *out);
 static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
-static FILE	*opencalout(void);
 static int	 tokenize(char *line, FILE *out, bool *skip);
 static char	*triml(char *s);
 static char	*trimlr(char *s);
@@ -406,25 +404,46 @@ cal(bool doall)
 {
 	FILE *fpin;
 	FILE *fpout;
-	int i;
 
 	allmode = doall;
 
 	if ((fpin = opencalin()) == NULL)
 		return;
 
-	if ((fpout = opencalout()) == NULL) {
-		fclose(fpin);
-		return;
+	if (allmode) {
+		/*
+		 * Set output to a temporary file, so don't send mail
+		 * if no output
+		 */
+		char caloutfile[MAXPATHLEN];
+		int fd;
+
+		snprintf(caloutfile, sizeof(caloutfile),
+			 "%s/_calendarXXXXXX", _PATH_TMP);
+		if ((fd = mkstemp(caloutfile)) < 0) {
+			warn("mkstemp");
+			fclose(fpin);
+			return;
+		}
+		fpout = fdopen(fd, "w");
+
+		if (!cal_parse(fpin, fpout)) {
+			warnx("Failed to parse calendar files");
+			return;
+		}
+
+		event_print_all(fpout);
+		closecal(fpout);
+		unlink(caloutfile);
+	} else {
+		if (!cal_parse(fpin, stdout)) {
+			warnx("Failed to parse calendar files");
+			return;
+		}
+		event_print_all(stdout);
 	}
 
-	if (!cal_parse(fpin, fpout))
-		return;
-
-	event_print_all(fpout);
-	closecal(fpout);
-
-	for (i = 0; i < MAXCOUNT; i++) {
+	for (int i = 0; i < MAXCOUNT; i++) {
 		if (extradata[i]) {
 			free(extradata[i]);
 			extradata[i] = NULL;
@@ -460,39 +479,21 @@ opencalin(void)
 	return (fpin);
 }
 
-static FILE *
-opencalout(void)
-{
-	int fd;
-
-	/* not reading all calendar files, just set output to stdout */
-	if (!allmode)
-		return (stdout);
-
-	/* set output to a temporary file, so if no output don't send mail */
-	snprintf(path, sizeof(path), "%s/_calendarXXXXXX", _PATH_TMP);
-	if ((fd = mkstemp(path)) < 0)
-		return (NULL);
-	return (fdopen(fd, "w+"));
-}
-
 static void
 closecal(FILE *fp)
 {
 	int nread, pdes[2], status;
 	char buf[1024];
 
-	if (!allmode)
-		return;
-
 	if (fseek(fp, 0L, SEEK_END) != 0 || ftell(fp) == 0)
-		goto done;
-	if (pipe(pdes) < 0)
-		goto done;
+		return;
+	if (pipe(pdes) < 0) {
+		warnx("Cannot open pipe");
+		return;
+	}
 
 	switch (fork()) {
 	case -1:
-		/* error */
 		close(pdes[0]);
 		close(pdes[1]);
 		goto done;
@@ -519,7 +520,6 @@ closecal(FILE *fp)
 
 done:
 	fclose(fp);
-	unlink(path);
 	while (wait(&status) >= 0)
 		;
 }
