@@ -39,10 +39,17 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #ifndef nitems
 #define nitems(x)	(sizeof(x) / sizeof((x)[0]))
 #endif
+
+static inline bool
+string_eqn(const char *s1, const char *s2)
+{
+	return (s1 && s2 && strncmp(s1, s2, strlen(s2)) == 0);
+}
 
 int	div_floor(int x, int y);
 

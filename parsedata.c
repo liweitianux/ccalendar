@@ -121,7 +121,7 @@ determinestyle(char *date, int *flags,
 	*specialday = '\0';
 
 #define CHECKSPECIAL(s1, s2, lens2, type)				\
-	if (s2 != NULL && strncmp(s1, s2, lens2) == 0) {		\
+	if (string_eqn(s1, s2)) {		\
 		*flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
 		if (strlen(s1) == lens2) {				\
 			strcpy(specialday, s1);				\

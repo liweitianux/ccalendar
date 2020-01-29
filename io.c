@@ -85,12 +85,6 @@ static char	*trimr(char *s);
 static void	 write_mailheader(int fd);
 
 
-static inline bool
-string_eqn(const char *s1, const char *s2)
-{
-	return (strncmp(s1, s2, strlen(s2)) == 0);
-}
-
 static char *
 triml(char *s)
 {
