@@ -34,9 +34,6 @@
 
 #include "calendar.h"
 
-#define	PASKHA		"paskha"
-#define	PASKHALEN	(sizeof(PASKHA) - 1)
-
 static int	j2g(int year);
 
 /*
