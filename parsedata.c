@@ -40,7 +40,7 @@
 #include "utils.h"
 
 static char *showflags(int flags);
-static bool isonlydigits(char *s, int nostar);
+static bool isonlydigits(char *s, bool nostar);
 static const char *getmonthname(int i);
 static bool checkmonth(char *s, size_t *len, size_t *offset,
 		       const char **month);
@@ -169,7 +169,7 @@ determinestyle(char *date, int *flags,
 			*flags |= F_MODIFIERINDEX;
 			return (true);
 		}
-		if (isonlydigits(date, 1)) {
+		if (isonlydigits(date, true)) {
 			/* Assume month number only */
 			*flags |= F_MONTH;
 			*imonth = (int)strtol(date, NULL, 10);
@@ -207,7 +207,7 @@ determinestyle(char *date, int *flags,
 		*imonth = offset;
 
 		strcpy(month, getmonthname(offset));
-		if (isonlydigits(p2, 1)) {
+		if (isonlydigits(p2, true)) {
 			strcpy(dayofmonth, p2);
 			*idayofmonth = (int)strtol(p2, NULL, 10);
 			*flags |= F_DAYOFMONTH;
@@ -232,8 +232,8 @@ determinestyle(char *date, int *flags,
 	}
 
 	/* Check if there is an every-day or every-month in the string */
-	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, 1)) ||
-	    (strcmp(p2, "*") == 0 && isonlydigits(p1, 1) && (p2 = p1))) {
+	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, true)) ||
+	    (strcmp(p2, "*") == 0 && isonlydigits(p1, true) && (p2 = p1))) {
 		*flags |= (F_ALLMONTH | F_DAYOFMONTH);
 		*idayofmonth = (int)strtol(p2, NULL, 10);
 		sprintf(dayofmonth, "%d", *idayofmonth);
@@ -241,7 +241,7 @@ determinestyle(char *date, int *flags,
 	}
 
 	/* Month as a number, then a weekday */
-	if (isonlydigits(p1, 1) &&
+	if (isonlydigits(p1, true) &&
 	    checkdayofweek(p2, &len, &offset, &dow)) {
 		*flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 
@@ -258,7 +258,7 @@ determinestyle(char *date, int *flags,
 	}
 
 	/* If both the month and date are specified as numbers */
-	if (isonlydigits(p1, 1) && isonlydigits(p2, 0)) {
+	if (isonlydigits(p1, true) && isonlydigits(p2, false)) {
 		/* Now who wants to be this ambiguous? :-( */
 		int m, d;
 
@@ -965,11 +965,10 @@ checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 }
 
 static bool
-isonlydigits(char *s, int nostar)
+isonlydigits(char *s, bool nostar)
 {
-	int i;
-	for (i = 0; s[i] != '\0'; i++) {
-		if (nostar == 0 && s[i] == '*' && s[i + 1] == '\0')
+	for (int i = 0; s[i] != '\0'; i++) {
+		if (nostar == false && s[i] == '*' && s[i+1] == '\0')
 			return (true);
 		if (!isdigit((unsigned char)s[i]))
 			return (false);
