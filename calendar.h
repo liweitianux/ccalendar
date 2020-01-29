@@ -54,9 +54,6 @@
 #define	NMONTHS		12
 #define	NSEQUENCES	6
 
-#ifndef nitems
-#define nitems(x)	(sizeof(x) / sizeof((x)[0]))
-#endif
 
 /* Not yet categorized */
 
