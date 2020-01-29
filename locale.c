@@ -64,89 +64,72 @@ const char *sequences[NSEQUENCES+1] = {
 	"First", "Second", "Third", "Fourth", "Fifth", "Last", NULL,
 };
 
-struct fixs fndays[NDAYS+1];		/* full national days names */
-struct fixs ndays[NDAYS+1];		/* short national days names */
-struct fixs fnmonths[NMONTHS+1];	/* full national months names */
-struct fixs nmonths[NMONTHS+1];		/* short national month names */
-struct fixs nsequences[NSEQUENCES+1];	/* national sequence names */
+char *fndays[NDAYS+1] = { NULL }; /* full national day names */
+char *ndays[NDAYS+1] = { NULL }; /* short national day names */
+char *fnmonths[NMONTHS+1] = { NULL }; /* full national month names */
+char *nmonths[NMONTHS+1] = { NULL }; /* short national month names */
+char *nsequences[NSEQUENCES+1] = { NULL }; /* national sequence names */
 
 
 void
 setnnames(void)
 {
-	char buf[80];
+	char buf[64];
 	struct tm tm;
 
 	memset(&tm, 0, sizeof(tm));
 	for (int i = 0; i < NDAYS; i++) {
 		tm.tm_wday = i;
 		strftime(buf, sizeof(buf), "%a", &tm);
-		if (ndays[i].name != NULL)
-			free(ndays[i].name);
-		ndays[i].name = xstrdup(buf);
-		ndays[i].len = strlen(buf);
+		if (ndays[i] != NULL)
+			free(ndays[i]);
+		ndays[i] = xstrdup(buf);
 
 		strftime(buf, sizeof(buf), "%A", &tm);
-		if (fndays[i].name != NULL)
-			free(fndays[i].name);
-		fndays[i].name = xstrdup(buf);
-		fndays[i].len = strlen(buf);
+		if (fndays[i] != NULL)
+			free(fndays[i]);
+		fndays[i] = xstrdup(buf);
 	}
-	ndays[NDAYS].name = NULL;
-	ndays[NDAYS].len = 0;
-	fndays[NDAYS].name = NULL;
-	fndays[NDAYS].len = 0;
 
 	memset(&tm, 0, sizeof(tm));
 	for (int i = 0; i < NMONTHS; i++) {
 		tm.tm_mon = i;
 		strftime(buf, sizeof(buf), "%b", &tm);
-		if (nmonths[i].name != NULL)
-			free(nmonths[i].name);
-		nmonths[i].name = xstrdup(buf);
-		nmonths[i].len = strlen(buf);
+		if (nmonths[i] != NULL)
+			free(nmonths[i]);
+		nmonths[i] = xstrdup(buf);
 
 		strftime(buf, sizeof(buf), "%B", &tm);
-		if (fnmonths[i].name != NULL)
-			free(fnmonths[i].name);
-		fnmonths[i].name = xstrdup(buf);
-		fnmonths[i].len = strlen(buf);
+		if (fnmonths[i] != NULL)
+			free(fnmonths[i]);
+		fnmonths[i] = xstrdup(buf);
 	}
-	nmonths[NMONTHS].name = NULL;
-	nmonths[NMONTHS].len = 0;
-	fnmonths[NMONTHS].name = NULL;
-	fnmonths[NMONTHS].len = 0;
 }
 
 void
-setnsequences(char *seq)
+setnsequences(const char *seq)
 {
-	int i;
-	char *p;
+	const char *p;
+	int nspace = 0;
+
+	for (p = seq; *p; p++) {
+		if (*p == ' ')
+			nspace++;
+	}
+	if (nspace != NSEQUENCES - 1) {
+		warnx("Invalid SEQUENCE: %s", seq);
+		return;
+	}
 
 	p = seq;
-	for (i = 0; i < NSEQUENCES-1; i++) {
-		nsequences[i].name = p;
-		if ((p = strchr(p, ' ')) == NULL) {
-			/* Oh oh there is something wrong. Erase! Erase! */
-			for (i = 0; i < 5; i++) {
-				nsequences[i].name = NULL;
-				nsequences[i].len = 0;
-			}
-			return;
-		}
-		*p = '\0';
-		p++;
-	}
-	nsequences[NSEQUENCES-1].name = p;
+	for (int i = 0; i < NSEQUENCES; i++) {
+		while (*p != ' ' && *p != '\0')
+			p++;
 
-	for (i = 0; i < NSEQUENCES-1; i++) {
-		nsequences[i].name = xstrdup(nsequences[i].name);
-		nsequences[i].len = nsequences[i + 1].name - nsequences[i].name;
+		if (nsequences[i] != NULL)
+			free(nsequences[i]);
+		nsequences[i] = xcalloc(1, p - seq + 1);
+		strncpy(nsequences[i], seq, p - seq);
+		seq = ++p;
 	}
-	nsequences[NSEQUENCES-1].name = xstrdup(nsequences[NSEQUENCES-1].name);
-	nsequences[NSEQUENCES-1].len = strlen(nsequences[NSEQUENCES-1].name);
-
-	nsequences[NSEQUENCES].name = NULL;
-	nsequences[NSEQUENCES].len = 0;
 }

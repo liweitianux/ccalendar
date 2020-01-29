@@ -121,52 +121,40 @@ determinestyle(char *date, int *flags,
 	*modifierindex = '\0';
 	*specialday = '\0';
 
-#define CHECKSPECIAL(s1, s2, lens2, type)				\
+#define CHECKSPECIAL(s1, s2, type)				\
 	if (string_eqn(s1, s2)) {		\
 		*flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
-		if (strlen(s1) == lens2) {				\
+		if (strlen(s1) == strlen(s2)) {				\
 			strcpy(specialday, s1);				\
 			return (true);					\
 		}							\
-		strncpy(specialday, s1, lens2);				\
-		specialday[lens2] = '\0';				\
-		strcpy(modifieroffset, s1 + lens2);			\
+		strncpy(specialday, s1, strlen(s2));			\
+		specialday[strlen(s2)] = '\0';				\
+		strcpy(modifieroffset, s1 + strlen(s2));		\
 		*flags |= F_MODIFIEROFFSET;				\
 		return (true);						\
 	}
 
 	if ((p = strchr(date, ' ')) == NULL &&
 	    (p = strchr(date, '/')) == NULL) {
-		CHECKSPECIAL(date, STRING_CNY, strlen(STRING_CNY), F_CNY);
-		CHECKSPECIAL(date, ncny.name, ncny.len, F_CNY);
-		CHECKSPECIAL(date, STRING_NEWMOON,
-			     strlen(STRING_NEWMOON), F_NEWMOON);
-		CHECKSPECIAL(date, nnewmoon.name, nnewmoon.len, F_NEWMOON);
-		CHECKSPECIAL(date, STRING_FULLMOON,
-			     strlen(STRING_FULLMOON), F_FULLMOON);
-		CHECKSPECIAL(date, nfullmoon.name, nfullmoon.len, F_FULLMOON);
-		CHECKSPECIAL(date, STRING_PASKHA,
-			     strlen(STRING_PASKHA), F_PASKHA);
-		CHECKSPECIAL(date, npaskha.name, npaskha.len, F_PASKHA);
-		CHECKSPECIAL(date, STRING_EASTER,
-			     strlen(STRING_EASTER), F_EASTER);
-		CHECKSPECIAL(date, neaster.name, neaster.len, F_EASTER);
-		CHECKSPECIAL(date, STRING_MAREQUINOX,
-			     strlen(STRING_MAREQUINOX), F_MAREQUINOX);
-		CHECKSPECIAL(date, nmarequinox.name, nmarequinox.len,
-			     F_SEPEQUINOX);
-		CHECKSPECIAL(date, STRING_SEPEQUINOX,
-			     strlen(STRING_SEPEQUINOX), F_SEPEQUINOX);
-		CHECKSPECIAL(date, nsepequinox.name, nsepequinox.len,
-			     F_SEPEQUINOX);
-		CHECKSPECIAL(date, STRING_JUNSOLSTICE,
-			     strlen(STRING_JUNSOLSTICE), F_JUNSOLSTICE);
-		CHECKSPECIAL(date, njunsolstice.name, njunsolstice.len,
-			     F_JUNSOLSTICE);
-		CHECKSPECIAL(date, STRING_DECSOLSTICE,
-			     strlen(STRING_DECSOLSTICE), F_DECSOLSTICE);
-		CHECKSPECIAL(date, ndecsolstice.name, ndecsolstice.len,
-			     F_DECSOLSTICE);
+		CHECKSPECIAL(date, STRING_CNY, F_CNY);
+		CHECKSPECIAL(date, ncny, F_CNY);
+		CHECKSPECIAL(date, STRING_NEWMOON, F_NEWMOON);
+		CHECKSPECIAL(date, nnewmoon, F_NEWMOON);
+		CHECKSPECIAL(date, STRING_FULLMOON, F_FULLMOON);
+		CHECKSPECIAL(date, nfullmoon, F_FULLMOON);
+		CHECKSPECIAL(date, STRING_PASKHA, F_PASKHA);
+		CHECKSPECIAL(date, npaskha, F_PASKHA);
+		CHECKSPECIAL(date, STRING_EASTER, F_EASTER);
+		CHECKSPECIAL(date, neaster, F_EASTER);
+		CHECKSPECIAL(date, STRING_MAREQUINOX, F_MAREQUINOX);
+		CHECKSPECIAL(date, nmarequinox, F_SEPEQUINOX);
+		CHECKSPECIAL(date, STRING_SEPEQUINOX, F_SEPEQUINOX);
+		CHECKSPECIAL(date, nsepequinox, F_SEPEQUINOX);
+		CHECKSPECIAL(date, STRING_JUNSOLSTICE, F_JUNSOLSTICE);
+		CHECKSPECIAL(date, njunsolstice, F_JUNSOLSTICE);
+		CHECKSPECIAL(date, STRING_DECSOLSTICE, F_DECSOLSTICE);
+		CHECKSPECIAL(date, ndecsolstice, F_DECSOLSTICE);
 
 		if (checkdayofweek(date, &len, &offset, &dow)) {
 			*flags |= (F_DAYOFWEEK | F_VARIABLE);
@@ -869,49 +857,54 @@ showflags(int flags)
 static const char *
 getmonthname(int i)
 {
-	if (i <= 0 || i > 12)
-		return ("");
-	if (nmonths[i - 1].len != 0 && nmonths[i - 1].name != NULL)
-		return (nmonths[i - 1].name);
-	return (months[i - 1]);
+	if (i <= 0 || i > NMONTHS)
+		errx(1, "Invalid month index: %d", i);
+
+	return (nmonths[i-1] ? nmonths[i-1] : months[i-1]);
 }
 
 static bool
 checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 {
-	struct fixs *n;
-	int i;
+	const char *p;
+	size_t l;
 
-	for (i = 0; fnmonths[i].name != NULL; i++) {
-		n = fnmonths + i;
-		if (strncasecmp(s, n->name, n->len) == 0) {
-			*len = n->len;
-			*month = n->name;
+	for (int i = 0; fnmonths[i]; i++) {
+		p = fnmonths[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*month = p;
 			*offset = i + 1;
 			return (true);
 		}
 	}
-	for (i = 0; nmonths[i].name != NULL; i++) {
-		n = nmonths + i;
-		if (strncasecmp(s, n->name, n->len) == 0) {
-			*len = n->len;
-			*month = n->name;
+	for (int i = 0; nmonths[i]; i++) {
+		p = nmonths[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*month = p;
 			*offset = i + 1;
 			return (true);
 		}
 	}
-	for (i = 0; fmonths[i] != NULL; i++) {
-		*len = strlen(fmonths[i]);
-		if (strncasecmp(s, fmonths[i], *len) == 0) {
-			*month = fmonths[i];
+	for (int i = 0; fmonths[i]; i++) {
+		p = fmonths[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*month = p;
 			*offset = i + 1;
 			return (true);
 		}
 	}
-	for (i = 0; months[i] != NULL; i++) {
-		if (strncasecmp(s, months[i], 3) == 0) {
-			*len = 3;
-			*month = months[i];
+	for (int i = 0; months[i]; i++) {
+		p = months[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*month = p;
 			*offset = i + 1;
 			return (true);
 		}
@@ -922,47 +915,54 @@ checkmonth(char *s, size_t *len, size_t *offset, const char **month)
 static const char *
 getdayofweekname(int i)
 {
-	if (ndays[i].len != 0 && ndays[i].name != NULL)
-		return (ndays[i].name);
-	return (days[i]);
+	if (i < 0 || i >= NDAYS)
+		errx(1, "Invalid day-of-week index: %d", i);
+
+	return (ndays[i] ? ndays[i] : days[i]);
 }
 
 static bool
 checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 {
-	struct fixs *n;
-	int i;
+	const char *p;
+	size_t l;
 
-	for (i = 0; fndays[i].name != NULL; i++) {
-		n = fndays + i;
-		if (strncasecmp(s, n->name, n->len) == 0) {
-			*len = n->len;
-			*dow = n->name;
+	for (int i = 0; fndays[i]; i++) {
+		p = fndays[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*dow = p;
 			*offset = i;
 			return (true);
 		}
 	}
-	for (i = 0; ndays[i].name != NULL; i++) {
-		n = ndays + i;
-		if (strncasecmp(s, n->name, n->len) == 0) {
-			*len = n->len;
-			*dow = n->name;
+	for (int i = 0; ndays[i]; i++) {
+		p = ndays[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*dow = p;
 			*offset = i;
 			return (true);
 		}
 	}
-	for (i = 0; fdays[i] != NULL; i++) {
-		*len = strlen(fdays[i]);
-		if (strncasecmp(s, fdays[i], *len) == 0) {
-			*dow = fdays[i];
+	for (int i = 0; fdays[i]; i++) {
+		p = fdays[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*dow = p;
 			*offset = i;
 			return (true);
 		}
 	}
-	for (i = 0; days[i] != NULL; i++) {
-		if (strncasecmp(s, days[i], 3) == 0) {
-			*len = 3;
-			*dow = days[i];
+	for (int i = 0; days[i]; i++) {
+		p = days[i];
+		l = strlen(p);
+		if (strncasecmp(s, p, l) == 0) {
+			*len = l;
+			*dow = p;
 			*offset = i;
 			return (true);
 		}
@@ -987,8 +987,8 @@ static int
 indextooffset(char *s)
 {
 	int i;
-	struct fixs *n;
 	char *es;
+	const char *p;
 
 	if (s[0] == '+' || s[0] == '-') {
 		i = strtol (s, &es, 10);
@@ -1004,11 +1004,9 @@ indextooffset(char *s)
 			return (i + 1);
 		}
 	}
-	for (i = 0; nsequences[i].name; i++) {
-		n = nsequences + i;
-		if (n->len == 0)
-			continue;
-		if (strncasecmp(s, n->name, n->len) == 0) {
+	for (i = 0; nsequences[i]; i++) {
+		p = nsequences[i];
+		if (strncasecmp(s, p, strlen(p)) == 0) {
 			if (i == 5)
 				return (-1);
 			return (i + 1);

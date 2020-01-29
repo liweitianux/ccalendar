@@ -61,9 +61,6 @@ enum {
 	T_PROCESS,
 };
 
-struct fixs neaster, npaskha, ncny, nfullmoon, nnewmoon;
-struct fixs nmarequinox, nsepequinox, njunsolstice, ndecsolstice;
-
 const char *calendarFile = "calendar"; /* default calendar file */
 static const char *calendarHomes[] = {".calendar", "/usr/share/calendar"};
 static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
@@ -73,6 +70,17 @@ static bool allmode = false; /* whether to run for all users */
 static StringList *definitions = NULL;
 static struct event *events[MAXCOUNT] = { NULL };
 static char *extradata[MAXCOUNT] = { NULL };
+
+/* National names for special days */
+char *neaster = NULL;
+char *npaskha = NULL;
+char *ncny = NULL;
+char *nfullmoon = NULL;
+char *nnewmoon = NULL;
+char *nmarequinox = NULL;
+char *nsepequinox = NULL;
+char *njunsolstice = NULL;
+char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in, FILE *out);
@@ -298,14 +306,13 @@ cal_parse(FILE *in, FILE *out)
 			continue;
 		}
 
-#define	REPLACE(string, struct_) \
-		if (strncasecmp(buf, (string), strlen(string)) == 0 &&		\
-		    buf[strlen(string)]) {					\
-			if (struct_.name != NULL)				\
-				free(struct_.name);				\
-			struct_.name = xstrdup(buf + strlen(string));		\
-			struct_.len = strlen(struct_.name);			\
-			continue;						\
+#define	REPLACE(string, nvar) \
+		if (strncasecmp(buf, (string), strlen(string)) == 0 &&	\
+		    buf[strlen(string)]) {				\
+			if (nvar != NULL)				\
+				free(nvar);				\
+			nvar = xstrdup(buf + strlen(string));		\
+			continue;					\
 		}
 
 		REPLACE("Easter=", neaster);

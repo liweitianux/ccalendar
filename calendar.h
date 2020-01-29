@@ -64,8 +64,6 @@ extern bool debug;
 extern int year1, year2;
 extern time_t t1, t2;
 extern const char *calendarFile;
-extern struct fixs neaster, npaskha, ncny, nfullmoon, nnewmoon;
-extern struct fixs nmarequinox, nsepequinox, njunsolstice, ndecsolstice;
 extern struct tm tm_now;  /* time/date of calendar events to remind */
 extern double UTCOffset;
 extern double EastLongitude;
@@ -102,25 +100,19 @@ struct event {
 };
 
 /* locale.c */
-
-struct fixs {
-	char	*name;
-	size_t	len;
-};
-
-extern const char *days[];
-extern const char *fdays[];
-extern const char *fmonths[];
-extern const char *months[];
-extern const char *sequences[];
-extern struct fixs fndays[];		/* full national days names */
-extern struct fixs fnmonths[];	/* full national months names */
-extern struct fixs ndays[];		/* short national days names */
-extern struct fixs nmonths[];		/* short national month names */
-extern struct fixs nsequences[];
+extern const char *fdays[];		/* full day names */
+extern const char *days[];		/* short day names */
+extern const char *fmonths[];		/* full month names */
+extern const char *months[];		/* short month names */
+extern const char *sequences[];		/* sequence names */
+extern char *fndays[];			/* full national day names */
+extern char *ndays[];			/* short national day names */
+extern char *fnmonths[];		/* full national month names */
+extern char *nmonths[];			/* short national month names */
+extern char *nsequences[];		/* national sequence names */
 
 void	setnnames(void);
-void	setnsequences(char *seq);
+void	setnsequences(const char *seq);
 
 /* day.c */
 void	settimes(time_t now, int before, int after, int friday,
@@ -128,6 +120,9 @@ void	settimes(time_t now, int before, int after, int friday,
 time_t	Mktime(const char *s);
 
 /* io.c */
+extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
+extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
+
 void	cal(bool doall);
 
 /* ostern.c / paskha.c */
