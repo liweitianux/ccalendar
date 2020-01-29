@@ -82,22 +82,12 @@ setnnames(void)
 	for (i = 0; i < 7; i++) {
 		tm.tm_wday = i;
 		strftime(buf, sizeof(buf), "%a", &tm);
-		for (l = strlen(buf);
-		     l > 0 && isspace((unsigned char)buf[l - 1]);
-		     l--)
-			;
-		buf[l] = '\0';
 		if (ndays[i].name != NULL)
 			free(ndays[i].name);
 		ndays[i].name = xstrdup(buf);
 		ndays[i].len = strlen(buf);
 
 		strftime(buf, sizeof(buf), "%A", &tm);
-		for (l = strlen(buf);
-		     l > 0 && isspace((unsigned char)buf[l - 1]);
-		     l--)
-			;
-		buf[l] = '\0';
 		if (fndays[i].name != NULL)
 			free(fndays[i].name);
 		fndays[i].name = xstrdup(buf);
@@ -108,22 +98,12 @@ setnnames(void)
 	for (i = 0; i < 12; i++) {
 		tm.tm_mon = i;
 		strftime(buf, sizeof(buf), "%b", &tm);
-		for (l = strlen(buf);
-		     l > 0 && isspace((unsigned char)buf[l - 1]);
-		     l--)
-			;
-		buf[l] = '\0';
 		if (nmonths[i].name != NULL)
 			free(nmonths[i].name);
 		nmonths[i].name = xstrdup(buf);
 		nmonths[i].len = strlen(buf);
 
 		strftime(buf, sizeof(buf), "%B", &tm);
-		for (l = strlen(buf);
-		     l > 0 && isspace((unsigned char)buf[l - 1]);
-		     l--)
-			;
-		buf[l] = '\0';
 		if (fnmonths[i].name != NULL)
 			free(fnmonths[i].name);
 		fnmonths[i].name = xstrdup(buf);
