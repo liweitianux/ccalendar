@@ -51,6 +51,15 @@ string_eqn(const char *s1, const char *s2)
 	return (s1 && s2 && strncmp(s1, s2, strlen(s2)) == 0);
 }
 
+static inline void
+swap(int *a, int *b)
+{
+	int tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+
 int	div_floor(int x, int y);
 
 int	mod(int x, int y);

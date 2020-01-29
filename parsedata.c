@@ -260,26 +260,24 @@ determinestyle(char *date, int *flags,
 	/* If both the month and date are specified as numbers */
 	if (isonlydigits(p1, true) && isonlydigits(p2, false)) {
 		/* Now who wants to be this ambiguous? :-( */
-		int m, d;
-
 		*flags |= (F_MONTH | F_DAYOFMONTH);
 		if (strchr(p2, '*') != NULL)
 			*flags |= F_VARIABLE;
 
-		m = (int)strtol(p1, NULL, 10);
-		d = (int)strtol(p2, NULL, 10);
+		int m = (int)strtol(p1, NULL, 10);
+		int d = (int)strtol(p2, NULL, 10);
 
-		if (m > 12) {
-			*imonth = d;
-			*idayofmonth = m;
-			strcpy(month, getmonthname(d));
-			sprintf(dayofmonth, "%d", m);
-		} else {
-			*imonth = m;
-			*idayofmonth = d;
-			strcpy(month, getmonthname(m));
-			sprintf(dayofmonth, "%d", d);
+		if (m > 12 && d > 12) {
+			warnx("Invalid date: %s", date);
+			goto fail;
 		}
+
+		if (m > 12)
+			swap(&m, &d);
+		*imonth = m;
+		*idayofmonth = d;
+		strcpy(month, getmonthname(m));
+		sprintf(dayofmonth, "%d", d);
 		goto allfine;
 	}
 
