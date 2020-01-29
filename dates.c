@@ -105,7 +105,7 @@ createdate(int y, int m, int d)
 		struct tm td = { 0 };
 		time_t t;
 
-		py = xcalloc(1, sizeof(struct cal_year));
+		py = xcalloc(1, sizeof(*py));
 		py->year = y + 1900;
 		py->easter = easter(y);
 		py->paskha = paskha(y);
@@ -133,7 +133,7 @@ createdate(int y, int m, int d)
 	}
 
 	if (pm == NULL) {
-		pm = xcalloc(1, sizeof(struct cal_month));
+		pm = xcalloc(1, sizeof(*pm));
 		pm->year = py;
 		pm->month = m;
 		cumday = cumdaytab[isleap(y)];
@@ -154,7 +154,7 @@ createdate(int y, int m, int d)
 	}
 
 	if (pd == NULL) {	/* Always true */
-		pd = xcalloc(1, sizeof(struct cal_day));
+		pd = xcalloc(1, sizeof(*pd));
 		pd->month = pm;
 		pd->year = py;
 		pd->dayofmonth = d;

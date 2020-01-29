@@ -481,7 +481,7 @@ parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
 			yearinfo = yearinfo -> next;
 		}
 		if (yearinfo == NULL) {
-			yearinfo = xcalloc(1, sizeof(struct yearinfo));
+			yearinfo = xcalloc(1, sizeof(*yearinfo));
 			yearinfo->year = year;
 			yearinfo->next = years;
 			years = yearinfo;
