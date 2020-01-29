@@ -77,15 +77,6 @@ event_print_all(FILE *fp)
 	struct event *e;
 
 	while (walkthrough_dates(&e)) {
-#ifdef DEBUG
-		fprintf(stderr, "event_print_allmonth: %d, day: %d\n",
-		    month, day);
-#endif
-
-		/*
-		 * Go through all events and print the text of the matching
-		 * dates
-		 */
 		while (e != NULL) {
 			fprintf(fp, "%s%c%s%s%s%s\n", e->date,
 			    e->variable ? '*' : ' ', e->text,
