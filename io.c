@@ -36,6 +36,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <assert.h>
 #include <ctype.h>
 #include <err.h>
 #include <langinfo.h>
@@ -269,8 +270,7 @@ cal_parse(FILE *in, FILE *out)
 	char *pp, p;
 	int flags;
 
-	if (in == NULL)
-		return (false);
+	assert(in != NULL && out != NULL);
 
 	d_first = locale_day_first();
 
@@ -484,6 +484,8 @@ closecal(FILE *fp)
 {
 	int nread, pdes[2], status;
 	char buf[1024];
+
+	assert(allmode == true);
 
 	if (fseek(fp, 0L, SEEK_END) != 0 || ftell(fp) == 0)
 		return;
