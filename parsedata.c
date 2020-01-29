@@ -996,14 +996,14 @@ indextooffset(char *s)
 		return (i);
 	}
 
-	for (i = 0; i < 6; i++) {
+	for (i = 0; sequences[i]; i++) {
 		if (strcasecmp(s, sequences[i]) == 0) {
 			if (i == 5)
 				return (-1);
 			return (i + 1);
 		}
 	}
-	for (i = 0; i < 6; i++) {
+	for (i = 0; nsequences[i].name; i++) {
 		n = nsequences + i;
 		if (n->len == 0)
 			continue;

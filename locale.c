@@ -41,45 +41,44 @@
 #include "calendar.h"
 #include "utils.h"
 
-const char *fdays[] = {
+const char *fdays[NDAYS+1] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 	"Saturday", NULL,
 };
 
-const char *days[] = {
+const char *days[NDAYS+1] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", NULL,
 };
 
-const char *fmonths[] = {
+const char *fmonths[NMONTHS+1] = {
 	"January", "February", "March", "April", "May", "June", "Juli",
 	"August", "September", "October", "November", "December", NULL,
 };
 
-const char *months[] = {
+const char *months[NMONTHS+1] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec", NULL,
 };
 
-const char *sequences[] = {
-	"First", "Second", "Third", "Fourth", "Fifth", "Last"
+const char *sequences[NSEQUENCES+1] = {
+	"First", "Second", "Third", "Fourth", "Fifth", "Last", NULL,
 };
 
-struct fixs fndays[8];		/* full national days names */
-struct fixs ndays[8];		/* short national days names */
-struct fixs fnmonths[13];	/* full national months names */
-struct fixs nmonths[13];	/* short national month names */
-struct fixs nsequences[10];	/* national sequence names */
+struct fixs fndays[NDAYS+1];		/* full national days names */
+struct fixs ndays[NDAYS+1];		/* short national days names */
+struct fixs fnmonths[NMONTHS+1];	/* full national months names */
+struct fixs nmonths[NMONTHS+1];		/* short national month names */
+struct fixs nsequences[NSEQUENCES+1];	/* national sequence names */
 
 
 void
 setnnames(void)
 {
 	char buf[80];
-	int i, l;
 	struct tm tm;
 
-	memset(&tm, 0, sizeof(struct tm));
-	for (i = 0; i < 7; i++) {
+	memset(&tm, 0, sizeof(tm));
+	for (int i = 0; i < NDAYS; i++) {
 		tm.tm_wday = i;
 		strftime(buf, sizeof(buf), "%a", &tm);
 		if (ndays[i].name != NULL)
@@ -93,9 +92,13 @@ setnnames(void)
 		fndays[i].name = xstrdup(buf);
 		fndays[i].len = strlen(buf);
 	}
+	ndays[NDAYS].name = NULL;
+	ndays[NDAYS].len = 0;
+	fndays[NDAYS].name = NULL;
+	fndays[NDAYS].len = 0;
 
-	memset(&tm, 0, sizeof(struct tm));
-	for (i = 0; i < 12; i++) {
+	memset(&tm, 0, sizeof(tm));
+	for (int i = 0; i < NMONTHS; i++) {
 		tm.tm_mon = i;
 		strftime(buf, sizeof(buf), "%b", &tm);
 		if (nmonths[i].name != NULL)
@@ -109,6 +112,10 @@ setnnames(void)
 		fnmonths[i].name = xstrdup(buf);
 		fnmonths[i].len = strlen(buf);
 	}
+	nmonths[NMONTHS].name = NULL;
+	nmonths[NMONTHS].len = 0;
+	fnmonths[NMONTHS].name = NULL;
+	fnmonths[NMONTHS].len = 0;
 }
 
 void
@@ -118,7 +125,7 @@ setnsequences(char *seq)
 	char *p;
 
 	p = seq;
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < NSEQUENCES-1; i++) {
 		nsequences[i].name = p;
 		if ((p = strchr(p, ' ')) == NULL) {
 			/* Oh oh there is something wrong. Erase! Erase! */
@@ -131,12 +138,15 @@ setnsequences(char *seq)
 		*p = '\0';
 		p++;
 	}
-	nsequences[i].name = p;
+	nsequences[NSEQUENCES-1].name = p;
 
-	for (i = 0; i < 5; i++) {
+	for (i = 0; i < NSEQUENCES-1; i++) {
 		nsequences[i].name = xstrdup(nsequences[i].name);
 		nsequences[i].len = nsequences[i + 1].name - nsequences[i].name;
 	}
-	nsequences[i].name = xstrdup(nsequences[i].name);
-	nsequences[i].len = strlen(nsequences[i].name);
+	nsequences[NSEQUENCES-1].name = xstrdup(nsequences[NSEQUENCES-1].name);
+	nsequences[NSEQUENCES-1].len = strlen(nsequences[NSEQUENCES-1].name);
+
+	nsequences[NSEQUENCES].name = NULL;
+	nsequences[NSEQUENCES].len = 0;
 }

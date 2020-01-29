@@ -50,6 +50,10 @@
 #define	DAYSPERYEAR	365
 #define	DAYSPERLEAPYEAR	366
 
+#define	NDAYS		7
+#define	NMONTHS		12
+#define	NSEQUENCES	6
+
 #ifndef nitems
 #define nitems(x)	(sizeof(x) / sizeof((x)[0]))
 #endif
@@ -109,14 +113,14 @@ extern const char *fdays[];
 extern const char *fmonths[];
 extern const char *months[];
 extern const char *sequences[];
-extern struct fixs fndays[8];		/* full national days names */
-extern struct fixs fnmonths[13];	/* full national months names */
-extern struct fixs ndays[8];		/* short national days names */
-extern struct fixs nmonths[13];		/* short national month names */
-extern struct fixs nsequences[10];
+extern struct fixs fndays[];		/* full national days names */
+extern struct fixs fnmonths[];	/* full national months names */
+extern struct fixs ndays[];		/* short national days names */
+extern struct fixs nmonths[];		/* short national month names */
+extern struct fixs nsequences[];
 
 void	setnnames(void);
-void	setnsequences(char *);
+void	setnsequences(char *seq);
 
 /* day.c */
 void	settimes(time_t now, int before, int after, int friday,
