@@ -45,7 +45,8 @@ static const char *getmonthname(int i);
 static bool checkmonth(char *s, size_t *len, size_t *offset,
 		       const char **month);
 static const char *getdayofweekname(int i);
-static int checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow);
+static bool checkdayofweek(char *s, size_t *len, size_t *offset,
+			   const char **dow);
 static int indextooffset(char *s);
 static int parseoffset(char *s);
 static char *floattoday(int year, double f);
@@ -167,7 +168,7 @@ determinestyle(char *date, int *flags,
 		CHECKSPECIAL(date, ndecsolstice.name, ndecsolstice.len,
 			     F_DECSOLSTICE);
 
-		if (checkdayofweek(date, &len, &offset, &dow) != 0) {
+		if (checkdayofweek(date, &len, &offset, &dow)) {
 			*flags |= (F_DAYOFWEEK | F_VARIABLE);
 			*idayofweek = offset;
 			if (strlen(date) == len) {
@@ -229,7 +230,7 @@ determinestyle(char *date, int *flags,
 			goto allfine;
 		}
 
-		if (checkdayofweek(p2, &len, &offset, &dow) != 0) {
+		if (checkdayofweek(p2, &len, &offset, &dow)) {
 			*flags |= F_DAYOFWEEK;
 			*flags |= F_VARIABLE;
 			*idayofweek = offset;
@@ -257,8 +258,8 @@ determinestyle(char *date, int *flags,
 	}
 
 	/* Month as a number, then a weekday */
-	if (isonlydigits(p1, 1)
-	    && checkdayofweek(p2, &len, &offset, &dow) != 0) {
+	if (isonlydigits(p1, 1) &&
+	    checkdayofweek(p2, &len, &offset, &dow)) {
 		int d;
 
 		*flags |= F_MONTH;
@@ -926,7 +927,7 @@ getdayofweekname(int i)
 	return (days[i]);
 }
 
-static int
+static bool
 checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 {
 	struct fixs *n;
@@ -938,7 +939,7 @@ checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 			*len = n->len;
 			*dow = n->name;
 			*offset = i;
-			return (1);
+			return (true);
 		}
 	}
 	for (i = 0; ndays[i].name != NULL; i++) {
@@ -947,7 +948,7 @@ checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 			*len = n->len;
 			*dow = n->name;
 			*offset = i;
-			return (1);
+			return (true);
 		}
 	}
 	for (i = 0; fdays[i] != NULL; i++) {
@@ -955,7 +956,7 @@ checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 		if (strncasecmp(s, fdays[i], *len) == 0) {
 			*dow = fdays[i];
 			*offset = i;
-			return (1);
+			return (true);
 		}
 	}
 	for (i = 0; days[i] != NULL; i++) {
@@ -963,10 +964,10 @@ checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 			*len = 3;
 			*dow = days[i];
 			*offset = i;
-			return (1);
+			return (true);
 		}
 	}
-	return (0);
+	return (false);
 }
 
 static bool
