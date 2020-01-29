@@ -56,7 +56,7 @@ static bool determinestyle(char *date, int *flags, char *month, int *imonth,
 	char *dayofmonth, int *idayofmonth, char *dayofweek, int *idayofweek,
 	char *modifieroffset, char *modifierindex, char *specialday,
 	char *year, int *iyear);
-static void remember(int *rememberindex, int *y, int *m, int *d, char **ed,
+static void remember(int *index, int *y, int *m, int *d, char **ed,
 	int yy, int mm, int dd, char *extra);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 	int max, int *result);
@@ -71,8 +71,8 @@ static bool parse_angle(const char *s, double *result);
  *				Month . '/' . DayOfWeek . ModifierIndex |
  *				DayOfMonth . ' ' . Month |
  *				DayOfMonth . '/' . Month |
- *				DayOfWeek . ModifierIndex . ' ' .Month |
- *				DayOfWeek . ModifierIndex . '/' .Month |
+ *				DayOfWeek . ModifierIndex . ' ' . Month |
+ *				DayOfWeek . ModifierIndex . '/' . Month |
  *				DayOfWeek . ModifierIndex |
  *				SpecialDay . ModifierOffset
  *
@@ -91,8 +91,8 @@ static bool parse_angle(const char *s, double *result);
  * ModifierOffset	::=	'' | '+' . ModifierNumber | '-' . ModifierNumber
  * ModifierNumber	::=	'0' ... '9' | '00' ... '99' | '000' ... '299' |
  *				'300' ... '359' | '360' ... '365'
- * ModifierIndex	::=	'Second' | 'Third' | 'Fourth' | 'Fifth' |
- *				'First' | 'Last'
+ * ModifierIndex	::=	'First' | 'Second' | 'Third' | 'Fourth' |
+ *				'Fifth' | 'Last'
  *
  * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear'
  *
@@ -121,8 +121,8 @@ determinestyle(char *date, int *flags,
 	*modifierindex = '\0';
 	*specialday = '\0';
 
-#define CHECKSPECIAL(s1, s2, type)				\
-	if (string_eqn(s1, s2)) {		\
+#define CHECKSPECIAL(s1, s2, type)					\
+	if (string_eqn(s1, s2)) {					\
 		*flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
 		if (strlen(s1) == strlen(s2)) {				\
 			strcpy(specialday, s1);				\
@@ -172,7 +172,7 @@ determinestyle(char *date, int *flags,
 		if (isonlydigits(date, 1)) {
 			/* Assume month number only */
 			*flags |= F_MONTH;
-			*imonth = (int)strtol(date, (char **)NULL, 10);
+			*imonth = (int)strtol(date, NULL, 10);
 			strcpy(month, getmonthname(*imonth));
 			return(true);
 		}
@@ -184,7 +184,7 @@ determinestyle(char *date, int *flags,
 	 * original data in `date'.
 	 */
 	pold = *p;
-	*p = 0;
+	*p = '\0';
 	p1 = date;
 	p2 = p + 1;
 	/* Now p2 points to the next field and p1 to the first field */
@@ -209,7 +209,7 @@ determinestyle(char *date, int *flags,
 		strcpy(month, getmonthname(offset));
 		if (isonlydigits(p2, 1)) {
 			strcpy(dayofmonth, p2);
-			*idayofmonth = (int)strtol(p2, (char **)NULL, 10);
+			*idayofmonth = (int)strtol(p2, NULL, 10);
 			*flags |= F_DAYOFMONTH;
 			goto allfine;
 		}
@@ -219,8 +219,7 @@ determinestyle(char *date, int *flags,
 		}
 
 		if (checkdayofweek(p2, &len, &offset, &dow)) {
-			*flags |= F_DAYOFWEEK;
-			*flags |= F_VARIABLE;
+			*flags |= (F_DAYOFWEEK | F_VARIABLE);
 			*idayofweek = offset;
 			strcpy(dayofweek, getdayofweekname(offset));
 			if (strlen(p2) == len)
@@ -233,31 +232,22 @@ determinestyle(char *date, int *flags,
 	}
 
 	/* Check if there is an every-day or every-month in the string */
-	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, 1))
-	    || (strcmp(p2, "*") == 0 && isonlydigits(p1, 1) && (p2 = p1))) {
-		int d;
-
-		*flags |= F_ALLMONTH;
-		*flags |= F_DAYOFMONTH;
-		d = (int)strtol(p2, (char **)NULL, 10);
-		*idayofmonth = d;
-		sprintf(dayofmonth, "%d", d);
+	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, 1)) ||
+	    (strcmp(p2, "*") == 0 && isonlydigits(p1, 1) && (p2 = p1))) {
+		*flags |= (F_ALLMONTH | F_DAYOFMONTH);
+		*idayofmonth = (int)strtol(p2, NULL, 10);
+		sprintf(dayofmonth, "%d", *idayofmonth);
 		goto allfine;
 	}
 
 	/* Month as a number, then a weekday */
 	if (isonlydigits(p1, 1) &&
 	    checkdayofweek(p2, &len, &offset, &dow)) {
-		int d;
-
-		*flags |= F_MONTH;
-		*flags |= F_DAYOFWEEK;
-		*flags |= F_VARIABLE;
+		*flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 
 		*idayofweek = offset;
-		d = (int)strtol(p1, (char **)NULL, 10);
-		*imonth = d;
-		strcpy(month, getmonthname(d));
+		*imonth = (int)strtol(p1, NULL, 10);
+		strcpy(month, getmonthname(*imonth));
 
 		strcpy(dayofweek, getdayofweekname(offset));
 		if (strlen(p2) == len)
@@ -272,14 +262,12 @@ determinestyle(char *date, int *flags,
 		/* Now who wants to be this ambiguous? :-( */
 		int m, d;
 
+		*flags |= (F_MONTH | F_DAYOFMONTH);
 		if (strchr(p2, '*') != NULL)
 			*flags |= F_VARIABLE;
 
-		m = (int)strtol(p1, (char **)NULL, 10);
-		d = (int)strtol(p2, (char **)NULL, 10);
-
-		*flags |= F_MONTH;
-		*flags |= F_DAYOFMONTH;
+		m = (int)strtol(p1, NULL, 10);
+		d = (int)strtol(p2, NULL, 10);
 
 		if (m > 12) {
 			*imonth = d;
@@ -341,7 +329,7 @@ debug_determinestyle(int dateonly, char *date, int flags, char *month,
 		if (dateonly == 1)
 			return;
 	}
-	printf("flags: %x - %s\n", flags, showflags(flags));
+	printf("flags: 0x%x - %s\n", flags, showflags(flags));
 	if (modifieroffset[0] != '\0')
 		printf("modifieroffset: |%s|\n", modifieroffset);
 	if (modifierindex[0] != '\0')
@@ -358,19 +346,25 @@ debug_determinestyle(int dateonly, char *date, int flags, char *month,
 		printf("specialday: |%s|\n", specialday);
 }
 
-static struct yearinfo {
+struct yearinfo {
 	int year;
-	int ieaster, ipaskha, firstcnyday;
-	double ffullmoon[MAXMOONS], fnewmoon[MAXMOONS];
-	double ffullmooncny[MAXMOONS], fnewmooncny[MAXMOONS];
+	int ieaster;
+	int ipaskha;
+	int firstcnyday;
+	double ffullmoon[MAXMOONS];
+	double fnewmoon[MAXMOONS];
+	double ffullmooncny[MAXMOONS];
+	double fnewmooncny[MAXMOONS];
 	int ichinesemonths[MAXMOONS];
-	double equinoxdays[2], solsticedays[2];
+	double equinoxdays[2];
+	double solsticedays[2];
 	int *monthdays;
 	struct yearinfo *next;
-} *years, *yearinfo;
+};
+static struct yearinfo *years, *yearinfo;
 
 /*
- * Calculate dates with offset from weekdays, like Thurs-3, Wed+2, etc.
+ * Calculate dates with offset from weekdays, like Thu-3, Wed+2, etc.
  * day is the day of the week,
  * offset the ordinal number of the weekday in the month.
  */
@@ -401,13 +395,13 @@ wdayom(int day, int offset, int month, int year)
 		while (wdayn <= yearinfo->monthdays[month])
 			wdayn += 7;
 		d = offset * 7 + wdayn;
-	} else if (offset > 0){
+	} else if (offset > 0) {
 		if (d > 0)
 			d += offset * 7 - 7;
 		else
 			d += offset * 7;
 	} else {
-		warnx ("Invalid offset 0");
+		warnx("Invalid offset 0");
 	}
 	return (d);
 }
@@ -991,7 +985,7 @@ indextooffset(char *s)
 	const char *p;
 
 	if (s[0] == '+' || s[0] == '-') {
-		i = strtol (s, &es, 10);
+		i = strtol(s, &es, 10);
 		if (*es != '\0')                      /* trailing junk */
 			errx (1, "Invalid specifier format: %s\n", s);
 		return (i);

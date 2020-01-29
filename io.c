@@ -36,7 +36,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <assert.h>
 #include <ctype.h>
 #include <err.h>
 #include <langinfo.h>
@@ -127,7 +126,7 @@ cal_fopen(const char *file)
 	char *cwd = NULL;
 	char *home;
 	char cwdpath[MAXPATHLEN];
-	unsigned int i;
+	size_t i;
 
 	if (!allmode) {
 		home = getenv("HOME");
@@ -258,7 +257,7 @@ cal_parse(FILE *in, FILE *out)
 	char *buf;
 	size_t linecap = 0;
 	ssize_t linelen;
-	static int count = 0;
+	int count = 0;
 	int i;
 	int month[MAXCOUNT];
 	int day[MAXCOUNT];
@@ -299,7 +298,7 @@ cal_parse(FILE *in, FILE *out)
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
 		if (string_eqn(buf, "LANG=")) {
-			setlocale(LC_ALL, buf + 5);
+			setlocale(LC_ALL, buf + strlen("LANG="));
 			d_first = locale_day_first();
 			setnnames();
 			locale_changed = true;
@@ -327,7 +326,7 @@ cal_parse(FILE *in, FILE *out)
 #undef	REPLACE
 
 		if (string_eqn(buf, "SEQUENCE=")) {
-			setnsequences(buf + 9);
+			setnsequences(buf + strlen("SEQUENCE="));
 			continue;
 		}
 
@@ -376,9 +375,9 @@ cal_parse(FILE *in, FILE *out)
 			tm.tm_mon = month[i] - 1;
 			tm.tm_mday = day[i];
 			strftime(dbuf, sizeof(dbuf),
-			    d_first ? "%e %b" : "%b %e", &tm);
+				 d_first ? "%e %b" : "%b %e", &tm);
 			if (debug)
-				fprintf(stderr, "got %s\n", pp);
+				fprintf(stderr, "Got: %s\n", pp);
 			events[i] = event_add(year[i], month[i], day[i], dbuf,
 					      ((flags &= F_VARIABLE) != 0),
 					      pp, extradata[i]);

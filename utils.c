@@ -39,7 +39,6 @@
  * 2018, Cambridge University Press
  */
 
-#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <math.h>

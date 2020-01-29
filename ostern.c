@@ -34,9 +34,9 @@
 
 #include "calendar.h"
 
-/* return year day for Easter */
-
 /*
+ * Return the year day for Easter.
+ *
  * This code is based on the Calendar FAQ's code for how to calculate
  * easter is. This is the Gregorian calendar version. They refer to
  * the Algorithm of Oudin in the "Explanatory Supplement to the

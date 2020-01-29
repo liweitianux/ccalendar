@@ -44,7 +44,7 @@ struct cal_year {
 	int cny;	/* Julian day */
 	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
 	struct cal_month *months;
-	struct cal_year	*nextyear;
+	struct cal_year *nextyear;
 };
 
 struct cal_month {
@@ -62,7 +62,7 @@ struct cal_day {
 	int dayofweek;			/* 0 .. 6 */
 	struct cal_day *nextday;
 	struct cal_month *month;	/* points back */
-	struct cal_year	*year;		/* points back */
+	struct cal_year *year;		/* points back */
 	struct event *events;
 };
 
