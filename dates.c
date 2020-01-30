@@ -37,36 +37,6 @@
 #include "calendar.h"
 #include "utils.h"
 
-struct cal_year {
-	int year;	/* 19xx, 20xx, 21xx */
-	int easter;	/* Julian day */
-	int paskha;	/* Julian day */
-	int cny;	/* Julian day */
-	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
-	struct cal_month *months;
-	struct cal_year *nextyear;
-};
-
-struct cal_month {
-	int month;			/* 01 .. 12 */
-	int firstdayjulian;		/* 000 .. 366 */
-	int firstdayofweek;		/* 0 .. 6 */
-	struct cal_year *year;		/* points back */
-	struct cal_day *days;
-	struct cal_month *nextmonth;
-};
-
-struct cal_day {
-	int dayofmonth;			/* 01 .. 31 */
-	int julianday;			/* 000 .. 366 */
-	int dayofweek;			/* 0 .. 6 */
-	struct cal_day *nextday;
-	struct cal_month *month;	/* points back */
-	struct cal_year *year;		/* points back */
-	struct event *events;
-};
-
-static bool debug_remember = false;
 static struct cal_year *hyear = NULL;
 
 /* 1-based month, 0-based days, cumulative */
@@ -258,40 +228,6 @@ dumpdates(void)
 	}
 }
 
-bool
-remember_yd(int yy, int dd, int *rm, int *rd)
-{
-	struct cal_year *y;
-	struct cal_month *m;
-	struct cal_day *d;
-
-	if (debug_remember)
-		printf("remember_yd: %d - %d\n", yy, dd);
-
-	y = hyear;
-	while (y != NULL) {
-		if (y->year != yy) {
-			y = y->nextyear;
-			continue;
-		}
-		m = y->months;
-		while (m != NULL) {
-			d = m->days;
-			while (d != NULL) {
-				if (d->julianday == dd) {
-					*rm = m->month;
-					*rd = d->dayofmonth;
-					return (true);
-				}
-				d = d->nextday;
-			}
-			m = m->nextmonth;
-		}
-		return (false);
-	}
-	return (false);
-}
-
 int
 first_dayofweek_of_year(int yy)
 {
@@ -360,6 +296,30 @@ walkthrough_dates(struct event **e)
 	}
 
 	return false;
+}
+
+struct cal_day *
+find_yd(int yy, int dd)
+{
+	struct cal_year *yp;
+	struct cal_month *mp;
+	struct cal_day *dp;
+
+	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
+		if (yp->year == yy)
+			break;
+	}
+	if (yp == NULL)
+		return NULL;
+
+	for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
+		for (dp = mp->days; dp != NULL; dp = dp->nextday) {
+			if (dp->julianday == dd)
+				return dp;
+		}
+	}
+
+	return NULL;
 }
 
 struct cal_day *

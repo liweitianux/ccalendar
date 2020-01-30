@@ -127,15 +127,45 @@ int	paskha(int);
 int	easter(int);
 
 /* dates.c */
+struct cal_year {
+	int year;	/* 19xx, 20xx, 21xx */
+	int easter;	/* Julian day */
+	int paskha;	/* Julian day */
+	int cny;	/* Julian day */
+	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
+	struct cal_month *months;
+	struct cal_year *nextyear;
+};
+
+struct cal_month {
+	int month;			/* 01 .. 12 */
+	int firstdayjulian;		/* 000 .. 366 */
+	int firstdayofweek;		/* 0 .. 6 */
+	struct cal_year *year;		/* points back */
+	struct cal_day *days;
+	struct cal_month *nextmonth;
+};
+
+struct cal_day {
+	int dayofmonth;			/* 01 .. 31 */
+	int julianday;			/* 000 .. 366 */
+	int dayofweek;			/* 0 .. 6 */
+	struct cal_day *nextday;
+	struct cal_month *month;	/* points back */
+	struct cal_year *year;		/* points back */
+	struct event *events;
+};
+
 extern int cumdaytab[][14];
 extern int monthdaytab[][14];
+
 void	generatedates(struct tm *tp1, struct tm *tp2);
 void	dumpdates(void);
-bool	remember_yd(int y, int d, int *rm, int *rd);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);
 bool	walkthrough_dates(struct event **e);
 void	addtodate(struct event *e, int year, int month, int day);
+struct cal_day *find_yd(int yy, int dd);
 struct cal_day *find_ymd(int yy, int mm, int dd);
 
 /* pom.c */
