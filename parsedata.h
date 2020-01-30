@@ -76,7 +76,7 @@
  */
 #define UTCOFFSET_CNY		8.0
 
-int	parsedaymonth(char *date, int *yearp, int *monthp, int *dayp,
+int	parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		      int *flags, char **edp);
 void	dodebug(const char *type);
 

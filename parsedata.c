@@ -39,28 +39,38 @@
 #include "parsedata.h"
 #include "utils.h"
 
-static char *showflags(int flags);
-static bool isonlydigits(char *s, bool nostar);
-static const char *getmonthname(int i);
-static bool checkmonth(char *s, size_t *len, size_t *offset,
-		       const char **month);
+static bool	 checkdayofweek(const char *s, size_t *len, size_t *offset,
+				const char **dow);
+static bool	 checkmonth(const char *s, size_t *len, size_t *offset,
+			    const char **month);
+static void	 debug_determinestyle(int dateonly, const char *date,
+				      int flags, const char *month, int imonth,
+				      const char *dayofmonth, int idayofmonth,
+				      const char *dayofweek, int idayofweek,
+				      const char *modifieroffset,
+				      const char *modifierindex,
+				      const char *specialday,
+				      const char *year, int iyear);
+static bool	 determinestyle(const char *date, int *flags,
+				char *month, int *imonth,
+				char *dayofmonth, int *idayofmonth,
+				char *dayofweek, int *idayofweek,
+				char *modifieroffset, char *modifierindex,
+				char *specialday, char *year, int *iyear);
+static char	*floattoday(int year, double f);
+static char	*floattotime(double f);
 static const char *getdayofweekname(int i);
-static bool checkdayofweek(char *s, size_t *len, size_t *offset,
-			   const char **dow);
-static int indextooffset(char *s);
-static int parseoffset(char *s);
-static char *floattoday(int year, double f);
-static char *floattotime(double f);
-static int wdayom(int day, int offset, int month, int year);
-static bool determinestyle(const char *date, int *flags, char *month, int *imonth,
-	char *dayofmonth, int *idayofmonth, char *dayofweek, int *idayofweek,
-	char *modifieroffset, char *modifierindex, char *specialday,
-	char *year, int *iyear);
-static void remember(int *index, int *y, int *m, int *d, char **ed,
-	int yy, int mm, int dd, char *extra);
+static const char *getmonthname(int i);
+static int	 indextooffset(const char *s);
+static bool	 isonlydigits(const char *s, bool nostar);
+static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
-	int max, int *result);
-static bool parse_angle(const char *s, double *result);
+				    int max, int *result);
+static int	 parseoffset(const char *s);
+static void	 remember(int *index, int *y, int *m, int *d, char **ed,
+			  int yy, int mm, int dd, const char *extra);
+static char	*showflags(int flags);
+static int	 wdayom(int day, int offset, int month, int year);
 
 /*
  * Expected styles:
@@ -298,7 +308,7 @@ out:
 
 static void
 remember(int *index, int *y, int *m, int *d, char **ed,
-	 int yy, int mm, int dd, char *extra)
+	 int yy, int mm, int dd, const char *extra)
 {
 	static bool warned = false;
 
@@ -324,10 +334,12 @@ remember(int *index, int *y, int *m, int *d, char **ed,
 }
 
 static void
-debug_determinestyle(int dateonly, char *date, int flags, char *month,
-    int imonth, char *dayofmonth, int idayofmonth, char *dayofweek,
-    int idayofweek, char *modifieroffset, char *modifierindex, char *specialday,
-    char *year, int iyear)
+debug_determinestyle(int dateonly, const char *date, int flags,
+		     const char *month, int imonth,
+		     const char *dayofmonth, int idayofmonth,
+		     const char *dayofweek, int idayofweek,
+		     const char *modifieroffset, const char *modifierindex,
+		     const char *specialday, const char *year, int iyear)
 {
 	if (dateonly != 0) {
 		printf("-------\ndate: |%s|\n", date);
@@ -422,8 +434,8 @@ wdayom(int day, int offset, int month, int year)
  * along with the matched line.
  */
 int
-parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
-	      char **edp)
+parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
+	      int *flags, char **edp)
 {
 	char month[100], dayofmonth[100], dayofweek[100], modifieroffset[100];
 	char syear[100];
@@ -464,7 +476,6 @@ parsedaymonth(char *date, int *yearp, int *monthp, int *dayp, int *flags,
 
 	remindex = 0;
 	for (year = year1; year <= year2; year++) {
-
 		int lflags = *flags;
 		/* If the year is specified, only do it if it is this year! */
 		if ((lflags & F_YEAR) != 0)
@@ -863,7 +874,7 @@ getmonthname(int i)
 }
 
 static bool
-checkmonth(char *s, size_t *len, size_t *offset, const char **month)
+checkmonth(const char *s, size_t *len, size_t *offset, const char **month)
 {
 	const char *p;
 	size_t l;
@@ -921,7 +932,7 @@ getdayofweekname(int i)
 }
 
 static bool
-checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
+checkdayofweek(const char *s, size_t *len, size_t *offset, const char **dow)
 {
 	const char *p;
 	size_t l;
@@ -970,7 +981,7 @@ checkdayofweek(char *s, size_t *len, size_t *offset, const char **dow)
 }
 
 static bool
-isonlydigits(char *s, bool nostar)
+isonlydigits(const char *s, bool nostar)
 {
 	for (int i = 0; s[i] != '\0'; i++) {
 		if (nostar == false && s[i] == '*' && s[i+1] == '\0')
@@ -982,7 +993,7 @@ isonlydigits(char *s, bool nostar)
 }
 
 static int
-indextooffset(char *s)
+indextooffset(const char *s)
 {
 	int i;
 	char *es;
@@ -1014,7 +1025,7 @@ indextooffset(char *s)
 }
 
 static int
-parseoffset(char *s)
+parseoffset(const char *s)
 {
 	return strtol(s, NULL, 10);
 }
