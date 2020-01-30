@@ -331,43 +331,35 @@ remember_yd(int yy, int dd, int *rm, int *rd)
 int
 first_dayofweek_of_year(int yy)
 {
-	struct cal_year *y;
+	struct cal_year *yp;
 
-	y = hyear;
-	while (y != NULL) {
-		if (y->year == yy)
-			return (y->firstdayofweek);
-		y = y->nextyear;
+	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
+		if (yp->year == yy)
+			return yp->firstdayofweek;
 	}
 
-	/* Should not happen */
-	return (-1);
+	return -1;
 }
 
 int
 first_dayofweek_of_month(int yy, int mm)
 {
-	struct cal_year *y;
-	struct cal_month *m;
+	struct cal_year *yp;
+	struct cal_month *mp;
 
-	y = hyear;
-	while (y != NULL) {
-		if (y->year != yy) {
-			y = y->nextyear;
-			continue;
-		}
-		m = y->months;
-		while (m != NULL) {
-			if (m->month == mm)
-				return (m->firstdayofweek);
-			m = m->nextmonth;
-		}
-		/* No data for this month */
-		return (-1);
+	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
+		if (yp->year == yy)
+			break;
+	}
+	if (yp == NULL)
+		return -1;
+
+	for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
+		if (mp->month == mm)
+			return mp->firstdayofweek;
 	}
 
-	/* No data for this year.  Error? */
-        return (-1);
+        return -1;
 }
 
 bool
@@ -409,34 +401,30 @@ walkthrough_dates(struct event **e)
 static struct cal_day *
 find_day(int yy, int mm, int dd)
 {
-	struct cal_year *y;
-	struct cal_month *m;
-	struct cal_day *d;
+	struct cal_year *yp;
+	struct cal_month *mp;
+	struct cal_day *dp;
 
-	y = hyear;
-	while (y != NULL) {
-		if (y->year != yy) {
-			y = y->nextyear;
-			continue;
-		}
-		m = y->months;
-		while (m != NULL) {
-			if (m->month != mm) {
-				m = m->nextmonth;
-				continue;
-			}
-			d = m->days;
-			while (d != NULL) {
-				if (d->dayofmonth == dd)
-					return (d);
-				d = d->nextday;
-				continue;
-			}
-			return (NULL);
-		}
-		return (NULL);
+	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
+		if (yp->year == yy)
+			break;
 	}
-	return (NULL);
+	if (yp == NULL)
+		return NULL;
+
+	for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
+		if (mp->month == mm)
+			break;
+	}
+	if (mp == NULL)
+		return NULL;
+
+	for (dp = mp->days; dp != NULL; dp = dp->nextday) {
+		if (dp->dayofmonth == dd)
+			return dp;
+	}
+
+	return NULL;
 }
 
 void
