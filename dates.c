@@ -82,7 +82,7 @@ int	monthdaytab[][14] = {
 };
 
 static void createdate(int y, int m, int d);
-static struct cal_day *find_day(int yy, int mm, int dd);
+
 
 static void
 createdate(int y, int m, int d)
@@ -259,42 +259,6 @@ dumpdates(void)
 }
 
 bool
-remember_ymd(int yy, int mm, int dd)
-{
-	struct cal_year *y;
-	struct cal_month *m;
-	struct cal_day *d;
-
-	if (debug_remember)
-		printf("remember_ymd: %d - %d - %d\n", yy, mm, dd);
-
-	y = hyear;
-	while (y != NULL) {
-		if (y->year != yy) {
-			y = y->nextyear;
-			continue;
-		}
-		m = y->months;
-		while (m != NULL) {
-			if (m->month != mm) {
-				m = m->nextmonth;
-				continue;
-			}
-			d = m->days;
-			while (d != NULL) {
-				if (d->dayofmonth == dd)
-					return (true);
-				d = d->nextday;
-				continue;
-			}
-			return (false);
-		}
-		return (false);
-	}
-	return (false);
-}
-
-bool
 remember_yd(int yy, int dd, int *rm, int *rd)
 {
 	struct cal_year *y;
@@ -398,8 +362,8 @@ walkthrough_dates(struct event **e)
 	return false;
 }
 
-static struct cal_day *
-find_day(int yy, int mm, int dd)
+struct cal_day *
+find_ymd(int yy, int mm, int dd)
 {
 	struct cal_year *yp;
 	struct cal_month *mp;
@@ -432,9 +396,9 @@ addtodate(struct event *e, int year, int month, int day)
 {
 	struct cal_day *d;
 
-	d = find_day(year, month, day);
+	d = find_ymd(year, month, day);
 	if (d == NULL) {
-		errx(1, "%s: find_day(%d, %d, %d) failed",
+		errx(1, "%s: find_ymd(%d, %d, %d) failed",
 				__func__, year, month, day);
 	}
 

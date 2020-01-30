@@ -524,7 +524,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 		/* Same day every year */
 		if (lflags == (F_MONTH | F_DAYOFMONTH)) {
-			if (!remember_ymd(year, imonth, idayofmonth))
+			if (find_ymd(year, imonth, idayofmonth) == NULL)
 				continue;
 			remember(&remindex, yearp, monthp, dayp, edp,
 			    year, imonth, idayofmonth, NULL);
@@ -533,7 +533,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 		/* XXX Same day every year, but variable */
 		if (lflags == (F_MONTH | F_DAYOFMONTH | F_VARIABLE)) {
-			if (!remember_ymd(year, imonth, idayofmonth))
+			if (find_ymd(year, imonth, idayofmonth) == NULL)
 				continue;
 			remember(&remindex, yearp, monthp, dayp, edp,
 			    year, imonth, idayofmonth, NULL);
@@ -543,7 +543,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Same day every month */
 		if (lflags == (F_ALLMONTH | F_DAYOFMONTH)) {
 			for (m = 1; m <= 12; m++) {
-				if (!remember_ymd(year, m, idayofmonth))
+				if (find_ymd(year, m, idayofmonth) == NULL)
 					continue;
 				remember(&remindex, yearp, monthp, dayp, edp,
 				    year, m, idayofmonth, NULL);
@@ -554,7 +554,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Every day of a month */
 		if (lflags == (F_ALLDAY | F_MONTH)) {
 			for (d = 1; d <= yearinfo->monthdays[imonth]; d++) {
-				if (!remember_ymd(year, imonth, d))
+				if (find_ymd(year, imonth, d) == NULL)
 					continue;
 				remember(&remindex, yearp, monthp, dayp, edp,
 				    year, imonth, d, NULL);
@@ -565,7 +565,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* One day of every month */
 		if (lflags == (F_ALLMONTH | F_DAYOFWEEK)) {
 			for (m = 1; m <= 12; m++) {
-				if (!remember_ymd(year, m, idayofmonth))
+				if (find_ymd(year, m, idayofmonth) == NULL)
 					continue;
 				remember(&remindex, yearp, monthp, dayp, edp,
 				    year, m, idayofmonth, NULL);
@@ -596,7 +596,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 			for (m = 0; m <= 12; m++) {
 	                        d = wdayom (idayofweek, offset, m, year);
-				if (remember_ymd(year, m, d)) {
+				if (find_ymd(year, m, d)) {
 					remember(&remindex,
 					    yearp, monthp, dayp, edp,
 					    year, m, d, NULL);
@@ -619,7 +619,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			if (offset > 0) {
 				while (d <= yearinfo->monthdays[imonth]) {
 					if (--offset == 0
-					    && remember_ymd(year, imonth, d)) {
+					    && find_ymd(year, imonth, d)) {
 						remember(&remindex,
 						    yearp, monthp, dayp, edp,
 						    year, imonth, d, NULL);
@@ -636,10 +636,11 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 					offset++;
 					d -= 7;
 				}
-				if (remember_ymd(year, imonth, d))
+				if (find_ymd(year, imonth, d)) {
 					remember(&remindex,
 					    yearp, monthp, dayp, edp,
 					    year, imonth, d, NULL);
+				}
 				continue;
 			}
 			continue;
@@ -650,10 +651,11 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			dow = first_dayofweek_of_month(year, imonth);
 			d = (idayofweek - dow + 8) % 7;
 			while (d <= yearinfo->monthdays[imonth]) {
-				if (remember_ymd(year, imonth, d))
+				if (find_ymd(year, imonth, d)) {
 					remember(&remindex,
 					    yearp, monthp, dayp, edp,
 					    year, imonth, d, NULL);
+				}
 				d += 7;
 			}
 			continue;

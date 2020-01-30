@@ -131,12 +131,12 @@ extern int cumdaytab[][14];
 extern int monthdaytab[][14];
 void	generatedates(struct tm *tp1, struct tm *tp2);
 void	dumpdates(void);
-bool	remember_ymd(int y, int m, int d);
 bool	remember_yd(int y, int d, int *rm, int *rd);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);
 bool	walkthrough_dates(struct event **e);
 void	addtodate(struct event *e, int year, int month, int day);
+struct cal_day *find_ymd(int yy, int mm, int dd);
 
 /* pom.c */
 #define	MAXMOONS	18
