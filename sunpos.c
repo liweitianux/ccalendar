@@ -198,10 +198,10 @@ equinoxsolstice(int year, double UTCoffset, int *equinoxdays, int *solsticedays)
 	double fe[2], fs[2];
 
 	fequinoxsolstice(year, UTCoffset, fe, fs);
-	equinoxdays[0] = round(fe[0]);
-	equinoxdays[1] = round(fe[1]);
-	solsticedays[0] = round(fs[0]);
-	solsticedays[1] = round(fs[1]);
+	equinoxdays[0] = (int)round(fe[0]);
+	equinoxdays[1] = (int)round(fe[1]);
+	solsticedays[0] = (int)round(fs[0]);
+	solsticedays[1] = (int)round(fs[1]);
 }
 
 void

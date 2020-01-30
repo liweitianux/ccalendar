@@ -76,10 +76,10 @@ pom(int year, double utcoffset, int *fms, int *nms)
 
 	j = 0;
 	for (i = 0; ffms[i] != 0; i++)
-		fms[j++] = round(ffms[i]);
+		fms[j++] = (int)round(ffms[i]);
 	fms[i] = -1;
 	for (i = 0; fnms[i] != 0; i++)
-		nms[i] = round(fnms[i]);
+		nms[i] = (int)round(fnms[i]);
 	nms[i] = -1;
 }
 

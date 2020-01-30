@@ -482,8 +482,9 @@ opencalin(void)
 static void
 closecal(FILE *fp)
 {
-	int nread, pdes[2], status;
+	int pdes[2], status;
 	char buf[1024];
+	ssize_t nread;
 
 	assert(allmode == true);
 

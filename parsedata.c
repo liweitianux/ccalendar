@@ -39,9 +39,9 @@
 #include "parsedata.h"
 #include "utils.h"
 
-static bool	 checkdayofweek(const char *s, size_t *len, size_t *offset,
+static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
-static bool	 checkmonth(const char *s, size_t *len, size_t *offset,
+static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
 static void	 debug_determinestyle(int dateonly, const char *date,
 				      int flags, const char *month, int imonth,
@@ -116,7 +116,8 @@ determinestyle(const char *date, int *flags,
 	char *date2;
 	char *p, *p1, *p2;
 	const char *dow, *pmonth;
-	size_t len, offset;
+	size_t len;
+	int offset;
 	bool ret = false;
 
 	date2 = xstrdup(date);
@@ -515,7 +516,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			for (m = 0; yearinfo->fnewmooncny[m] >= 0; m++) {
 				if (yearinfo->fnewmooncny[m] >
 				    yearinfo->firstcnyday) {
-					yearinfo->firstcnyday =
+					yearinfo->firstcnyday = (int)
 					    floor(yearinfo->fnewmooncny[m - 1]);
 					break;
 				}
@@ -711,7 +712,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				offset = parseoffset(modifieroffset);
 			for (i = 0; yearinfo->ffullmoon[i] > 0; i++) {
 				if (remember_yd(year,
-				    floor(yearinfo->ffullmoon[i]) + offset,
+				    (int)floor(yearinfo->ffullmoon[i]) + offset,
 				    &rm, &rd)) {
 					ed = floattotime(
 					    yearinfo->ffullmoon[i]);
@@ -733,7 +734,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				offset = parseoffset(modifieroffset);
 			for (i = 0; yearinfo->ffullmoon[i] > 0; i++) {
 				if (remember_yd(year,
-				    floor(yearinfo->fnewmoon[i]) + offset,
+				    (int)floor(yearinfo->fnewmoon[i]) + offset,
 				    &rm, &rd)) {
 					ed = floattotime(yearinfo->fnewmoon[i]);
 					remember(&remindex,
@@ -750,7 +751,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
 				offset = parseoffset(modifieroffset);
-			if (remember_yd(year, yearinfo->equinoxdays[0] + offset,
+			if (remember_yd(year,
+					(int)yearinfo->equinoxdays[0] + offset,
 					&rm, &rd)) {
 				ed = floattotime(yearinfo->equinoxdays[0]);
 				remember(&remindex, yearp, monthp, dayp, edp,
@@ -763,7 +765,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
 				offset = parseoffset(modifieroffset);
-			if (remember_yd(year, yearinfo->equinoxdays[1] + offset,
+			if (remember_yd(year,
+					(int)yearinfo->equinoxdays[1] + offset,
 					&rm, &rd)) {
 				ed = floattotime(yearinfo->equinoxdays[1]);
 				remember(&remindex, yearp, monthp, dayp, edp,
@@ -779,7 +782,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			if ((lflags & F_MODIFIEROFFSET) != 0)
 				offset = parseoffset(modifieroffset);
 			if (remember_yd(year,
-			    yearinfo->solsticedays[0] + offset, &rm, &rd)) {
+					(int)yearinfo->solsticedays[0] + offset,
+					&rm, &rd)) {
 				ed = floattotime(yearinfo->solsticedays[0]);
 				remember(&remindex, yearp, monthp, dayp, edp,
 				    year, rm, rd, ed);
@@ -792,7 +796,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			if ((lflags & F_MODIFIEROFFSET) != 0)
 				offset = parseoffset(modifieroffset);
 			if (remember_yd(year,
-			    yearinfo->solsticedays[1] + offset, &rm, &rd)) {
+					(int)yearinfo->solsticedays[1] + offset,
+					&rm, &rd)) {
 				ed = floattotime(yearinfo->solsticedays[1]);
 				remember(&remindex, yearp, monthp, dayp, edp,
 				    year, rm, rd, ed);
@@ -874,7 +879,7 @@ getmonthname(int i)
 }
 
 static bool
-checkmonth(const char *s, size_t *len, size_t *offset, const char **month)
+checkmonth(const char *s, size_t *len, int *offset, const char **month)
 {
 	const char *p;
 	size_t l;
@@ -932,7 +937,7 @@ getdayofweekname(int i)
 }
 
 static bool
-checkdayofweek(const char *s, size_t *len, size_t *offset, const char **dow)
+checkdayofweek(const char *s, size_t *len, int *offset, const char **dow)
 {
 	const char *p;
 	size_t l;
@@ -1000,7 +1005,7 @@ indextooffset(const char *s)
 	const char *p;
 
 	if (s[0] == '+' || s[0] == '-') {
-		i = strtol(s, &es, 10);
+		i = (int)strtol(s, &es, 10);
 		if (*es != '\0')                      /* trailing junk */
 			errx (1, "Invalid specifier format: %s\n", s);
 		return (i);
@@ -1027,7 +1032,7 @@ indextooffset(const char *s)
 static int
 parseoffset(const char *s)
 {
-	return strtol(s, NULL, 10);
+	return (int)strtol(s, NULL, 10);
 }
 
 static char *
@@ -1037,7 +1042,7 @@ floattotime(double f)
 	int hh, mm, ss, i;
 
 	f -= floor(f);
-	i = f * SECSPERDAY;
+	i = (int)round(f * SECSPERDAY);
 
 	hh = i / SECSPERHOUR;
 	i %= SECSPERHOUR;
@@ -1059,9 +1064,9 @@ floattoday(int year, double f)
 	for (i = 0; 1 + cumdays[i] < f; i++)
 		;
 	m = --i;
-	d = floor(f - 1 - cumdays[i]);
+	d = (int)floor(f - 1 - cumdays[i]);
 	f -= floor(f);
-	i = f * SECSPERDAY;
+	i = (int)round(f * SECSPERDAY);
 
 	hh = i / SECSPERHOUR;
 	i %= SECSPERHOUR;
