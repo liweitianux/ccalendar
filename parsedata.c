@@ -52,7 +52,7 @@ static int parseoffset(char *s);
 static char *floattoday(int year, double f);
 static char *floattotime(double f);
 static int wdayom(int day, int offset, int month, int year);
-static bool determinestyle(char *date, int *flags, char *month, int *imonth,
+static bool determinestyle(const char *date, int *flags, char *month, int *imonth,
 	char *dayofmonth, int *idayofmonth, char *dayofweek, int *idayofweek,
 	char *modifieroffset, char *modifierindex, char *specialday,
 	char *year, int *iyear);
@@ -98,16 +98,18 @@ static bool parse_angle(const char *s, double *result);
  *
  */
 static bool
-determinestyle(char *date, int *flags,
-    char *month, int *imonth, char *dayofmonth, int *idayofmonth,
-    char *dayofweek, int *idayofweek, char *modifieroffset,
-    char *modifierindex, char *specialday, char *year, int *iyear)
+determinestyle(const char *date, int *flags,
+	       char *month, int *imonth, char *dayofmonth, int *idayofmonth,
+	       char *dayofweek, int *idayofweek, char *modifieroffset,
+	       char *modifierindex, char *specialday, char *year, int *iyear)
 {
-	char *p, *p1, *p2, *py;
+	char *date2;
+	char *p, *p1, *p2;
 	const char *dow, *pmonth;
-	char pold;
 	size_t len, offset;
+	bool ret = false;
 
+	date2 = xstrdup(date);
 	*flags = F_NONE;
 	*month = '\0';
 	*imonth = 0;
@@ -126,76 +128,77 @@ determinestyle(char *date, int *flags,
 		*flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
 		if (strlen(s1) == strlen(s2)) {				\
 			strcpy(specialday, s1);				\
-			return (true);					\
+			ret = true;					\
+			goto out;					\
 		}							\
 		strncpy(specialday, s1, strlen(s2));			\
 		specialday[strlen(s2)] = '\0';				\
 		strcpy(modifieroffset, s1 + strlen(s2));		\
 		*flags |= F_MODIFIEROFFSET;				\
-		return (true);						\
+		ret = true;						\
+		goto out;						\
 	}
 
-	if ((p = strchr(date, ' ')) == NULL &&
-	    (p = strchr(date, '/')) == NULL) {
-		CHECKSPECIAL(date, STRING_CNY, F_CNY);
-		CHECKSPECIAL(date, ncny, F_CNY);
-		CHECKSPECIAL(date, STRING_NEWMOON, F_NEWMOON);
-		CHECKSPECIAL(date, nnewmoon, F_NEWMOON);
-		CHECKSPECIAL(date, STRING_FULLMOON, F_FULLMOON);
-		CHECKSPECIAL(date, nfullmoon, F_FULLMOON);
-		CHECKSPECIAL(date, STRING_PASKHA, F_PASKHA);
-		CHECKSPECIAL(date, npaskha, F_PASKHA);
-		CHECKSPECIAL(date, STRING_EASTER, F_EASTER);
-		CHECKSPECIAL(date, neaster, F_EASTER);
-		CHECKSPECIAL(date, STRING_MAREQUINOX, F_MAREQUINOX);
-		CHECKSPECIAL(date, nmarequinox, F_SEPEQUINOX);
-		CHECKSPECIAL(date, STRING_SEPEQUINOX, F_SEPEQUINOX);
-		CHECKSPECIAL(date, nsepequinox, F_SEPEQUINOX);
-		CHECKSPECIAL(date, STRING_JUNSOLSTICE, F_JUNSOLSTICE);
-		CHECKSPECIAL(date, njunsolstice, F_JUNSOLSTICE);
-		CHECKSPECIAL(date, STRING_DECSOLSTICE, F_DECSOLSTICE);
-		CHECKSPECIAL(date, ndecsolstice, F_DECSOLSTICE);
+	if ((p = strchr(date2, ' ')) == NULL &&
+	    (p = strchr(date2, '/')) == NULL) {
+		CHECKSPECIAL(date2, STRING_CNY, F_CNY);
+		CHECKSPECIAL(date2, ncny, F_CNY);
+		CHECKSPECIAL(date2, STRING_NEWMOON, F_NEWMOON);
+		CHECKSPECIAL(date2, nnewmoon, F_NEWMOON);
+		CHECKSPECIAL(date2, STRING_FULLMOON, F_FULLMOON);
+		CHECKSPECIAL(date2, nfullmoon, F_FULLMOON);
+		CHECKSPECIAL(date2, STRING_PASKHA, F_PASKHA);
+		CHECKSPECIAL(date2, npaskha, F_PASKHA);
+		CHECKSPECIAL(date2, STRING_EASTER, F_EASTER);
+		CHECKSPECIAL(date2, neaster, F_EASTER);
+		CHECKSPECIAL(date2, STRING_MAREQUINOX, F_MAREQUINOX);
+		CHECKSPECIAL(date2, nmarequinox, F_SEPEQUINOX);
+		CHECKSPECIAL(date2, STRING_SEPEQUINOX, F_SEPEQUINOX);
+		CHECKSPECIAL(date2, nsepequinox, F_SEPEQUINOX);
+		CHECKSPECIAL(date2, STRING_JUNSOLSTICE, F_JUNSOLSTICE);
+		CHECKSPECIAL(date2, njunsolstice, F_JUNSOLSTICE);
+		CHECKSPECIAL(date2, STRING_DECSOLSTICE, F_DECSOLSTICE);
+		CHECKSPECIAL(date2, ndecsolstice, F_DECSOLSTICE);
 
-		if (checkdayofweek(date, &len, &offset, &dow)) {
+		if (checkdayofweek(date2, &len, &offset, &dow)) {
 			*flags |= (F_DAYOFWEEK | F_VARIABLE);
 			*idayofweek = offset;
-			if (strlen(date) == len) {
-				strcpy(dayofweek, date);
-				return (true);
+			if (strlen(date2) == len) {
+				strcpy(dayofweek, date2);
+				ret = true;
+				goto out;
 			}
-			strncpy(dayofweek, date, len);
+			strncpy(dayofweek, date2, len);
 			dayofweek[len] = '\0';
-			strcpy(modifierindex, date + len);
+			strcpy(modifierindex, date2 + len);
 			*flags |= F_MODIFIERINDEX;
-			return (true);
+			ret = true;
+			goto out;
 		}
-		if (isonlydigits(date, true)) {
+		if (isonlydigits(date2, true)) {
 			/* Assume month number only */
 			*flags |= F_MONTH;
-			*imonth = (int)strtol(date, NULL, 10);
+			*imonth = (int)strtol(date2, NULL, 10);
 			strcpy(month, getmonthname(*imonth));
-			return(true);
+			ret = true;
+			goto out;
 		}
-		return (false);
+
+		goto out;
 	}
 
-	/*
-	 * After this, leave by goto-ing to "allfine" or "fail" to restore the
-	 * original data in `date'.
-	 */
-	pold = *p;
 	*p = '\0';
-	p1 = date;
+	p1 = date2;
 	p2 = p + 1;
-	/* Now p2 points to the next field and p1 to the first field */
+	/* Now p1 and p2 point to the first and second fields, respectively */
 
-	if ((py = strchr(p2, '/')) != NULL) {
+	if ((p = strchr(p2, '/')) != NULL) {
 		/* We have a year in the string. Now this is getting tricky */
 		strcpy(year, p1);
 		*iyear = (int)strtol(year, NULL, 10);
+		*p = '\0';
 		p1 = p2;
-		p2 = py + 1;
-		*py = 0;
+		p2 = p + 1;
 		*flags |= F_YEAR;
 	}
 
@@ -205,30 +208,34 @@ determinestyle(char *date, int *flags,
 		/* p2 is the non-month part */
 		*flags |= F_MONTH;
 		*imonth = offset;
-
 		strcpy(month, getmonthname(offset));
 		if (isonlydigits(p2, true)) {
 			strcpy(dayofmonth, p2);
 			*idayofmonth = (int)strtol(p2, NULL, 10);
 			*flags |= F_DAYOFMONTH;
-			goto allfine;
+			ret = true;
+			goto out;
 		}
 		if (strcmp(p2, "*") == 0) {
 			*flags |= F_ALLDAY;
-			goto allfine;
+			ret = true;
+			goto out;
 		}
-
 		if (checkdayofweek(p2, &len, &offset, &dow)) {
 			*flags |= (F_DAYOFWEEK | F_VARIABLE);
 			*idayofweek = offset;
 			strcpy(dayofweek, getdayofweekname(offset));
-			if (strlen(p2) == len)
-				goto allfine;
+			if (strlen(p2) == len) {
+				ret = true;
+				goto out;
+			}
 			strcpy(modifierindex, p2 + len);
 			*flags |= F_MODIFIERINDEX;
-			goto allfine;
+			ret = true;
+			goto out;
 		}
-		goto fail;
+
+		goto out;
 	}
 
 	/* Check if there is an every-day or every-month in the string */
@@ -237,24 +244,26 @@ determinestyle(char *date, int *flags,
 		*flags |= (F_ALLMONTH | F_DAYOFMONTH);
 		*idayofmonth = (int)strtol(p2, NULL, 10);
 		sprintf(dayofmonth, "%d", *idayofmonth);
-		goto allfine;
+		ret = true;
+		goto out;
 	}
 
 	/* Month as a number, then a weekday */
 	if (isonlydigits(p1, true) &&
 	    checkdayofweek(p2, &len, &offset, &dow)) {
 		*flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
-
 		*idayofweek = offset;
 		*imonth = (int)strtol(p1, NULL, 10);
 		strcpy(month, getmonthname(*imonth));
-
 		strcpy(dayofweek, getdayofweekname(offset));
-		if (strlen(p2) == len)
-			goto allfine;
+		if (strlen(p2) == len) {
+			ret = true;
+			goto out;
+		}
 		strcpy(modifierindex, p2 + len);
 		*flags |= F_MODIFIERINDEX;
-		goto allfine;
+		ret = true;
+		goto out;
 	}
 
 	/* If both the month and date are specified as numbers */
@@ -269,7 +278,7 @@ determinestyle(char *date, int *flags,
 
 		if (m > 12 && d > 12) {
 			warnx("Invalid date: %s", date);
-			goto fail;
+			goto out;
 		}
 
 		if (m > 12)
@@ -278,15 +287,13 @@ determinestyle(char *date, int *flags,
 		*idayofmonth = d;
 		strcpy(month, getmonthname(m));
 		sprintf(dayofmonth, "%d", d);
-		goto allfine;
+		ret = true;
+		goto out;
 	}
 
-fail:
-	*p = pold;
-	return (false);
-allfine:
-	*p = pold;
-	return (true);
+out:
+	free(date2);
+	return ret;
 }
 
 static void
