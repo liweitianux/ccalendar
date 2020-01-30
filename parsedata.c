@@ -66,7 +66,6 @@ static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
-static int	 parseoffset(const char *s);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 			  int yy, int mm, int dd, const char *extra);
 static char	*showflags(int flags);
@@ -665,7 +664,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_EASTER)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year, yearinfo->ieaster + offset,
 					&rm, &rd)) {
 				remember(&remindex, yearp, monthp, dayp, edp,
@@ -679,7 +678,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_PASKHA)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year, yearinfo->ipaskha + offset,
 					&rm, &rd)) {
 				remember(&remindex, yearp, monthp, dayp, edp,
@@ -693,7 +692,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_CNY)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year, yearinfo->firstcnyday + offset,
 					&rm, &rd)) {
 				remember(&remindex, yearp, monthp, dayp, edp,
@@ -709,7 +708,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			for (i = 0; yearinfo->ffullmoon[i] > 0; i++) {
 				if (remember_yd(year,
 				    (int)floor(yearinfo->ffullmoon[i]) + offset,
@@ -731,7 +730,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			for (i = 0; yearinfo->ffullmoon[i] > 0; i++) {
 				if (remember_yd(year,
 				    (int)floor(yearinfo->fnewmoon[i]) + offset,
@@ -750,7 +749,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_MAREQUINOX)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year,
 					(int)yearinfo->equinoxdays[0] + offset,
 					&rm, &rd)) {
@@ -764,7 +763,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_SEPEQUINOX)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year,
 					(int)yearinfo->equinoxdays[1] + offset,
 					&rm, &rd)) {
@@ -780,7 +779,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_JUNSOLSTICE)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year,
 					(int)yearinfo->solsticedays[0] + offset,
 					&rm, &rd)) {
@@ -794,7 +793,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_DECSOLSTICE)) {
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = parseoffset(modifieroffset);
+				offset = (int)strtol(modifieroffset, NULL, 10);
 			if (remember_yd(year,
 					(int)yearinfo->solsticedays[1] + offset,
 					&rm, &rd)) {
@@ -1027,12 +1026,6 @@ indextooffset(const char *s)
 		}
 	}
 	return (0);
-}
-
-static int
-parseoffset(const char *s)
-{
-	return (int)strtol(s, NULL, 10);
 }
 
 static char *
