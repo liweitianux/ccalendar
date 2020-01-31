@@ -235,7 +235,7 @@ first_dayofweek_of_year(int yy)
 			return yp->firstdayofweek;
 	}
 
-	return -1;
+	errx(1, "%s(%d) failed!", __func__, yy);
 }
 
 int
@@ -249,14 +249,14 @@ first_dayofweek_of_month(int yy, int mm)
 			break;
 	}
 	if (yp == NULL)
-		return -1;
+		errx(1, "%s(%d, %d) failed [1]", __func__, yy, mm);
 
 	for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
 		if (mp->month == mm)
 			return mp->firstdayofweek;
 	}
 
-        return -1;
+	errx(1, "%s(%d, %d) failed [2]", __func__, yy, mm);
 }
 
 bool

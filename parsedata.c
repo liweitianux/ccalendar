@@ -423,8 +423,6 @@ wdayom(int day, int offset, int month, int year)
 	int d;
 
 	wday1 = first_dayofweek_of_month(year, month);
-	if (wday1 < 0)                          /* not set */
-		return (wday1);
 
 	for (yinfo = yearinfo_list; yinfo; yinfo = yinfo->next) {
 		if (yinfo->year == year)
