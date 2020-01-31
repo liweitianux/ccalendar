@@ -482,7 +482,7 @@ opencalin(void)
 static void
 closecal(FILE *fp)
 {
-	int pdes[2], status;
+	int pdes[2];
 	char buf[1024];
 	ssize_t nread;
 
@@ -523,7 +523,7 @@ closecal(FILE *fp)
 
 done:
 	fclose(fp);
-	while (wait(&status) >= 0)
+	while (wait(NULL) >= 0)
 		;
 }
 

@@ -184,12 +184,9 @@ arctan_deg(double y, double x)
 {
 	errno = 0;
 	double v = atan2(y, x);
-	if (errno == EDOM) {
+	if (errno == EDOM)
 		errx(10, "%s(%g, %g) invalid!", __func__, y, x);
-		/* NOTREACHED */
-	} else {
-		return mod_f(v * 180.0 / M_PI, 360);
-	}
+	return mod_f(v * 180.0 / M_PI, 360);
 }
 
 /*

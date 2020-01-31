@@ -39,6 +39,23 @@
 #include "parsedata.h"
 #include "utils.h"
 
+struct yearinfo {
+	int year;
+	int ieaster;
+	int ipaskha;
+	int firstcnyday;
+	double ffullmoon[MAXMOONS];
+	double fnewmoon[MAXMOONS];
+	double ffullmooncny[MAXMOONS];
+	double fnewmooncny[MAXMOONS];
+	int ichinesemonths[MAXMOONS];
+	double equinoxdays[2];
+	double solsticedays[2];
+	int *monthdays;
+	struct yearinfo *next;
+};
+static struct yearinfo *years, *yearinfo;
+
 static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
 static bool	 checkmonth(const char *s, size_t *len, int *offset,
@@ -365,23 +382,6 @@ debug_determinestyle(int dateonly, const char *date, int flags,
 		fprintf(stderr, "specialday: |%s|\n", specialday);
 }
 
-struct yearinfo {
-	int year;
-	int ieaster;
-	int ipaskha;
-	int firstcnyday;
-	double ffullmoon[MAXMOONS];
-	double fnewmoon[MAXMOONS];
-	double ffullmooncny[MAXMOONS];
-	double fnewmooncny[MAXMOONS];
-	int ichinesemonths[MAXMOONS];
-	double equinoxdays[2];
-	double solsticedays[2];
-	int *monthdays;
-	struct yearinfo *next;
-};
-static struct yearinfo *years, *yearinfo;
-
 /*
  * Calculate dates with offset from weekdays, like Thu-3, Wed+2, etc.
  * day is the day of the week,
@@ -441,8 +441,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 {
 	struct cal_day *dp;
 	char month[100], dayofmonth[100], dayofweek[100], modifieroffset[100];
-	char syear[100];
-	char modifierindex[100], specialday[100];
+	char syear[100], modifierindex[100], specialday[100];
 	int idayofweek = -1, imonth = -1, idayofmonth = -1, iyear = -1;
 	int year, remindex;
 	int d, m, dow, rm, rd, offset;
@@ -601,7 +600,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			offset = indextooffset(modifierindex);
 
 			for (m = 0; m <= 12; m++) {
-	                        d = wdayom (idayofweek, offset, m, year);
+				d = wdayom(idayofweek, offset, m, year);
 				if (find_ymd(year, m, d)) {
 					remember(&remindex,
 					    yearp, monthp, dayp, edp,
@@ -715,12 +714,10 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* FullMoon */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_FULLMOON)) {
-			int i;
-
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
 				offset = (int)strtol(modifieroffset, NULL, 10);
-			for (i = 0; yearinfo->ffullmoon[i] > 0; i++) {
+			for (int i = 0; yearinfo->ffullmoon[i] > 0; i++) {
 				dp = find_yd(year, (int)floor(yearinfo->ffullmoon[i]) + offset);
 				if (dp) {
 					rm = dp->month->month;
@@ -737,12 +734,10 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* NewMoon */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_NEWMOON)) {
-			int i;
-
 			offset = 0;
 			if ((lflags & F_MODIFIEROFFSET) != 0)
 				offset = (int)strtol(modifieroffset, NULL, 10);
-			for (i = 0; yearinfo->ffullmoon[i] > 0; i++) {
+			for (int i = 0; yearinfo->ffullmoon[i] > 0; i++) {
 				dp = find_yd(year, (int)floor(yearinfo->fnewmoon[i]) + offset);
 				if (dp) {
 					rm = dp->month->month;
@@ -839,7 +834,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 static char *
 showflags(int flags)
 {
-	static char s[1000];
+	static char s[128];
 	s[0] = '\0';
 
 	if ((flags & F_YEAR) != 0)
@@ -888,7 +883,7 @@ static const char *
 getmonthname(int i)
 {
 	if (i <= 0 || i > NMONTHS)
-		errx(1, "Invalid month index: %d", i);
+		errx(1, "Invalid month number: %d", i);
 
 	return (nmonths[i-1] ? nmonths[i-1] : months[i-1]);
 }
@@ -946,7 +941,7 @@ static const char *
 getdayofweekname(int i)
 {
 	if (i < 0 || i >= NDAYS)
-		errx(1, "Invalid day-of-week index: %d", i);
+		errx(1, "Invalid day-of-week number: %d", i);
 
 	return (ndays[i] ? ndays[i] : days[i]);
 }
