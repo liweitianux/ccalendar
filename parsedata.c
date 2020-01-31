@@ -342,25 +342,27 @@ debug_determinestyle(int dateonly, const char *date, int flags,
 		     const char *specialday, const char *year, int iyear)
 {
 	if (dateonly != 0) {
-		printf("-------\ndate: |%s|\n", date);
+		fprintf(stderr, "-------\ndate: |%s|\n", date);
 		if (dateonly == 1)
 			return;
 	}
-	printf("flags: 0x%x - %s\n", flags, showflags(flags));
+	fprintf(stderr, "flags: 0x%x - %s\n", flags, showflags(flags));
 	if (modifieroffset[0] != '\0')
-		printf("modifieroffset: |%s|\n", modifieroffset);
+		fprintf(stderr, "modifieroffset: |%s|\n", modifieroffset);
 	if (modifierindex[0] != '\0')
-		printf("modifierindex: |%s|\n", modifierindex);
+		fprintf(stderr, "modifierindex: |%s|\n", modifierindex);
 	if (year[0] != '\0')
-		printf("year: |%s| (%d)\n", year, iyear);
+		fprintf(stderr, "year: |%s| (%d)\n", year, iyear);
 	if (month[0] != '\0')
-		printf("month: |%s| (%d)\n", month, imonth);
+		fprintf(stderr, "month: |%s| (%d)\n", month, imonth);
 	if (dayofmonth[0] != '\0')
-		printf("dayofmonth: |%s| (%d)\n", dayofmonth, idayofmonth);
+		fprintf(stderr, "dayofmonth: |%s| (%d)\n",
+			dayofmonth, idayofmonth);
 	if (dayofweek[0] != '\0')
-		printf("dayofweek: |%s| (%d)\n", dayofweek, idayofweek);
+		fprintf(stderr, "dayofweek: |%s| (%d)\n",
+			dayofweek, idayofweek);
 	if (specialday[0] != '\0')
-		printf("specialday: |%s|\n", specialday);
+		fprintf(stderr, "specialday: |%s|\n", specialday);
 }
 
 struct yearinfo {
@@ -466,7 +468,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
 			   modifierindex, specialday, syear, &iyear) == false) {
 		if (debug)
-			printf("Failed!\n");
+			fprintf(stderr, "Failed!\n");
 		return (0);
 	}
 
@@ -819,7 +821,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		}
 
 		if (debug) {
-			printf("Unprocessed:\n");
+			fprintf(stderr, "Unprocessed:\n");
 			debug_determinestyle(2, date, lflags, month, imonth,
 			    dayofmonth, idayofmonth, dayofweek, idayofweek,
 			    modifieroffset, modifierindex, specialday, syear,

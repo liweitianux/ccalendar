@@ -56,7 +56,7 @@
 static void
 comp(char *s, double v, double c)
 {
-	printf("%-*s %*g %*g %*g\n", 15, s, 15, v, 15, c, 15, v - c);
+	fprintf(stderr, "%-*s %*g %*g %*g\n", 15, s, 15, v, 15, c, 15, v - c);
 }
 
 int expY;
@@ -137,8 +137,8 @@ sunpos(int inYY, int inMM, int inDD, double UTCOFFSET, int inHOUR, int inMIN,
 	fixup(&HA);
 	fixup(&latitude);
 #ifdef DEBUG
-	printf("%02d/%02d %02d:%02d:%02d l:%g d:%g h:%g\n",
-	    inMM, inDD, inHOUR, inMIN, inSEC, latitude, *DEC, HA);
+	fprintf(stderr, "%02d/%02d %02d:%02d:%02d l:%g d:%g h:%g\n",
+		inMM, inDD, inHOUR, inMIN, inSEC, latitude, *DEC, HA);
 #endif
 
 	/*
@@ -156,9 +156,10 @@ sunpos(int inYY, int inMM, int inDD, double UTCOFFSET, int inHOUR, int inMIN,
 		*ALT -= 360;
 	if (*ALT < -180)
 		*ALT += 360;
-	printf("a:%g a:%g\n", *ALT, *AZ);
+	fprintf(stderr, "a:%g a:%g\n", *ALT, *AZ);
 
-	printf("Y:\t\t\t     %d\t\t     %d\t\t      %d\n", Y, expY, Y - expY);
+	fprintf(stderr, "Y:\t\t\t     %d\t\t     %d\t\t      %d\n",
+		Y, expY, Y - expY);
 	comp("ZJ", ZJ, expZJ);
 	comp("UTHM", UTHM, expUTHM);
 	comp("D", D, expD);
@@ -187,11 +188,11 @@ sunpos(int inYY, int inMM, int inDD, double UTCOFFSET, int inHOUR, int inMIN,
 #define	MINUTE(h)	(15 * ((h) % 4))
 #define	SEC(h)		0
 #define	DEBUG1(y, m, d, hh, mm, pdec, dec) \
-	printf("%4d-%02d-%02d %02d:%02d:00 - %7.7g -> %7.7g\n", \
-	    y, m, d, hh, mm, pdec, dec)
+	fprintf(stderr, "%4d-%02d-%02d %02d:%02d:00 - %7.7g -> %7.7g\n", \
+		y, m, d, hh, mm, pdec, dec)
 #define	DEBUG2(y, m, d, hh, mm, pdec, dec, pang, ang) \
-	printf("%4d-%02d-%02d %02d:%02d:00 - %7.7g -> %7.7g - %d -> %d\n", \
-	    y, m, d, hh, mm, pdec, dec, pang, ang)
+	fprintf(stderr, "%4d-%02d-%02d %02d:%02d:00 - %7.7g -> %7.7g - %d -> %d\n", \
+		y, m, d, hh, mm, pdec, dec, pang, ang)
 void
 equinoxsolstice(int year, double UTCoffset, int *equinoxdays, int *solsticedays)
 {
@@ -223,23 +224,23 @@ fequinoxsolstice(int year, double UTCoffset, double *equinoxdays, double *solsti
 	 * [350 ... 360> -> [0 ... 10]
 	 */
 	for (d = 18; d < 31; d++) {
-		/* printf("Comparing day %d to %d.\n", d, d+1); */
+		/* fprintf(stderr, "Comparing day %d to %d.\n", d, d+1); */
 		sunpos(year, 3, d, UTCoffset, 0, 0, 0, 0.0, 0.0, &L, &decleft);
 		sunpos(year, 3, d + 1, UTCoffset, 0, 0, 0, 0.0, 0.0,
 		    &L, &decright);
-		/* printf("Found %g and %g.\n", decleft, decright); */
+		/* fprintf(stderr, "Found %g and %g.\n", decleft, decright); */
 		if (SIGN(decleft) == SIGN(decright))
 			continue;
 
 		dial = SECSPERDAY;
 		s = SECSPERDAY / 2;
 		while (s > 0) {
-			/* printf("Obtaining %d (%02d:%02d)\n",
+			/* fprintf(stderr, "Obtaining %d (%02d:%02d)\n",
 			    dial, SHOUR(dial), SMINUTE(dial)); */
 			sunpos(year, 3, d, UTCoffset,
 			    SHOUR(dial), SMINUTE(dial), SSEC(dial),
 			    0.0, 0.0, &L, &decmiddle);
-			/* printf("Found %g\n", decmiddle); */
+			/* fprintf(stderr, "Found %g\n", decmiddle); */
 			if (SIGN(decleft) == SIGN(decmiddle)) {
 				decleft = decmiddle;
 				dial += s;
@@ -248,7 +249,7 @@ fequinoxsolstice(int year, double UTCoffset, double *equinoxdays, double *solsti
 				dial -= s;
 			}
 			/*
-			 printf("New boundaries: %g - %g\n", decleft, decright);
+			fprintf(stderr, "New boundaries: %g - %g\n", decleft, decright);
 			*/
 
 			s /= 2;
@@ -262,23 +263,23 @@ fequinoxsolstice(int year, double UTCoffset, double *equinoxdays, double *solsti
 	 * [10 ... 0] -> <360 ... 350]
 	 */
 	for (d = 18; d < 31; d++) {
-		/* printf("Comparing day %d to %d.\n", d, d+1); */
+		/* fprintf(stderr, "Comparing day %d to %d.\n", d, d+1); */
 		sunpos(year, 9, d, UTCoffset, 0, 0, 0, 0.0, 0.0, &L, &decleft);
 		sunpos(year, 9, d + 1, UTCoffset, 0, 0, 0, 0.0, 0.0,
 		    &L, &decright);
-		/* printf("Found %g and %g.\n", decleft, decright); */
+		/* fprintf(stderr, "Found %g and %g.\n", decleft, decright); */
 		if (SIGN(decleft) == SIGN(decright))
 			continue;
 
 		dial = SECSPERDAY;
 		s = SECSPERDAY / 2;
 		while (s > 0) {
-			/* printf("Obtaining %d (%02d:%02d)\n",
+			/* fprintf(stderr, "Obtaining %d (%02d:%02d)\n",
 			    dial, SHOUR(dial), SMINUTE(dial)); */
 			sunpos(year, 9, d, UTCoffset,
 			    SHOUR(dial), SMINUTE(dial), SSEC(dial),
 			    0.0, 0.0, &L, &decmiddle);
-			/* printf("Found %g\n", decmiddle); */
+			/* fprintf(stderr, "Found %g\n", decmiddle); */
 			if (SIGN(decleft) == SIGN(decmiddle)) {
 				decleft = decmiddle;
 				dial += s;
@@ -287,7 +288,7 @@ fequinoxsolstice(int year, double UTCoffset, double *equinoxdays, double *solsti
 				dial -= s;
 			}
 			/*
-			printf("New boundaries: %g - %g\n", decleft, decright);
+			fprintf(stderr, "New boundaries: %g - %g\n", decleft, decright);
 			*/
 
 			s /= 2;
@@ -387,8 +388,8 @@ calculatesunlongitude30(int year, int degreeGMToffset, int *ichinesemonths)
 				if (curL < 180 && prevL > 180) {
 					*pichinesemonths = cumdays[m] + d;
 #ifdef DEBUG
-printf("%04d-%02d-%02d %02d:%02d - %d %g\n",
-    year, m, d, HOUR(h), MINUTE(h), *pichinesemonths, curL);
+fprintf(stderr, "%04d-%02d-%02d %02d:%02d - %d %g\n",
+	year, m, d, HOUR(h), MINUTE(h), *pichinesemonths, curL);
 #endif
 					    pichinesemonths++;
 				} else {
@@ -397,8 +398,8 @@ printf("%04d-%02d-%02d %02d:%02d - %d %g\n",
 							*pichinesemonths =
 							    cumdays[m] + d;
 #ifdef DEBUG
-printf("%04d-%02d-%02d %02d:%02d - %d %g\n",
-    year, m, d, HOUR(h), MINUTE(h), *pichinesemonths, curL);
+fprintf(stderr, "%04d-%02d-%02d %02d:%02d - %d %g\n",
+	year, m, d, HOUR(h), MINUTE(h), *pichinesemonths, curL);
 #endif
 							if (i == 330)
 								firstmonth330 = *pichinesemonths;

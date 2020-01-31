@@ -211,15 +211,16 @@ dumpdates(void)
 
 	y = hyear;
 	while (y != NULL) {
-		printf("%-5d (wday:%d)\n", y->year, y->firstdayofweek);
+		fprintf(stderr, "%-5d (wday:%d)\n", y->year, y->firstdayofweek);
 		m = y->months;
 		while (m != NULL) {
-			printf("-- %-5d (julian:%d, dow:%d)\n", m->month,
-			    m->firstdayjulian, m->firstdayofweek);
+			fprintf(stderr, "-- %-5d (julian:%d, dow:%d)\n",
+				m->month, m->firstdayjulian, m->firstdayofweek);
 			d = m->days;
 			while (d != NULL) {
-				printf("  -- %-5d (julian:%d, dow:%d)\n",
-				    d->dayofmonth, d->julianday, d->dayofweek);
+				fprintf(stderr, "  -- %-5d (julian:%d, dow:%d)\n",
+					d->dayofmonth, d->julianday,
+					d->dayofweek);
 				d = d->nextday;
 			}
 			m = m->nextmonth;
