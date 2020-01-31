@@ -60,14 +60,6 @@ static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
 static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
-static void	 debug_determinestyle(int dateonly, const char *date,
-				      int flags, const char *month, int imonth,
-				      const char *dayofmonth, int idayofmonth,
-				      const char *dayofweek, int idayofweek,
-				      const char *modifieroffset,
-				      const char *modifierindex,
-				      const char *specialday,
-				      const char *year, int iyear);
 static bool	 determinestyle(const char *date, int *flags,
 				char *month, int *imonth,
 				char *dayofmonth, int *idayofmonth,
@@ -85,6 +77,13 @@ static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 			  int yy, int mm, int dd, const char *extra);
+static void	 show_datestyle(int flags, const char *month, int imonth,
+				const char *dayofmonth, int idayofmonth,
+				const char *dayofweek, int idayofweek,
+				const char *modifieroffset,
+				const char *modifierindex,
+				const char *specialday,
+				const char *year, int iyear);
 static char	*showflags(int flags);
 static int	 wdayom(int day, int offset, int month, int year);
 
@@ -149,6 +148,9 @@ determinestyle(const char *date, int *flags,
 	*modifieroffset = '\0';
 	*modifierindex = '\0';
 	*specialday = '\0';
+
+	if (debug)
+		fprintf(stderr, "-------\ndate: |%s|\n", date);
 
 #define CHECKSPECIAL(s1, s2, type)					\
 	if (string_eqn(s1, s2)) {					\
@@ -304,7 +306,7 @@ determinestyle(const char *date, int *flags,
 		int d = (int)strtol(p2, NULL, 10);
 
 		if (m > 12 && d > 12) {
-			warnx("Invalid date: %s", date);
+			warnx("Invalid date: |%s|", date);
 			goto out;
 		}
 
@@ -318,51 +320,26 @@ determinestyle(const char *date, int *flags,
 		goto out;
 	}
 
+	warnx("Unrecognized date: |%s|", date);
+
 out:
+	if (debug) {
+		show_datestyle(*flags, month, *imonth, dayofmonth,
+			       *idayofmonth, dayofweek, *idayofweek,
+			       modifieroffset, modifierindex, specialday,
+			       year, *iyear);
+	}
 	free(date2);
 	return ret;
 }
 
 static void
-remember(int *index, int *y, int *m, int *d, char **ed,
-	 int yy, int mm, int dd, const char *extra)
+show_datestyle(int flags, const char *month, int imonth,
+	       const char *dayofmonth, int idayofmonth,
+	       const char *dayofweek, int idayofweek,
+	       const char *modifieroffset, const char *modifierindex,
+	       const char *specialday, const char *year, int iyear)
 {
-	static bool warned = false;
-
-	if (*index >= MAXCOUNT - 1) {
-		if (!warned)
-			warnx("Event count exceeds %d, ignored", MAXCOUNT);
-		warned = true;
-		return;
-	}
-
-	y[*index] = yy;
-	m[*index] = mm;
-	d[*index] = dd;
-
-	if (ed[*index] != NULL) {
-		free(ed[*index]);
-		ed[*index] = NULL;
-	}
-	if (extra != NULL)
-		ed[*index] = xstrdup(extra);
-
-	*index += 1;
-}
-
-static void
-debug_determinestyle(int dateonly, const char *date, int flags,
-		     const char *month, int imonth,
-		     const char *dayofmonth, int idayofmonth,
-		     const char *dayofweek, int idayofweek,
-		     const char *modifieroffset, const char *modifierindex,
-		     const char *specialday, const char *year, int iyear)
-{
-	if (dateonly != 0) {
-		fprintf(stderr, "-------\ndate: |%s|\n", date);
-		if (dateonly == 1)
-			return;
-	}
 	fprintf(stderr, "flags: 0x%x - %s\n", flags, showflags(flags));
 	if (modifieroffset[0] != '\0')
 		fprintf(stderr, "modifieroffset: |%s|\n", modifieroffset);
@@ -380,6 +357,54 @@ debug_determinestyle(int dateonly, const char *date, int flags,
 			dayofweek, idayofweek);
 	if (specialday[0] != '\0')
 		fprintf(stderr, "specialday: |%s|\n", specialday);
+}
+
+static char *
+showflags(int flags)
+{
+	static char s[128];
+	s[0] = '\0';
+
+	if ((flags & F_YEAR) != 0)
+		strcat(s, "year ");
+	if ((flags & F_MONTH) != 0)
+		strcat(s, "month ");
+	if ((flags & F_DAYOFWEEK) != 0)
+		strcat(s, "dayofweek ");
+	if ((flags & F_DAYOFMONTH) != 0)
+		strcat(s, "dayofmonth ");
+	if ((flags & F_MODIFIERINDEX) != 0)
+		strcat(s, "modifierindex ");
+	if ((flags & F_MODIFIEROFFSET) != 0)
+		strcat(s, "modifieroffset ");
+	if ((flags & F_SPECIALDAY) != 0)
+		strcat(s, "specialday ");
+	if ((flags & F_ALLMONTH) != 0)
+		strcat(s, "allmonth ");
+	if ((flags & F_ALLDAY) != 0)
+		strcat(s, "allday ");
+	if ((flags & F_VARIABLE) != 0)
+		strcat(s, "variable ");
+	if ((flags & F_CNY) != 0)
+		strcat(s, "chinesenewyear ");
+	if ((flags & F_PASKHA) != 0)
+		strcat(s, "paskha ");
+	if ((flags & F_EASTER) != 0)
+		strcat(s, "easter ");
+	if ((flags & F_FULLMOON) != 0)
+		strcat(s, "fullmoon ");
+	if ((flags & F_NEWMOON) != 0)
+		strcat(s, "newmoon ");
+	if ((flags & F_MAREQUINOX) != 0)
+		strcat(s, "marequinox ");
+	if ((flags & F_SEPEQUINOX) != 0)
+		strcat(s, "sepequinox ");
+	if ((flags & F_JUNSOLSTICE) != 0)
+		strcat(s, "junsolstice ");
+	if ((flags & F_DECSOLSTICE) != 0)
+		strcat(s, "decsolstice ");
+
+	return s;
 }
 
 /*
@@ -459,22 +484,12 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 	*flags = 0;
 
-	if (debug)
-		debug_determinestyle(1, date, *flags, month, imonth,
-		    dayofmonth, idayofmonth, dayofweek, idayofweek,
-		    modifieroffset, modifierindex, specialday, syear, iyear);
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
 			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
 			   modifierindex, specialday, syear, &iyear) == false) {
-		if (debug)
-			fprintf(stderr, "Failed!\n");
+		warnx("Cannot determine style for date: |%s|", date);
 		return (0);
 	}
-
-	if (debug)
-		debug_determinestyle(0, date, *flags, month, imonth,
-		    dayofmonth, idayofmonth, dayofweek, idayofweek,
-		    modifieroffset, modifierindex, specialday, syear, iyear);
 
 	remindex = 0;
 	for (year = year1; year <= year2; year++) {
@@ -817,11 +832,14 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 		if (debug) {
 			fprintf(stderr, "Unprocessed:\n");
-			debug_determinestyle(2, date, lflags, month, imonth,
-			    dayofmonth, idayofmonth, dayofweek, idayofweek,
-			    modifieroffset, modifierindex, specialday, syear,
-			    iyear);
+			fprintf(stderr, "date: |%s|\n", date);
+			show_datestyle(lflags, month, imonth,
+				       dayofmonth, idayofmonth, dayofweek,
+				       idayofweek, modifieroffset,
+				       modifierindex, specialday,
+				       syear, iyear);
 		}
+
 		retvalsign = -1;
 	}
 
@@ -831,52 +849,31 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		return (remindex);
 }
 
-static char *
-showflags(int flags)
+static void
+remember(int *index, int *y, int *m, int *d, char **ed,
+	 int yy, int mm, int dd, const char *extra)
 {
-	static char s[128];
-	s[0] = '\0';
+	static bool warned = false;
 
-	if ((flags & F_YEAR) != 0)
-		strcat(s, "year ");
-	if ((flags & F_MONTH) != 0)
-		strcat(s, "month ");
-	if ((flags & F_DAYOFWEEK) != 0)
-		strcat(s, "dayofweek ");
-	if ((flags & F_DAYOFMONTH) != 0)
-		strcat(s, "dayofmonth ");
-	if ((flags & F_MODIFIERINDEX) != 0)
-		strcat(s, "modifierindex ");
-	if ((flags & F_MODIFIEROFFSET) != 0)
-		strcat(s, "modifieroffset ");
-	if ((flags & F_SPECIALDAY) != 0)
-		strcat(s, "specialday ");
-	if ((flags & F_ALLMONTH) != 0)
-		strcat(s, "allmonth ");
-	if ((flags & F_ALLDAY) != 0)
-		strcat(s, "allday ");
-	if ((flags & F_VARIABLE) != 0)
-		strcat(s, "variable ");
-	if ((flags & F_CNY) != 0)
-		strcat(s, "chinesenewyear ");
-	if ((flags & F_PASKHA) != 0)
-		strcat(s, "paskha ");
-	if ((flags & F_EASTER) != 0)
-		strcat(s, "easter ");
-	if ((flags & F_FULLMOON) != 0)
-		strcat(s, "fullmoon ");
-	if ((flags & F_NEWMOON) != 0)
-		strcat(s, "newmoon ");
-	if ((flags & F_MAREQUINOX) != 0)
-		strcat(s, "marequinox ");
-	if ((flags & F_SEPEQUINOX) != 0)
-		strcat(s, "sepequinox ");
-	if ((flags & F_JUNSOLSTICE) != 0)
-		strcat(s, "junsolstice ");
-	if ((flags & F_DECSOLSTICE) != 0)
-		strcat(s, "decsolstice ");
+	if (*index >= MAXCOUNT - 1) {
+		if (!warned)
+			warnx("Event count exceeds %d, ignored", MAXCOUNT);
+		warned = true;
+		return;
+	}
 
-	return s;
+	y[*index] = yy;
+	m[*index] = mm;
+	d[*index] = dd;
+
+	if (ed[*index] != NULL) {
+		free(ed[*index]);
+		ed[*index] = NULL;
+	}
+	if (extra != NULL)
+		ed[*index] = xstrdup(extra);
+
+	*index += 1;
 }
 
 static const char *
