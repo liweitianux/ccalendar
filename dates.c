@@ -205,27 +205,23 @@ generatedates(struct tm *tp1, struct tm *tp2)
 void
 dumpdates(void)
 {
-	struct cal_year *y;
-	struct cal_month *m;
-	struct cal_day *d;
+	struct cal_year *yp;
+	struct cal_month *mp;
+	struct cal_day *dp;
 
-	y = hyear;
-	while (y != NULL) {
-		fprintf(stderr, "%-5d (wday:%d)\n", y->year, y->firstdayofweek);
-		m = y->months;
-		while (m != NULL) {
+	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
+		fprintf(stderr, "%-5d (wday:%d)\n",
+			yp->year, yp->firstdayofweek);
+		for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
 			fprintf(stderr, "-- %-5d (julian:%d, dow:%d)\n",
-				m->month, m->firstdayjulian, m->firstdayofweek);
-			d = m->days;
-			while (d != NULL) {
+				mp->month, mp->firstdayjulian,
+				mp->firstdayofweek);
+			for (dp = mp->days; dp != NULL; dp = dp->nextday) {
 				fprintf(stderr, "  -- %-5d (julian:%d, dow:%d)\n",
-					d->dayofmonth, d->julianday,
-					d->dayofweek);
-				d = d->nextday;
+					dp->dayofmonth, dp->julianday,
+					dp->dayofweek);
 			}
-			m = m->nextmonth;
 		}
-		y = y->nextyear;
 	}
 }
 
