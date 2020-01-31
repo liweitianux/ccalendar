@@ -243,3 +243,19 @@ xstrdup(const char *str)
 		errx(1, "xstrdup: out of memory (length: %zu)", strlen(str));
 	return p;
 }
+
+/*
+ * Count the number of character $ch in string $s.
+ */
+size_t
+count_char(const char *s, int ch)
+{
+	size_t count = 0;
+
+	for ( ; *s; s++) {
+		if (*s == ch)
+			count++;
+	}
+
+	return count;
+}

@@ -109,19 +109,12 @@ setnnames(void)
 void
 setnsequences(const char *seq)
 {
-	const char *p;
-	int nspace = 0;
-
-	for (p = seq; *p; p++) {
-		if (*p == ' ')
-			nspace++;
-	}
-	if (nspace != NSEQUENCES - 1) {
+	if (count_char(seq, ' ') != NSEQUENCES - 1) {
 		warnx("Invalid SEQUENCE: %s", seq);
 		return;
 	}
 
-	p = seq;
+	const char *p = seq;
 	for (int i = 0; i < NSEQUENCES; i++) {
 		while (*p != ' ' && *p != '\0')
 			p++;

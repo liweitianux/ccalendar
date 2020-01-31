@@ -84,4 +84,6 @@ double	invert_angular(double (*f)(double), double y, double a, double b);
 void *	xcalloc(size_t number, size_t size);
 char *	xstrdup(const char *str);
 
+size_t	count_char(const char *s, int ch);
+
 #endif
