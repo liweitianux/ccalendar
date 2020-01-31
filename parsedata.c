@@ -521,21 +521,13 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			yearinfo_list = yinfo;
 		}
 
-		/* Same day every year */
-		if (lflags == (F_MONTH | F_DAYOFMONTH)) {
+		/* Specified month and day (fixed or variable) */
+		if (lflags == (F_MONTH | F_DAYOFMONTH) ||
+		    lflags == (F_MONTH | F_DAYOFMONTH | F_VARIABLE)) {
 			if (find_ymd(year, imonth, idayofmonth) == NULL)
 				continue;
 			remember(&remindex, yearp, monthp, dayp, edp,
-			    year, imonth, idayofmonth, NULL);
-			continue;
-		}
-
-		/* XXX Same day every year, but variable */
-		if (lflags == (F_MONTH | F_DAYOFMONTH | F_VARIABLE)) {
-			if (find_ymd(year, imonth, idayofmonth) == NULL)
-				continue;
-			remember(&remindex, yearp, monthp, dayp, edp,
-			    year, imonth, idayofmonth, NULL);
+				 year, imonth, idayofmonth, NULL);
 			continue;
 		}
 
