@@ -73,11 +73,11 @@ static char	*floattoday(int year, double f);
 static char	*floattotime(double f);
 static const char *getdayofweekname(int i);
 static const char *getmonthname(int i);
-static int	 indextooffset(const char *s);
 static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
+static int	 parse_index(const char *s);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 			  int yy, int mm, int dd, const char *extra);
 static void	 show_datestyle(int flags, const char *month, int imonth,
@@ -476,7 +476,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	char syear[100], modifierindex[100], specialday[100];
 	int idayofweek = -1, imonth = -1, idayofmonth = -1, iyear = -1;
 	int remindex;
-	int d, m, dow, rm, rd, offset;
+	int d, m, dow, rm, rd, offset, index;
 	char *ed;
 	int retvalsign = 1;
 
@@ -583,9 +583,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		 * Thu-3
 		 */
 		if (lflags == (F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
-			offset = indextooffset(modifierindex);
+			index = parse_index(modifierindex);
 			for (m = 1; m <= NMONTHS; m++) {
-				d = dayofweek_of_month(idayofweek, offset,
+				d = dayofweek_of_month(idayofweek, index,
 						       m, year);
 				if (find_ymd(year, m, d)) {
 					remember(&remindex,
@@ -603,14 +603,14 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		 */
 		if (lflags ==
 		    (F_MONTH | F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
-			offset = indextooffset(modifierindex);
+			index = parse_index(modifierindex);
 			dow = first_dayofweek_of_month(year, imonth);
 			d = (idayofweek - dow + 8) % 7;
 
-			if (offset > 0) {
+			if (index > 0) {
 				while (d <= yinfo->monthdays[imonth]) {
-					if (--offset == 0
-					    && find_ymd(year, imonth, d)) {
+					if (--index == 0 &&
+					    find_ymd(year, imonth, d)) {
 						remember(&remindex,
 						    yearp, monthp, dayp, edp,
 						    year, imonth, d, NULL);
@@ -620,11 +620,11 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				}
 				continue;
 			}
-			if (offset < 0) {
+			if (index < 0) {
 				while (d <= yinfo->monthdays[imonth])
 					d += 7;
-				while (offset != 0) {
-					offset++;
+				while (index != 0) {
+					index++;
 					d -= 7;
 				}
 				if (find_ymd(year, imonth, d)) {
@@ -1004,7 +1004,7 @@ isonlydigits(const char *s, bool nostar)
 }
 
 static int
-indextooffset(const char *s)
+parse_index(const char *s)
 {
 	int i;
 	char *es;
