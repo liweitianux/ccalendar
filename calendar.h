@@ -33,6 +33,7 @@
 
 #include <sys/types.h>
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>
 
@@ -66,6 +67,18 @@ extern double UTCOffset;
 extern double EastLongitude;
 
 #define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
+
+static inline void
+logdebug(const char *format, ...)
+{
+	if (!debug)
+		return;
+
+	va_list args;
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+}
 
 /*
  * Random number of maximum number of repeats of an event. Should be 52 (number

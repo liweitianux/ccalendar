@@ -359,8 +359,7 @@ cal_parse(FILE *in, FILE *out)
 		*pp = p;
 		if (count < 0) {
 			/* Show error status based on return value */
-			if (debug)
-				fprintf(stderr, "Ignored: %s\n", buf);
+			logdebug("%s() ignored: |%s|\n", __func__, buf);
 			if (count == -1)
 				continue;
 			count = -count + 1;
@@ -376,8 +375,7 @@ cal_parse(FILE *in, FILE *out)
 			tm.tm_mday = day[i];
 			strftime(dbuf, sizeof(dbuf),
 				 d_first ? "%e %b" : "%b %e", &tm);
-			if (debug)
-				fprintf(stderr, "Got: %s\n", pp);
+			logdebug("%s() got: |%s|\n", __func__, pp);
 			events[i] = event_add(year[i], month[i], day[i], dbuf,
 					      ((flags & F_VARIABLE) != 0),
 					      pp, extradata[i]);
