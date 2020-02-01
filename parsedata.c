@@ -67,7 +67,8 @@ static bool	 determinestyle(const char *date, int *flags,
 				char *month, int *imonth,
 				char *dayofmonth, int *idayofmonth,
 				char *dayofweek, int *idayofweek,
-				char *modifieroffset, char *modifierindex,
+				char *modifieroffset,
+				char *modifierindex, int *imodifierindex,
 				char *specialday, char *year, int *iyear);
 static char	*floattoday(int year, double f);
 static char	*floattotime(double f);
@@ -77,14 +78,14 @@ static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
-static int	 parse_index(const char *s);
+static bool	 parse_index(const char *s, int *index);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 			  int yy, int mm, int dd, const char *extra);
 static void	 show_datestyle(int flags, const char *month, int imonth,
 				const char *dayofmonth, int idayofmonth,
 				const char *dayofweek, int idayofweek,
 				const char *modifieroffset,
-				const char *modifierindex,
+				const char *modifierindex, int imodifierindex,
 				const char *specialday,
 				const char *year, int iyear);
 static char	*showflags(int flags);
@@ -128,7 +129,8 @@ static bool
 determinestyle(const char *date, int *flags,
 	       char *month, int *imonth, char *dayofmonth, int *idayofmonth,
 	       char *dayofweek, int *idayofweek, char *modifieroffset,
-	       char *modifierindex, char *specialday, char *year, int *iyear)
+	       char *modifierindex, int *imodifierindex,
+	       char *specialday, char *year, int *iyear)
 {
 	char *date2;
 	char *p, *p1, *p2;
@@ -149,6 +151,7 @@ determinestyle(const char *date, int *flags,
 	*idayofweek = 0;
 	*modifieroffset = '\0';
 	*modifierindex = '\0';
+	*imodifierindex = 0;
 	*specialday = '\0';
 
 	if (debug)
@@ -202,8 +205,10 @@ determinestyle(const char *date, int *flags,
 			strncpy(dayofweek, date2, len);
 			dayofweek[len] = '\0';
 			strcpy(modifierindex, date2 + len);
-			*flags |= F_MODIFIERINDEX;
-			ret = true;
+			if (parse_index(modifierindex, imodifierindex)) {
+				*flags |= F_MODIFIERINDEX;
+				ret = true;
+			}
 			goto out;
 		}
 		if (isonlydigits(date2, true)) {
@@ -263,8 +268,10 @@ determinestyle(const char *date, int *flags,
 				goto out;
 			}
 			strcpy(modifierindex, p2 + len);
-			*flags |= F_MODIFIERINDEX;
-			ret = true;
+			if (parse_index(modifierindex, imodifierindex)) {
+				*flags |= F_MODIFIERINDEX;
+				ret = true;
+			}
 			goto out;
 		}
 
@@ -296,8 +303,10 @@ determinestyle(const char *date, int *flags,
 			goto out;
 		}
 		strcpy(modifierindex, p2 + len);
-		*flags |= F_MODIFIERINDEX;
-		ret = true;
+		if (parse_index(modifierindex, imodifierindex)) {
+			*flags |= F_MODIFIERINDEX;
+			ret = true;
+		}
 		goto out;
 	}
 
@@ -331,8 +340,8 @@ out:
 	if (debug) {
 		show_datestyle(*flags, month, *imonth, dayofmonth,
 			       *idayofmonth, dayofweek, *idayofweek,
-			       modifieroffset, modifierindex, specialday,
-			       year, *iyear);
+			       modifieroffset, modifierindex, *imodifierindex,
+			       specialday, year, *iyear);
 	}
 	free(date2);
 	return ret;
@@ -342,14 +351,16 @@ static void
 show_datestyle(int flags, const char *month, int imonth,
 	       const char *dayofmonth, int idayofmonth,
 	       const char *dayofweek, int idayofweek,
-	       const char *modifieroffset, const char *modifierindex,
+	       const char *modifieroffset,
+	       const char *modifierindex, int imodifierindex,
 	       const char *specialday, const char *year, int iyear)
 {
 	fprintf(stderr, "flags: 0x%x - %s\n", flags, showflags(flags));
 	if (modifieroffset[0] != '\0')
 		fprintf(stderr, "modifieroffset: |%s|\n", modifieroffset);
 	if (modifierindex[0] != '\0')
-		fprintf(stderr, "modifierindex: |%s|\n", modifierindex);
+		fprintf(stderr, "modifierindex: |%s| (%d)\n",
+			modifierindex, imodifierindex);
 	if (year[0] != '\0')
 		fprintf(stderr, "year: |%s| (%d)\n", year, iyear);
 	if (month[0] != '\0')
@@ -479,15 +490,17 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	struct yearinfo *yinfo;
 	char month[100], dayofmonth[100], dayofweek[100], modifieroffset[100];
 	char syear[100], modifierindex[100], specialday[100];
-	int idayofweek = -1, imonth = -1, idayofmonth = -1, iyear = -1;
+	int idayofweek, imonth, idayofmonth, iyear;
+	int imodifierindex;
 	int remindex;
-	int d, m, dow, rm, rd, offset, index;
+	int d, m, dow, rm, rd, offset;
 	char *ed;
 	int retvalsign = 1;
 
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
 			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
-			   modifierindex, specialday, syear, &iyear) == false) {
+			   modifierindex, &imodifierindex, specialday,
+			   syear, &iyear) == false) {
 		warnx("Cannot determine style for date: |%s|", date);
 		return (0);
 	}
@@ -578,10 +591,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		 * e.g., 'Thu-3'
 		 */
 		if (lflags == (F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
-			index = parse_index(modifierindex);
 			for (m = 1; m <= NMONTHS; m++) {
-				d = dayofweek_of_month(idayofweek, index,
-						       m, year);
+				d = dayofweek_of_month(
+					idayofweek, imodifierindex, m, year);
 				if (d == -1)  /* not in the date range */
 					continue;
 				if (find_ymd(year, m, d)) {
@@ -598,8 +610,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		 */
 		if (lflags ==
 		    (F_MONTH | F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
-			index = parse_index(modifierindex);
-			d = dayofweek_of_month(idayofweek, index,
+			d = dayofweek_of_month(idayofweek, imodifierindex,
 					       imonth, year);
 			if (d == -1)  /* not in the date range */
 				continue;
@@ -781,8 +792,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			show_datestyle(lflags, month, imonth,
 				       dayofmonth, idayofmonth, dayofweek,
 				       idayofweek, modifieroffset,
-				       modifierindex, specialday,
-				       syear, iyear);
+				       modifierindex, imodifierindex,
+				       specialday, syear, iyear);
 		}
 
 		retvalsign = -1;
@@ -977,36 +988,43 @@ isonlydigits(const char *s, bool nostar)
 	return (true);
 }
 
-static int
-parse_index(const char *s)
+static bool
+parse_index(const char *s, int *index)
 {
-	int i;
-	char *es;
-	const char *p;
+	bool parsed = false;
 
 	if (s[0] == '+' || s[0] == '-') {
-		i = (int)strtol(s, &es, 10);
-		if (*es != '\0')                      /* trailing junk */
-			errx (1, "Invalid specifier format: %s\n", s);
-		return (i);
+		char *endp;
+		int idx = (int)strtol(s, &endp, 10);
+		if (*endp != '\0')  /* has trailing junk */
+			return false;
+
+		*index = idx;
+		parsed = true;
 	}
 
-	for (i = 0; sequences[i]; i++) {
+	for (int i = 0; !parsed && sequences[i]; i++) {
 		if (strcasecmp(s, sequences[i]) == 0) {
-			if (i == 5)
-				return (-1);
-			return (i + 1);
+			if (i == 5) {  /* sequence is 'last' */
+				*index = -1;
+				parsed = true;
+			}
+			*index = i + 1;
+			parsed = true;
 		}
 	}
-	for (i = 0; nsequences[i]; i++) {
-		p = nsequences[i];
-		if (strncasecmp(s, p, strlen(p)) == 0) {
-			if (i == 5)
-				return (-1);
-			return (i + 1);
+	for (int i = 0; !parsed && nsequences[i]; i++) {
+		if (strcasecmp(s, nsequences[i]) == 0) {
+			if (i == 5) {  /* sequence is 'last' */
+				*index = -1;
+				parsed = true;
+			}
+			*index = i + 1;
+			parsed = true;
 		}
 	}
-	return (0);
+
+	return parsed;
 }
 
 static char *
