@@ -996,8 +996,12 @@ parse_index(const char *s, int *index)
 	if (s[0] == '+' || s[0] == '-') {
 		char *endp;
 		int idx = (int)strtol(s, &endp, 10);
-		if (*endp != '\0')  /* has trailing junk */
-			return false;
+		if (*endp != '\0')
+			return false;  /* has trailing junk */
+		if (idx == 0 || idx <= -6 || idx >= 6) {
+			warnx("%s(): out of valid range: %d", __func__, idx);
+			return false;  /* out of valid range */
+		}
 
 		*index = idx;
 		parsed = true;
