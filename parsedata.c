@@ -62,7 +62,7 @@ static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
 static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
-static int	 dayofweek_of_month(int day, int offset, int month, int year);
+static int	 dayofweek_of_month(int dow, int offset, int month, int year);
 static bool	 determinestyle(const char *date, int *flags,
 				char *month, int *imonth,
 				char *dayofmonth, int *idayofmonth,
@@ -224,7 +224,7 @@ determinestyle(const char *date, int *flags,
 	/* Now p1 and p2 point to the first and second fields, respectively */
 
 	if ((p = strchr(p2, '/')) != NULL) {
-		/* We have a year in the string. Now this is getting tricky */
+		/* Got a year in the date string. */
 		strcpy(year, p1);
 		*iyear = (int)strtol(year, NULL, 10);
 		*p = '\0';
@@ -233,13 +233,15 @@ determinestyle(const char *date, int *flags,
 		*flags |= F_YEAR;
 	}
 
-	/* Check if there is a month-string in the date */
+	/* Check if there is a month string */
 	if (checkmonth(p1, &len, &offset, &pmonth) ||
 	    (checkmonth(p2, &len, &offset, &pmonth) && (p2 = p1))) {
-		/* p2 is the non-month part */
+		/* Now p2 is the non-month part */
+
 		*flags |= F_MONTH;
 		*imonth = offset;
 		strcpy(month, getmonthname(offset));
+
 		if (isonlydigits(p2, true)) {
 			strcpy(dayofmonth, p2);
 			*idayofmonth = (int)strtol(p2, NULL, 10);
@@ -269,7 +271,7 @@ determinestyle(const char *date, int *flags,
 		goto out;
 	}
 
-	/* Check if there is an every-day or every-month in the string */
+	/* Check if there is an every-month specifier */
 	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, true)) ||
 	    (strcmp(p2, "*") == 0 && isonlydigits(p1, true) && (p2 = p1))) {
 		*flags |= (F_ALLMONTH | F_DAYOFMONTH);
@@ -283,9 +285,11 @@ determinestyle(const char *date, int *flags,
 	if (isonlydigits(p1, true) &&
 	    checkdayofweek(p2, &len, &offset, &dow)) {
 		*flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
-		*idayofweek = offset;
+
 		*imonth = (int)strtol(p1, NULL, 10);
 		strcpy(month, getmonthname(*imonth));
+
+		*idayofweek = offset;
 		strcpy(dayofweek, getdayofweekname(offset));
 		if (strlen(p2) == len) {
 			ret = true;
@@ -297,9 +301,8 @@ determinestyle(const char *date, int *flags,
 		goto out;
 	}
 
-	/* If both the month and date are specified as numbers */
+	/* Both the month and date are specified as numbers */
 	if (isonlydigits(p1, true) && isonlydigits(p2, false)) {
-		/* Now who wants to be this ambiguous? :-( */
 		*flags |= (F_MONTH | F_DAYOFMONTH);
 		if (strchr(p2, '*') != NULL)
 			*flags |= F_VARIABLE;
@@ -482,17 +485,6 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	char *ed;
 	int retvalsign = 1;
 
-	/*
-	 * CONVENTION
-	 *
-	 * Month:     1-12
-	 * Monthname: Jan .. Dec
-	 * Day:       1-31
-	 * Weekday:   Mon .. Sun
-	 */
-
-	*flags = 0;
-
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
 			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
 			   modifierindex, specialday, syear, &iyear) == false) {
@@ -521,8 +513,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		}
 
 		/* Specified month and day (fixed or variable) */
-		if (lflags == (F_MONTH | F_DAYOFMONTH) ||
-		    lflags == (F_MONTH | F_DAYOFMONTH | F_VARIABLE)) {
+		if ((lflags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH)) {
 			if (find_ymd(year, imonth, idayofmonth) == NULL)
 				continue;
 			remember(&remindex, yearp, monthp, dayp, edp,
@@ -532,11 +523,11 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 		/* Same day every month */
 		if (lflags == (F_ALLMONTH | F_DAYOFMONTH)) {
-			for (m = 1; m <= 12; m++) {
+			for (m = 1; m <= NMONTHS; m++) {
 				if (find_ymd(year, m, idayofmonth) == NULL)
 					continue;
 				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, m, idayofmonth, NULL);
+					 year, m, idayofmonth, NULL);
 			}
 			continue;
 		}
@@ -547,23 +538,23 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				if (find_ymd(year, imonth, d) == NULL)
 					continue;
 				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, imonth, d, NULL);
+					 year, imonth, d, NULL);
 			}
 			continue;
 		}
 
 		/* One day of every month */
 		if (lflags == (F_ALLMONTH | F_DAYOFWEEK)) {
-			for (m = 1; m <= 12; m++) {
+			for (m = 1; m <= NMONTHS; m++) {
 				if (find_ymd(year, m, idayofmonth) == NULL)
 					continue;
 				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, m, idayofmonth, NULL);
+					 year, m, idayofmonth, NULL);
 			}
 			continue;
 		}
 
-		/* Every dayofweek of the year */
+		/* Every day-of-week of the year, e.g., 'Thu' */
 		if (lflags == (F_DAYOFWEEK | F_VARIABLE)) {
 			dow = first_dayofweek_of_year(year);
 			if (dow == -1)  /* not in the date range */
@@ -573,9 +564,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				if ((dp = find_yd(year, d))) {
 					rm = dp->month->month;
 					rd = dp->dayofmonth;
-					remember(&remindex,
-					    yearp, monthp, dayp, edp,
-					    year, rm, rd, NULL);
+					remember(&remindex, yearp, monthp,
+						 dayp, edp, year, rm, rd,
+						 NULL);
 				}
 				d += 7;
 			}
@@ -594,9 +585,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				if (d == -1)  /* not in the date range */
 					continue;
 				if (find_ymd(year, m, d)) {
-					remember(&remindex,
-					    yearp, monthp, dayp, edp,
-					    year, m, d, NULL);
+					remember(&remindex, yearp, monthp,
+						 dayp, edp, year, m, d, NULL);
 					continue;
 				}
 			}
@@ -621,7 +611,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			continue;
 		}
 
-		/* Every dayofweek of the month */
+		/* Every day-of-week of the month, e.g., 'Jan/Thu' */
 		if (lflags == (F_DAYOFWEEK | F_MONTH | F_VARIABLE)) {
 			dow = first_dayofweek_of_month(year, imonth);
 			if (dow == -1)  /* not in the date range */
@@ -629,9 +619,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			d = (idayofweek - dow + 8) % 7;
 			while (d <= yinfo->monthdays[imonth]) {
 				if (find_ymd(year, imonth, d)) {
-					remember(&remindex,
-					    yearp, monthp, dayp, edp,
-					    year, imonth, d, NULL);
+					remember(&remindex, yearp, monthp,
+						 dayp, edp, year, imonth,
+						 d, NULL);
 				}
 				d += 7;
 			}
@@ -647,8 +637,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			if ((dp = find_yd(year, yinfo->ieaster + offset))) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, NULL);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, NULL);
 			}
 			continue;
 		}
@@ -662,8 +652,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			if ((dp = find_yd(year, yinfo->ipaskha + offset))) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, NULL);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, NULL);
 			}
 			continue;
 		}
@@ -677,8 +667,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			if ((dp = find_yd(year, yinfo->firstcnyday + offset))) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, NULL);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, NULL);
 			}
 			continue;
 		}
@@ -695,9 +685,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 					rm = dp->month->month;
 					rd = dp->dayofmonth;
 					ed = floattotime(yinfo->ffullmoon[i]);
-					remember(&remindex,
-					    yearp, monthp, dayp, edp,
-					    year, rm, rd, ed);
+					remember(&remindex, yearp, monthp,
+						 dayp, edp, year, rm, rd, ed);
 				}
 			}
 			continue;
@@ -715,9 +704,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 					rm = dp->month->month;
 					rd = dp->dayofmonth;
 					ed = floattotime(yinfo->fnewmoon[i]);
-					remember(&remindex,
-					    yearp, monthp, dayp, edp,
-					    year, rm, rd, ed);
+					remember(&remindex, yearp, monthp,
+						 dayp, edp, year, rm, rd, ed);
 				}
 			}
 			continue;
@@ -734,8 +722,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				ed = floattotime(yinfo->equinoxdays[0]);
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, ed);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, ed);
 			}
 			continue;
 		}
@@ -749,8 +737,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				ed = floattotime(yinfo->equinoxdays[1]);
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, ed);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, ed);
 			}
 			continue;
 		}
@@ -766,8 +754,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				ed = floattotime(yinfo->solsticedays[0]);
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, ed);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, ed);
 			}
 			continue;
 		}
@@ -781,8 +769,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				ed = floattotime(yinfo->solsticedays[1]);
-				remember(&remindex, yearp, monthp, dayp, edp,
-				    year, rm, rd, ed);
+				remember(&remindex, yearp, monthp, dayp,
+					 edp, year, rm, rd, ed);
 			}
 			continue;
 		}
@@ -821,12 +809,12 @@ calc_yearinfo(int year)
 			 yinfo->solsticedays);
 
 	/* CNY: Match day with sun longitude at 330° with new moon */
-	yinfo->firstcnyday = calculatesunlongitude30(year,
-	    UTCOFFSET_CNY, yinfo->ichinesemonths);
+	yinfo->firstcnyday = calculatesunlongitude30(
+			year, UTCOFFSET_CNY, yinfo->ichinesemonths);
 	for (int m = 0; yinfo->fnewmooncny[m] >= 0; m++) {
 		if (yinfo->fnewmooncny[m] > yinfo->firstcnyday) {
 			yinfo->firstcnyday =
-				(int)floor(yinfo->fnewmooncny[m - 1]);
+				(int)floor(yinfo->fnewmooncny[m-1]);
 			break;
 		}
 	}
