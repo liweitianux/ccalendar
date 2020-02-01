@@ -353,16 +353,11 @@ cal_parse(FILE *in, FILE *out)
 
 		p = *pp;
 		*pp = '\0';
-		if ((count = parsedaymonth(buf, year, month, day, &flags,
-					   extradata)) == 0)
-			continue;
+		count = parsedaymonth(buf, year, month, day, &flags, extradata);
 		*pp = p;
-		if (count < 0) {
-			/* Show error status based on return value */
+		if (count == 0) {
 			logdebug("%s() ignored: |%s|\n", __func__, buf);
-			if (count == -1)
-				continue;
-			count = -count + 1;
+			continue;
 		}
 
 		/* Find the last tab */

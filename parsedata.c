@@ -477,16 +477,6 @@ dayofweek_of_month(int dow, int index, int month, int year)
 	return (d);
 }
 
-/*
- * Possible date formats include any combination of:
- *	3-charmonth			(January, Jan, Jan)
- *	3-charweekday			(Friday, Monday, mon.)
- *	numeric month or day		(1, 2, 04)
- *
- * Any character may separate them, or they may not be separated.  Any line,
- * following a line that is matched, that starts with "whitespace", is shown
- * along with the matched line.
- */
 int
 parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	      int *flags, char **edp)
@@ -500,7 +490,6 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	int remindex;
 	int d, m, dow, rm, rd;
 	char *ed;
-	int retvalsign = 1;
 
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
 			   &idayofmonth, dayofweek, &idayofweek,
@@ -776,23 +765,17 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			continue;
 		}
 
+		warnx("%s(): unprocessed date: |%s|\n", __func__, date);
 		if (debug) {
-			fprintf(stderr, "Unprocessed:\n");
-			fprintf(stderr, "date: |%s|\n", date);
 			show_datestyle(lflags, month, imonth, dayofmonth,
 				       idayofmonth, dayofweek, idayofweek,
 				       modifieroffset, imodifieroffset,
 				       modifierindex, imodifierindex,
 				       specialday, syear, iyear);
 		}
-
-		retvalsign = -1;
 	}
 
-	if (retvalsign == -1)
-		return (-remindex - 1);
-	else
-		return (remindex);
+	return remindex;
 }
 
 static struct yearinfo *
