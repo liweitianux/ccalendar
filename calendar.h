@@ -31,7 +31,8 @@
  * $FreeBSD: head/usr.bin/calendar/calendar.h 326025 2017-11-20 19:49:47Z pfg $
  */
 
-#include <sys/types.h>
+#ifndef CALENDAR_H_
+#define CALENDAR_H_
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -55,6 +56,13 @@
 #define	NMONTHS		12
 #define	NSEQUENCES	6
 
+/*
+ * Random number of maximum number of repeats of an event.  Should be 52
+ * (number of weeks per year).  If you want to show two years then it should
+ * be 104.  If you are seeing more than this you are using this program wrong.
+ */
+#define	MAXCOUNT	125
+
 
 /* Not yet categorized */
 
@@ -66,7 +74,11 @@ extern struct tm tm_now;  /* time/date of calendar events to remind */
 extern double UTCOffset;
 extern double EastLongitude;
 
-#define isleap(y) ((((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0)
+static inline bool
+isleap(int y)
+{
+	return (((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0;
+}
 
 static inline void
 logdebug(const char *format, ...)
@@ -80,12 +92,6 @@ logdebug(const char *format, ...)
 	va_end(args);
 }
 
-/*
- * Random number of maximum number of repeats of an event. Should be 52 (number
- * of weeks per year).  If you want to show two years then it should be 104.
- * If you are seeing more than this you are using this program wrong.
- */
-#define	MAXCOUNT	125
 
 /* events.c */
 /*
@@ -136,8 +142,8 @@ extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
 void	cal(bool doall);
 
 /* ostern.c / paskha.c */
-int	paskha(int);
-int	easter(int);
+int	paskha(int year);
+int	easter(int year);
 
 /* dates.c */
 struct cal_year {
@@ -187,6 +193,11 @@ void	pom(int year, double UTCoffset, int *fms, int *nms);
 void	fpom(int year, double UTCoffset, double *ffms, double *fnms);
 
 /* sunpos.c */
-void	equinoxsolstice(int year, double UTCoffset, int *equinoxdays, int *solsticedays);
-void	fequinoxsolstice(int year, double UTCoffset, double *equinoxdays, double *solsticedays);
-int	calculatesunlongitude30(int year, int degreeGMToffset, int *ichinesemonths);
+void	equinoxsolstice(int year, double UTCoffset, int *equinoxdays,
+			int *solsticedays);
+void	fequinoxsolstice(int year, double UTCoffset, double *equinoxdays,
+			 double *solsticedays);
+int	calculatesunlongitude30(int year, int degreeGMToffset,
+				int *ichinesemonths);
+
+#endif
