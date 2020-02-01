@@ -67,7 +67,7 @@ static bool	 determinestyle(const char *date, int *flags,
 				char *month, int *imonth,
 				char *dayofmonth, int *idayofmonth,
 				char *dayofweek, int *idayofweek,
-				char *modifieroffset,
+				char *modifieroffset, int *imodifieroffset,
 				char *modifierindex, int *imodifierindex,
 				char *specialday, char *year, int *iyear);
 static char	*floattoday(int year, double f);
@@ -84,7 +84,7 @@ static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 static void	 show_datestyle(int flags, const char *month, int imonth,
 				const char *dayofmonth, int idayofmonth,
 				const char *dayofweek, int idayofweek,
-				const char *modifieroffset,
+				const char *modifieroffset, int imodifieroffset,
 				const char *modifierindex, int imodifierindex,
 				const char *specialday,
 				const char *year, int iyear);
@@ -128,7 +128,8 @@ static char	*showflags(int flags);
 static bool
 determinestyle(const char *date, int *flags,
 	       char *month, int *imonth, char *dayofmonth, int *idayofmonth,
-	       char *dayofweek, int *idayofweek, char *modifieroffset,
+	       char *dayofweek, int *idayofweek,
+	       char *modifieroffset, int *imodifieroffset,
 	       char *modifierindex, int *imodifierindex,
 	       char *specialday, char *year, int *iyear)
 {
@@ -150,6 +151,7 @@ determinestyle(const char *date, int *flags,
 	*dayofweek = '\0';
 	*idayofweek = 0;
 	*modifieroffset = '\0';
+	*imodifieroffset = 0;
 	*modifierindex = '\0';
 	*imodifierindex = 0;
 	*specialday = '\0';
@@ -168,6 +170,7 @@ determinestyle(const char *date, int *flags,
 		strncpy(specialday, s1, strlen(s2));			\
 		specialday[strlen(s2)] = '\0';				\
 		strcpy(modifieroffset, s1 + strlen(s2));		\
+		*imodifieroffset = (int)strtol(modifieroffset, NULL, 10); \
 		*flags |= F_MODIFIEROFFSET;				\
 		ret = true;						\
 		goto out;						\
@@ -340,7 +343,8 @@ out:
 	if (debug) {
 		show_datestyle(*flags, month, *imonth, dayofmonth,
 			       *idayofmonth, dayofweek, *idayofweek,
-			       modifieroffset, modifierindex, *imodifierindex,
+			       modifieroffset, *imodifieroffset,
+			       modifierindex, *imodifierindex,
 			       specialday, year, *iyear);
 	}
 	free(date2);
@@ -351,13 +355,14 @@ static void
 show_datestyle(int flags, const char *month, int imonth,
 	       const char *dayofmonth, int idayofmonth,
 	       const char *dayofweek, int idayofweek,
-	       const char *modifieroffset,
+	       const char *modifieroffset, int imodifieroffset,
 	       const char *modifierindex, int imodifierindex,
 	       const char *specialday, const char *year, int iyear)
 {
 	fprintf(stderr, "flags: 0x%x - %s\n", flags, showflags(flags));
 	if (modifieroffset[0] != '\0')
-		fprintf(stderr, "modifieroffset: |%s|\n", modifieroffset);
+		fprintf(stderr, "modifieroffset: |%s| (%d)\n",
+			modifieroffset, imodifieroffset);
 	if (modifierindex[0] != '\0')
 		fprintf(stderr, "modifierindex: |%s| (%d)\n",
 			modifierindex, imodifierindex);
@@ -491,16 +496,17 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	char month[100], dayofmonth[100], dayofweek[100], modifieroffset[100];
 	char syear[100], modifierindex[100], specialday[100];
 	int idayofweek, imonth, idayofmonth, iyear;
-	int imodifierindex;
+	int imodifieroffset, imodifierindex;
 	int remindex;
-	int d, m, dow, rm, rd, offset;
+	int d, m, dow, rm, rd;
 	char *ed;
 	int retvalsign = 1;
 
 	if (determinestyle(date, flags, month, &imonth, dayofmonth,
-			   &idayofmonth, dayofweek, &idayofweek, modifieroffset,
-			   modifierindex, &imodifierindex, specialday,
-			   syear, &iyear) == false) {
+			   &idayofmonth, dayofweek, &idayofweek,
+			   modifieroffset, &imodifieroffset,
+			   modifierindex, &imodifierindex,
+			   specialday, syear, &iyear) == false) {
 		warnx("Cannot determine style for date: |%s|", date);
 		return (0);
 	}
@@ -642,10 +648,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Easter */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_EASTER)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			if ((dp = find_yd(year, yinfo->ieaster + offset))) {
+			dp = find_yd(year, yinfo->ieaster + imodifieroffset);
+			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				remember(&remindex, yearp, monthp, dayp,
@@ -657,10 +661,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Paskha */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_PASKHA)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			if ((dp = find_yd(year, yinfo->ipaskha + offset))) {
+			dp = find_yd(year, yinfo->ipaskha + imodifieroffset);
+			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				remember(&remindex, yearp, monthp, dayp,
@@ -672,10 +674,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Chinese New Year */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_CNY)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			if ((dp = find_yd(year, yinfo->firstcnyday + offset))) {
+			dp = find_yd(year, yinfo->firstcnyday + imodifieroffset);
+			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
 				remember(&remindex, yearp, monthp, dayp,
@@ -687,11 +687,10 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* FullMoon */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_FULLMOON)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
 			for (int i = 0; yinfo->ffullmoon[i] > 0; i++) {
-				dp = find_yd(year, (int)floor(yinfo->ffullmoon[i]) + offset);
+				dp = find_yd(year,
+					(int)floor(yinfo->ffullmoon[i]) +
+					imodifieroffset);
 				if (dp) {
 					rm = dp->month->month;
 					rd = dp->dayofmonth;
@@ -706,11 +705,10 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* NewMoon */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_NEWMOON)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
 			for (int i = 0; yinfo->ffullmoon[i] > 0; i++) {
-				dp = find_yd(year, (int)floor(yinfo->fnewmoon[i]) + offset);
+				dp = find_yd(year,
+					(int)floor(yinfo->fnewmoon[i]) +
+					imodifieroffset);
 				if (dp) {
 					rm = dp->month->month;
 					rd = dp->dayofmonth;
@@ -725,10 +723,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* (Mar|Sep)Equinox */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_MAREQUINOX)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			dp = find_yd(year, (int)yinfo->equinoxdays[0] + offset);
+			dp = find_yd(year,
+				(int)yinfo->equinoxdays[0] + imodifieroffset);
 			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
@@ -740,10 +736,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		}
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_SEPEQUINOX)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			dp = find_yd(year, (int)yinfo->equinoxdays[1] + offset);
+			dp = find_yd(year,
+				(int)yinfo->equinoxdays[1] + imodifieroffset);
 			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
@@ -757,10 +751,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* (Jun|Dec)Solstice */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_JUNSOLSTICE)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			dp = find_yd(year, (int)yinfo->solsticedays[0] + offset);
+			dp = find_yd(year,
+				(int)yinfo->solsticedays[0] + imodifieroffset);
 			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
@@ -772,10 +764,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		}
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_DECSOLSTICE)) {
-			offset = 0;
-			if ((lflags & F_MODIFIEROFFSET) != 0)
-				offset = (int)strtol(modifieroffset, NULL, 10);
-			dp = find_yd(year, (int)yinfo->solsticedays[1] + offset);
+			dp = find_yd(year,
+				(int)yinfo->solsticedays[1] + imodifieroffset);
 			if (dp) {
 				rm = dp->month->month;
 				rd = dp->dayofmonth;
@@ -789,9 +779,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		if (debug) {
 			fprintf(stderr, "Unprocessed:\n");
 			fprintf(stderr, "date: |%s|\n", date);
-			show_datestyle(lflags, month, imonth,
-				       dayofmonth, idayofmonth, dayofweek,
-				       idayofweek, modifieroffset,
+			show_datestyle(lflags, month, imonth, dayofmonth,
+				       idayofmonth, dayofweek, idayofweek,
+				       modifieroffset, imodifieroffset,
 				       modifierindex, imodifierindex,
 				       specialday, syear, iyear);
 		}
