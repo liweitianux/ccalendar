@@ -442,13 +442,6 @@ cal(bool doall)
 		}
 		event_print_all(stdout);
 	}
-
-	for (int i = 0; i < MAXCOUNT; i++) {
-		if (extradata[i]) {
-			free(extradata[i]);
-			extradata[i] = NULL;
-		}
-	}
 }
 
 static FILE *

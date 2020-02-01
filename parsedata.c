@@ -80,7 +80,7 @@ static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
 static bool	 parse_index(const char *s, int *index);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
-			  int yy, int mm, int dd, const char *extra);
+			  int yy, int mm, int dd, char *extra);
 static void	 show_datestyle(int flags, const char *month, int imonth,
 				const char *dayofmonth, int idayofmonth,
 				const char *dayofweek, int idayofweek,
@@ -825,7 +825,7 @@ calc_yearinfo(int year)
 
 static void
 remember(int *index, int *y, int *m, int *d, char **ed,
-	 int yy, int mm, int dd, const char *extra)
+	 int yy, int mm, int dd, char *extra)
 {
 	static bool warned = false;
 
@@ -839,13 +839,7 @@ remember(int *index, int *y, int *m, int *d, char **ed,
 	y[*index] = yy;
 	m[*index] = mm;
 	d[*index] = dd;
-
-	if (ed[*index] != NULL) {
-		free(ed[*index]);
-		ed[*index] = NULL;
-	}
-	if (extra != NULL)
-		ed[*index] = xstrdup(extra);
+	ed[*index] = extra;
 
 	*index += 1;
 }
