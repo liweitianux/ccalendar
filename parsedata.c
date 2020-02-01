@@ -62,6 +62,7 @@ static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
 static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
+static int	 dayofweek_of_month(int day, int offset, int month, int year);
 static bool	 determinestyle(const char *date, int *flags,
 				char *month, int *imonth,
 				char *dayofmonth, int *idayofmonth,
@@ -87,7 +88,6 @@ static void	 show_datestyle(int flags, const char *month, int imonth,
 				const char *specialday,
 				const char *year, int iyear);
 static char	*showflags(int flags);
-static int	 wdayom(int day, int offset, int month, int year);
 
 /*
  * Expected styles:
@@ -410,19 +410,20 @@ showflags(int flags)
 }
 
 /*
- * Calculate dates with offset from weekdays, like Thu-3, Wed+2, etc.
- * day is the day of the week,
- * offset the ordinal number of the weekday in the month.
+ * Calculate the date of an indexed day-of-week in the month, e.g.,
+ * 'Thu-3', 'Wed+2'.
+ * 'index' is the ordinal number of the day-of-week in the month.
  */
 static int
-wdayom(int day, int offset, int month, int year)
+dayofweek_of_month(int dow, int index, int month, int year)
 {
 	struct yearinfo *yinfo;
-	int wday1;  /* Weekday of first day in month */
-	int wdayn;  /* Weekday of first day in month */
+	int dow1;
 	int d;
 
-	wday1 = first_dayofweek_of_month(year, month);
+	assert(index != 0);
+
+	dow1 = first_dayofweek_of_month(year, month);
 
 	for (yinfo = yearinfo_list; yinfo; yinfo = yinfo->next) {
 		if (yinfo->year == year)
@@ -432,27 +433,25 @@ wdayom(int day, int offset, int month, int year)
 
 	/*
 	 * Date of zeroth or first of our weekday in month, depending on the
-	 * relationship with the first of the month.  The range is -6:6.
+	 * relationship with the first of the month.  The range is [-6, 6].
 	 */
-	d = (day - wday1 + 1) % 7;
+	d = (dow - dow1 + 1) % 7;
 	/*
-	 * Which way are we counting?  Offset 0 is invalid, abs (offset) > 5 is
-	 * meaningless, but that's OK.  Offset 5 may or may not be meaningless,
+	 * Which way are we counting?  Index 0 is invalid, abs(index) > 5 is
+	 * meaningless, but that's OK.  Index 5 may or may not be meaningless,
 	 * so there's no point in complaining for complaining's sake.
 	 */
-	if (offset < 0) {			/* back from end of month */
+	if (index < 0) {			/* back from end of month */
 						/* FIXME */
-		wdayn = d;
-		while (wdayn <= yinfo->monthdays[month])
-			wdayn += 7;
-		d = offset * 7 + wdayn;
-	} else if (offset > 0) {
-		if (d > 0)
-			d += offset * 7 - 7;
-		else
-			d += offset * 7;
+		int dow2 = d;
+		while (dow2 <= yinfo->monthdays[month])
+			dow2 += 7;
+		d = index * 7 + dow2;
 	} else {
-		warnx("Invalid offset 0");
+		if (d > 0)
+			d += index * 7 - 7;
+		else
+			d += index * 7;
 	}
 	return (d);
 }
@@ -585,9 +584,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		 */
 		if (lflags == (F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
 			offset = indextooffset(modifierindex);
-
-			for (m = 0; m <= 12; m++) {
-				d = wdayom(idayofweek, offset, m, year);
+			for (m = 1; m <= NMONTHS; m++) {
+				d = dayofweek_of_month(idayofweek, offset,
+						       m, year);
 				if (find_ymd(year, m, d)) {
 					remember(&remindex,
 					    yearp, monthp, dayp, edp,
