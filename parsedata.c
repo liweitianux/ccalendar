@@ -579,8 +579,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		}
 
 		/*
-		 * Every so-manied dayofweek of every month of the year:
-		 * Thu-3
+		 * One indexed day-of-week of every month of the year,
+		 * e.g., 'Thu-3'
 		 */
 		if (lflags == (F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
 			index = parse_index(modifierindex);
@@ -598,40 +598,16 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		}
 
 		/*
-		 * A certain dayofweek of a month
-		 * Jan/Thu-3
+		 * One indexed day-of-week of a month, e.g., 'Jan/Thu-3'
 		 */
 		if (lflags ==
 		    (F_MONTH | F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
 			index = parse_index(modifierindex);
-			dow = first_dayofweek_of_month(year, imonth);
-			d = (idayofweek - dow + 8) % 7;
-
-			if (index > 0) {
-				while (d <= yinfo->monthdays[imonth]) {
-					if (--index == 0 &&
-					    find_ymd(year, imonth, d)) {
-						remember(&remindex,
-						    yearp, monthp, dayp, edp,
-						    year, imonth, d, NULL);
-						continue;
-					}
-					d += 7;
-				}
-				continue;
-			}
-			if (index < 0) {
-				while (d <= yinfo->monthdays[imonth])
-					d += 7;
-				while (index != 0) {
-					index++;
-					d -= 7;
-				}
-				if (find_ymd(year, imonth, d)) {
-					remember(&remindex,
-					    yearp, monthp, dayp, edp,
-					    year, imonth, d, NULL);
-				}
+			d = dayofweek_of_month(idayofweek, index,
+					       imonth, year);
+			if (find_ymd(year, imonth, d)) {
+				remember(&remindex, yearp, monthp,
+					 dayp, edp, year, imonth, d, NULL);
 				continue;
 			}
 			continue;
