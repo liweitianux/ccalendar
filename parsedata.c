@@ -424,6 +424,8 @@ dayofweek_of_month(int dow, int index, int month, int year)
 	assert(index != 0);
 
 	dow1 = first_dayofweek_of_month(year, month);
+	if (dow1 == -1)  /* not in the date range */
+		return -1;
 
 	for (yinfo = yearinfo_list; yinfo; yinfo = yinfo->next) {
 		if (yinfo->year == year)
@@ -564,6 +566,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Every dayofweek of the year */
 		if (lflags == (F_DAYOFWEEK | F_VARIABLE)) {
 			dow = first_dayofweek_of_year(year);
+			if (dow == -1)  /* not in the date range */
+				continue;
 			d = (idayofweek - dow + 8) % 7;
 			while (d <= 366) {
 				if ((dp = find_yd(year, d))) {
@@ -587,6 +591,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			for (m = 1; m <= NMONTHS; m++) {
 				d = dayofweek_of_month(idayofweek, index,
 						       m, year);
+				if (d == -1)  /* not in the date range */
+					continue;
 				if (find_ymd(year, m, d)) {
 					remember(&remindex,
 					    yearp, monthp, dayp, edp,
@@ -605,6 +611,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			index = parse_index(modifierindex);
 			d = dayofweek_of_month(idayofweek, index,
 					       imonth, year);
+			if (d == -1)  /* not in the date range */
+				continue;
 			if (find_ymd(year, imonth, d)) {
 				remember(&remindex, yearp, monthp,
 					 dayp, edp, year, imonth, d, NULL);
@@ -616,6 +624,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Every dayofweek of the month */
 		if (lflags == (F_DAYOFWEEK | F_MONTH | F_VARIABLE)) {
 			dow = first_dayofweek_of_month(year, imonth);
+			if (dow == -1)  /* not in the date range */
+				continue;
 			d = (idayofweek - dow + 8) % 7;
 			while (d <= yinfo->monthdays[imonth]) {
 				if (find_ymd(year, imonth, d)) {
