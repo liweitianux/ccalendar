@@ -47,6 +47,29 @@
 #include "utils.h"
 
 /*
+ * Determine the day of week of the fixed data $rd.
+ * Return: 0 (Sunday), 1 (Monday), ..., 6 (Saturday)
+ * Ref: Sec.(1.12), Eq.(1.60)
+ */
+int
+dayofweek_from_fixed(int rd)
+{
+	/* NOTE: R.D. 1 is Monday */
+	return mod(rd, 7);
+}
+
+/*
+ * Calculate the fixed date of the $k-day on or before the fixed date $date.
+ * $k of 0 means Sunday, 1 means Monday, and so on.
+ * Ref: Sec.(1.12), Eq.(1.62)
+ */
+int
+kday_onbefore(int k, int rd)
+{
+	return rd - dayofweek_from_fixed(rd - k);
+}
+
+/*
  * Calculate the ephemeris correction (fraction of day) required for
  * converting between Universal Time and Dynamical Time at moment $t.
  * Ref: Sec.(14.2), Eq.(14.15)

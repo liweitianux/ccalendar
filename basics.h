@@ -46,6 +46,9 @@ struct location {
 	double	zone;		/* time offset (in days) from UTC */
 };
 
+int	dayofweek_from_fixed(int rd);
+int	kday_onbefore(int k, int rd);
+
 double	julian_centuries(double t);
 double	sidereal_from_moment(double t);
 
