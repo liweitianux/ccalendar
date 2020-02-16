@@ -39,6 +39,7 @@
  * 2018, Cambridge University Press
  */
 
+#include <err.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -65,6 +66,26 @@ int
 kday_onbefore(enum dayofweek k, int rd)
 {
 	return rd - dayofweek_from_fixed(rd - k);
+}
+
+/*
+ * Calculate the $n-th occurrence of a given day of week counting from
+ * either after (if $n > 0) or before (if $n < 0) the given $date.
+ * Ref: Sec.(2.5), Eq.(2.33)
+ */
+int
+nth_kday(int n, enum dayofweek k, struct g_date *date)
+{
+	if (n == 0)
+		errx(1, "%s(): n = 0 invalid!", __func__);
+
+	int rd = fixed_from_gregorian(date);
+	int kday;
+	if (n > 0)
+		kday = kday_onbefore(k, rd - 1);  /* Sec.(1.12), Eq.(1.67) */
+	else
+		kday = kday_onbefore(k, rd + 7);  /* Sec.(1.12), Eq.(1.68) */
+	return 7 * n + kday;
 }
 
 /*

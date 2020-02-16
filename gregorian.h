@@ -52,6 +52,5 @@ void	gregorian_from_fixed(int rd, struct g_date *date);
 bool	gregorian_leap_year(int year);
 int	gregorian_new_year(int year);
 int	gregorian_year_from_fixed(int rd);
-int	nth_kday(int n, enum dayofweek k, struct g_date *date);
 
 #endif
