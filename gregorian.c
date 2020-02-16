@@ -161,11 +161,10 @@ gregorian_from_fixed(int rd, struct g_date *date)
 /*
  * Calculate the $n-th occurrence of a given day of week counting from
  * either after (if $n > 0) or before (if $n < 0) the given $date.
- * A $k-day of 0 means Sunday, 1 means Monday, and so on.
  * Ref: Sec.(2.5), Eq.(2.33)
  */
 int
-nth_kday(int n, int k, struct g_date *date)
+nth_kday(int n, enum dayofweek k, struct g_date *date)
 {
 	if (n == 0)
 		errx(1, "%s(): n = 0 invalid!", __func__);
