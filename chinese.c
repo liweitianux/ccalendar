@@ -122,7 +122,7 @@ current_major_solar_term(int rd)
 {
 	double ut = midnight_in_china(rd);
 	double lon = solar_longitude(ut);
-	return mod1(2 + div_floor(lon, 30), 12);
+	return mod1(2 + div_floor((int)lon, 30), 12);
 }
 
 /*

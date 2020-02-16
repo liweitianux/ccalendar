@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -65,7 +65,7 @@ dayofweek_from_fixed(int rd)
 int
 kday_onbefore(enum dayofweek k, int rd)
 {
-	return rd - dayofweek_from_fixed(rd - k);
+	return rd - (int)dayofweek_from_fixed(rd - (int)k);
 }
 
 /*
@@ -328,7 +328,7 @@ format_time(char *buf, size_t size, double t)
 	int hh, mm, ss, i;
 
 	t -= floor(t);
-	i = lround(t * 24*60*60);
+	i = (int)round(t * 24*60*60);
 
 	hh = i / (60*60);
 	i %= 60*60;
@@ -348,7 +348,7 @@ format_zone(char *buf, size_t size, double zone)
 	int hh, mm, i;
 
 	positive = (zone >= 0);
-	i = lround(fabs(zone) * 24*60);
+	i = (int)round(fabs(zone) * 24*60);
 	hh = i / 60;
 	mm = i % 60;
 
@@ -366,14 +366,14 @@ format_location(char *buf, size_t size, const struct location *loc)
 	bool north, east;
 
 	north = (loc->latitude >= 0);
-	i = lround(fabs(loc->latitude) * 60*60);
+	i = (int)round(fabs(loc->latitude) * 60*60);
 	d1 = i / (60*60);
 	i %= 60*60;
 	m1 = i / 60;
 	s1 = i % 60;
 
 	east = (loc->longitude >= 0);
-	i = lround(fabs(loc->longitude) * 60*60);
+	i = (int)round(fabs(loc->longitude) * 60*60);
 	d2 = i / (60*60);
 	i %= 60*60;
 	m2 = i / 60;
