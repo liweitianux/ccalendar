@@ -204,6 +204,76 @@ test1(void)
 	show_moon_info(rd+t_day, &shanghai);
 }
 
+static void
+test2()
+{
+	int year1 = 2000, year2 = 2007;
+	int rd;
+	struct g_date date;
+
+	printf("\n-----------------------------------------------------------\n");
+
+	/* US Daylight Saving Start; Eq.(2.39) */
+	printf("US Daylight Saving Start:\t");
+	for (int y = year1; y <= year2; y++) {
+		date.year = y;
+		date.month = 3;
+		date.day = 1;
+		rd = nth_kday(2, SUNDAY, &date);
+		gregorian_from_fixed(rd, &date);
+		printf("%04d/%02d/%02d\t", date.year, date.month, date.day);
+	}
+	printf("\n");
+
+	/* US Daylight Saving End; Eq.(2.40) */
+	printf("US Daylight Saving End:\t");
+	for (int y = year1; y <= year2; y++) {
+		date.year = y;
+		date.month = 11;
+		date.day = 1;
+		rd = nth_kday(1, SUNDAY, &date);
+		gregorian_from_fixed(rd, &date);
+		printf("%04d/%02d/%02d\t", date.year, date.month, date.day);
+	}
+	printf("\n");
+
+	/* US Election Day; Eq.(2.38) */
+	printf("US Election Day:\t");
+	for (int y = year1; y <= year2; y++) {
+		date.year = y;
+		date.month = 11;
+		date.day = 2;
+		rd = nth_kday(1, TUESDAY, &date);
+		gregorian_from_fixed(rd, &date);
+		printf("%04d/%02d/%02d\t", date.year, date.month, date.day);
+	}
+	printf("\n");
+
+	/* US Memorial Day; Eq.(2.37) */
+	printf("US Memorial Day:\t");
+	for (int y = year1; y <= year2; y++) {
+		date.year = y;
+		date.month = 5;
+		date.day = 31;
+		rd = nth_kday(-1, MONDAY, &date);
+		gregorian_from_fixed(rd, &date);
+		printf("%04d/%02d/%02d\t", date.year, date.month, date.day);
+	}
+	printf("\n");
+
+	/* US Memorial Day; Eq.(2.37) */
+	printf("US Memorial Day (2):\t");
+	for (int y = year1; y <= year2; y++) {
+		date.year = y;
+		date.month = 6;
+		date.day = 0;
+		rd = nth_kday(-1, MONDAY, &date);
+		gregorian_from_fixed(rd, &date);
+		printf("%04d/%02d/%02d\t", date.year, date.month, date.day);
+	}
+	printf("\n");
+}
+
 
 /* Return the seconds east of UTC */
 static long
@@ -264,8 +334,10 @@ main(int argc, char *argv[])
 	printf("Location: (latitude=%lf°, longitude=%lf°, elevation=%lfm)\n",
 			latitude, longitude, elevation);
 
-	if (run_test)
+	if (run_test) {
 		test1();
+		test2();
+	}
 
 	return 0;
 }
