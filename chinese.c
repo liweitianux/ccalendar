@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -52,7 +52,6 @@
  * the first lunar month that is wholly within a solar month.
  */
 
-#include <err.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -118,7 +117,7 @@ midnight_in_china(int rd)
  * before the fixed date $rd.
  * Ref: Sec.(19.1), Eq.(19.1)
  */
-int
+static int
 current_major_solar_term(int rd)
 {
 	double ut = midnight_in_china(rd);
@@ -131,7 +130,7 @@ current_major_solar_term(int rd)
  * given fixed date $rd.
  * Ref: Sec.(19.1), Eq.(19.8)
  */
-int
+static int
 chinese_winter_solstice_onbefore(int rd)
 {
 	/* longitude of Sun at winter solstice */
@@ -154,7 +153,7 @@ chinese_winter_solstice_onbefore(int rd)
  * given fixed date $rd.
  * Ref: Sec.(19.2), Eq.(19.9)
  */
-int
+static int
 chinese_new_moon_onafter(int rd)
 {
 	double t = new_moon_atafter(midnight_in_china(rd));
@@ -168,7 +167,7 @@ chinese_new_moon_onafter(int rd)
  * given fixed date $rd.
  * Ref: Sec.(19.2), Eq.(19.10)
  */
-int
+static int
 chinese_new_moon_before(int rd)
 {
 	double t = new_moon_before(midnight_in_china(rd));
@@ -182,7 +181,7 @@ chinese_new_moon_before(int rd)
  * date $rd has no major solar term.
  * Ref: Sec.(19.2), Eq.(19.11)
  */
-bool
+static bool
 chinese_no_major_solar_term(int rd)
 {
 	int rd2 = chinese_new_moon_onafter(rd + 1);
@@ -196,7 +195,7 @@ chinese_no_major_solar_term(int rd)
  * the lunar month starting on fixed date $m2.
  * Ref: Sec.(19.2), Eq.(19.12)
  */
-bool
+static bool
 chinese_prior_leap_month(int m1, int m2)
 {
 	int m2_prev = chinese_new_moon_before(m2);
@@ -210,7 +209,7 @@ chinese_prior_leap_month(int m1, int m2)
  * given date $rd.
  * Ref: Sec.(19.2), Eq.(19.13)
  */
-int
+static int
 chinese_new_year_in_sui(int rd)
 {
 	/* prior and following winter solstice */
@@ -224,7 +223,7 @@ chinese_new_year_in_sui(int rd)
 	/* the next 11th month */
 	int m11_next = chinese_new_moon_before(s2 + 1);
 
-	bool leap_year = lround((m11_next - m12) / mean_synodic_month) == 12;
+	bool leap_year = (lround((m11_next - m12) / mean_synodic_month) == 12);
 	if (leap_year && (chinese_no_major_solar_term(m12) ||
 			  chinese_no_major_solar_term(m13))) {
 		/* either m12 or m13 is a leap month */
@@ -239,7 +238,7 @@ chinese_new_year_in_sui(int rd)
  * fixed date $rd.
  * Ref: Sec.(19.2), Eq.(19.14)
  */
-int
+static int
 chinese_new_year_onbefore(int rd)
 {
 	int newyear = chinese_new_year_in_sui(rd);
@@ -282,7 +281,7 @@ chinese_from_fixed(int rd, struct chinese_date *date)
 	/* the next 11th month */
 	int m11_next = chinese_new_moon_before(s2 + 1);
 
-	bool leap_year = lround((m11_next - m12) / mean_synodic_month) == 12;
+	bool leap_year = (lround((m11_next - m12) / mean_synodic_month) == 12);
 	int month = (int)lround((m - m12) / mean_synodic_month);
 	if (leap_year && chinese_prior_leap_month(m12, m))
 		month--;
@@ -412,8 +411,7 @@ static const struct solar_term {
 };
 
 /*
- * Print the Chinese calendar of the year containing the given fixed date
- * $rd.
+ * Print the Chinese calendar of the given date $rd and events of the year.
  */
 void
 show_chinese_calendar(int rd)

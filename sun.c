@@ -252,7 +252,7 @@ sine_offset(double t, double latitude, double longitude, double alpha)
  * NOTE: Return an NaN if the depression angle cannot be reached.
  * Ref: Sec.(14.7), Eq.(14.68)
  */
-double
+static double
 approx_depression_moment(double t, double latitude, double longitude,
 			 double alpha, bool morning)
 {
@@ -288,7 +288,7 @@ approx_depression_moment(double t, double latitude, double longitude,
  * NOTE: Return an NaN if the depression angle cannot be reached.
  * Ref: Sec.(14.7), Eq.(14.70)
  */
-double
+static double
 depression_moment(double tapprox, double latitude, double longitude,
 		  double alpha, bool morning)
 {
