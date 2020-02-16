@@ -39,6 +39,11 @@
  * 2018, Cambridge University Press
  */
 
+/*
+ * Rata Die (R.D.), i.e., fixed date, is 1 at midnight (00:00) local time
+ * on January 1, AD 1 in the proleptic Gregorian calendar.
+ */
+
 #include <stdbool.h>
 
 #include "basics.h"
