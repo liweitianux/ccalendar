@@ -37,6 +37,8 @@
 #ifndef BASICS_H_
 #define BASICS_H_
 
+#include <stddef.h>
+
 struct location {
 	double	latitude;	/* degree */
 	double	longitude;	/* degree */
