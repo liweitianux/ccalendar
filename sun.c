@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -367,22 +367,19 @@ show_sun_info(double t, const struct location *loc)
 {
 	struct g_date date;
 	char buf[128];
-	int n;
 
 	int rd = (int)floor(t);
 	gregorian_from_fixed(rd, &date);
 	printf("Gregorian date: %4d-%02d-%02d\n",
 	       date.year, date.month, date.day);
 
-	n = snprintf(buf, sizeof(buf), "%s", "Time: ");
-	n += format_time(buf + n, sizeof(buf) - n, t);
-	n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
-	n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	format_time(buf, sizeof(buf), t);
+	printf("Time: %s ", buf);
+	format_zone(buf, sizeof(buf), loc->zone);
 	printf("%s\n", buf);
 
-	n = snprintf(buf, sizeof(buf), "%s", "Location: ");
-	n += format_location(buf + n, sizeof(buf) - n, loc);
-	printf("%s\n", buf);
+	format_location(buf, sizeof(buf), loc);
+	printf("Location: %s\n", buf);
 
 	/*
 	 * Sun position
@@ -400,12 +397,11 @@ show_sun_info(double t, const struct location *loc)
 	double moments[2] = { sunrise(rd, loc), sunset(rd, loc) };
 	const char *names[2] = { "Sunrise", "Sunset" };
 	for (size_t i = 0; i < nitems(moments); i++) {
-		n = snprintf(buf, sizeof(buf), "%-7s: ", names[i]);
 		if (isnan(moments[i]))
-			n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
+			snprintf(buf, sizeof(buf), "(null)");
 		else
-			n += format_time(buf + n, sizeof(buf) - n, moments[i]);
-		printf("%s\n", buf);
+			format_time(buf, sizeof(buf), moments[i]);
+		printf("%-7s: %s\n", names[i], buf);
 	}
 
 	/*
@@ -424,11 +420,9 @@ show_sun_info(double t, const struct location *loc)
 		day_approx = fixed_from_gregorian(&date);
 		t = solar_longitude_atafter(lambda, day_approx) + loc->zone;
 		gregorian_from_fixed((int)floor(t), &date);
-		n = snprintf(buf, sizeof(buf),
-			     "%-17s: %3d°, %4d-%02d-%02d ",
-			     event->name, lambda,
-			     date.year, date.month, date.day);
-		n += format_time(buf + n, sizeof(buf) - n, t);
-		printf("%s\n", buf);
+		format_time(buf, sizeof(buf), t);
+		printf("%-17s: %3d°, %4d-%02d-%02d %s\n",
+		       event->name, lambda,
+		       date.year, date.month, date.day, buf);
 	}
 }

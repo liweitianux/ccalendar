@@ -450,8 +450,10 @@ show_chinese_calendar(int rd)
 	const double zone = chinese_zone(rd);
 	const struct solar_term *term;
 	double t_term;
-	int lambda, n;
-	char buf[128];
+	int lambda;
+	char buf_time[32], buf_zone[32];
+
+	format_zone(buf_zone, sizeof(buf_zone), zone);
 
 	printf("\n二十四节气 (solar terms):\n");
 	for (size_t i = 0; i < nitems(SOLAR_TERMS); i++) {
@@ -459,13 +461,11 @@ show_chinese_calendar(int rd)
 		lambda = term->longitude;
 		t_term = solar_longitude_atafter(lambda, feb1) + zone;
 		gregorian_from_fixed((int)floor(t_term), &gdate);
-		n = snprintf(buf, sizeof(buf),
-			     "%s (%-13s): %3d°, %4d-%02d-%02d ",
-			     term->zhname, term->name, lambda,
-			     gdate.year, gdate.month, gdate.day);
-		n += format_time(buf + n, sizeof(buf) - n, t_term);
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
-		n += format_zone(buf + n, sizeof(buf) - n, zone);
-		printf("%s\n", buf);
+		format_time(buf_time, sizeof(buf_time), t_term);
+
+		printf("%s (%-13s): %3d°, %4d-%02d-%02d %s %s\n",
+		       term->zhname, term->name, lambda,
+		       gdate.year, gdate.month, gdate.day,
+		       buf_time, buf_zone);
 	}
 }

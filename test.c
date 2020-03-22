@@ -29,7 +29,6 @@ static void
 test1(void)
 {
 	char buf[256];
-	int n;
 
 	/*
 	int rds[] = { -214193, -61387, 25469, 49217, 171307, 210155,
@@ -85,9 +84,8 @@ test1(void)
 	for (size_t i = 0; i < nitems(rds); i++) {
 		rd = rds[i];
 		t_sunset = sunset(rd, &jerusalem) - (double)rd;
-		n = snprintf(buf, sizeof(buf), "%7d\t%.8lf\t\t", rd, t_sunset);
-		n += format_time(buf + n, sizeof(buf) - n, t_sunset);
-		printf("%s\n", buf);
+		format_time(buf, sizeof(buf), t_sunset);
+		printf("%7d\t%.8lf\t\t%s\n", rd, t_sunset, buf);
 	}
 
 	/* Location of Mecca (Eq. 14.3) */
@@ -118,23 +116,19 @@ test1(void)
 		t_newmoon = new_moon_atafter(t);
 		t_moonrise = moonrise(rd, &mecca) - (double)rd;
 		t_moonset = moonset(rd, &mecca) - (double)rd;
-		n = snprintf(buf, sizeof(buf), "%7d\t%16.8lf\t", rd, t_newmoon);
+		printf("%7d\t%16.8lf\t", rd, t_newmoon);
 		if (isnan(t_moonrise)) {
-			n += snprintf(buf + n, sizeof(buf) - n, "%10s\t%8s",
-					"(null)", "(null)");
+			printf("%10s\t%8s", "(null)", "(null)");
 		} else {
-			n += snprintf(buf + n, sizeof(buf) - n, "%10.8lf\t", t_moonrise);
-			n += format_time(buf + n, sizeof(buf) - n, t_moonrise);
+			format_time(buf, sizeof(buf), t_moonrise);
+			printf("%10.8lf\t%s", t_moonrise, buf);
 		}
-		n += snprintf(buf + n, sizeof(buf) - n, "%s", "\t");
 		if (isnan(t_moonset)) {
-			n += snprintf(buf + n, sizeof(buf) - n, "%10s\t%8s",
-					"(null)", "(null)");
+			printf("\t%10s\t%8s\n", "(null)", "(null)");
 		} else {
-			n += snprintf(buf + n, sizeof(buf) - n, "%10.8lf\t", t_moonset);
-			n += format_time(buf + n, sizeof(buf) - n, t_moonset);
+			format_time(buf, sizeof(buf), t_moonset);
+			printf("\t%10.8lf\t%s\n", t_moonset, buf);
 		}
-		printf("%s\n", buf);
 	}
 
 	double ob = obliquity(rd);

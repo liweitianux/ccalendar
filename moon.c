@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -817,7 +817,6 @@ show_moon_info(double t, const struct location *loc)
 {
 	struct g_date date;
 	char buf[128];
-	int n;
 
 	int rd = (int)floor(t);
 	double t_u = t - loc->zone;  /* universal time */
@@ -826,15 +825,13 @@ show_moon_info(double t, const struct location *loc)
 	printf("Gregorian date: %4d-%02d-%02d\n",
 	       date.year, date.month, date.day);
 
-	n = snprintf(buf, sizeof(buf), "%s", "Time: ");
-	n += format_time(buf + n, sizeof(buf) - n, t);
-	n += snprintf(buf + n, sizeof(buf) - n, "%s", " ");
-	n += format_zone(buf + n, sizeof(buf) - n, loc->zone);
+	format_time(buf, sizeof(buf), t);
+	printf("Time: %s ", buf);
+	format_zone(buf, sizeof(buf), loc->zone);
 	printf("%s\n", buf);
 
-	n = snprintf(buf, sizeof(buf), "%s", "Location: ");
-	n += format_location(buf + n, sizeof(buf) - n, loc);
-	printf("%s\n", buf);
+	format_location(buf, sizeof(buf), loc);
+	printf("Location: %s\n", buf);
 
 	/*
 	 * Lunar phase
@@ -856,15 +853,14 @@ show_moon_info(double t, const struct location *loc)
 	else
 		phase_name = NULL;
 
-	n = snprintf(buf, sizeof(buf), "Moon phase: %.2lf° ", phi);
 	if (phase_name) {
-		n += snprintf(buf + n, sizeof(buf) - n, "(%s)", phase_name);
+		snprintf(buf, sizeof(buf), "%s", phase_name);
 	} else {
-		n += snprintf(buf + n, sizeof(buf) - n, "(%s %s)",
-			      (waxing ? "Waxing" : "Waning"),
-			      (crescent ? "Crescent" : "Gibbous"));
+		snprintf(buf, sizeof(buf), "%s %s",
+			 (waxing ? "Waxing" : "Waning"),
+			 (crescent ? "Crescent" : "Gibbous"));
 	}
-	printf("%s\n", buf);
+	printf("Moon phase: %.2lf° (%s)\n", phi, buf);
 
 	/*
 	 * Moon position
@@ -890,12 +886,11 @@ show_moon_info(double t, const struct location *loc)
 		names[1] = p;
 	}
 	for (size_t i = 0; i < nitems(moments); i++) {
-		n = snprintf(buf, sizeof(buf), "%-8s: ", names[i]);
 		if (isnan(moments[i]))
-			n += snprintf(buf + n, sizeof(buf) - n, "%s", "(null)");
+			snprintf(buf, sizeof(buf), "(null)");
 		else
-			n += format_time(buf + n, sizeof(buf) - n, moments[i]);
-		printf("%s\n", buf);
+			format_time(buf, sizeof(buf), moments[i]);
+		printf("%-8s: %s\n", names[i], buf);
 	}
 
 	/*
@@ -915,10 +910,9 @@ show_moon_info(double t, const struct location *loc)
 	while ((t_newmoon = new_moon_atafter(t_newmoon)) < t_end) {
 		t_newmoon += loc->zone;  /* to standard time */
 		gregorian_from_fixed((int)floor(t_newmoon), &date2);
-		n = snprintf(buf, sizeof(buf), "%4d-%02d-%02d ",
-			     date2.year, date2.month, date2.day);
-		n += format_time(buf + n, sizeof(buf) - n, t_newmoon);
-		printf("%s", buf);
+		format_time(buf, sizeof(buf), t_newmoon);
+		printf("%4d-%02d-%02d %s",
+		       date2.year, date2.month, date2.day, buf);
 
 		/*
 		 * first quarter, full moon, last quarter
@@ -929,10 +923,9 @@ show_moon_info(double t, const struct location *loc)
 			t_event = lunar_phase_atafter(phi_events[i], t_event);
 			t_event += loc->zone;
 			gregorian_from_fixed((int)floor(t_event), &date2);
-			n = snprintf(buf, sizeof(buf), "%4d-%02d-%02d ",
-				     date2.year, date2.month, date2.day);
-			n += format_time(buf + n, sizeof(buf) - n, t_event);
-			printf("   %s", buf);
+			format_time(buf, sizeof(buf), t_event);
+			printf("   %4d-%02d-%02d %s",
+			       date2.year, date2.month, date2.day, buf);
 		}
 		printf("\n");
 
