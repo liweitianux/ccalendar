@@ -11,6 +11,20 @@ presented in
 [DragonFly BSD](https://www.dragonflybsd.org/).
 
 
+Installaion
+-----------
+Requirements:
+* GCC
+* GNU Make
+* libbsd (on Linux)
+
+Build and installation:
+1. `make [PREFIX=/usr/local]`
+2. `sudo make install [PREFIX=/usr/local]`
+
+*NOTE*: Use `gmake` on BSD systems.
+
+
 License
 -------
 The 3-Clause BSD License
