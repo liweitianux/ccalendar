@@ -20,9 +20,7 @@ LIBS=		-lm
 
 OS?=		$(shell uname -s)
 ifeq ($(OS),Linux)
-CFLAGS+=	-D_GNU_SOURCE
-CFLAGS+=	$(shell pkg-config --cflags libbsd-overlay)
-LIBS+=		$(shell pkg-config --libs   libbsd-overlay)
+CFLAGS+=	-D_GNU_SOURCE -D__dead2=
 endif
 
 all: $(PROG) $(MAN)

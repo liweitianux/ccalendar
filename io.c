@@ -48,7 +48,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stringlist.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -68,7 +67,7 @@ static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist *
 
 static bool allmode = false; /* whether to run for all users */
 
-static StringList *definitions = NULL;
+static struct node *definitions = NULL;
 static struct event *events[MAXCOUNT] = { NULL };
 static char *extradata[MAXCOUNT] = { NULL };
 
@@ -216,9 +215,8 @@ tokenize(char *line, FILE *out, bool *skip)
 			return (T_ERR);
 		}
 
-		if (definitions == NULL)
-			definitions = sl_init();
-		sl_add(definitions, xstrdup(walk));
+		struct node *new = list_newnode(xstrdup(walk), NULL);
+		definitions = list_addfront(definitions, new);
 
 		return (T_OK);
 
@@ -229,7 +227,7 @@ tokenize(char *line, FILE *out, bool *skip)
 			return (T_ERR);
 		}
 
-		if (definitions != NULL && sl_find(definitions, walk) != NULL)
+		if (list_lookup(definitions, walk, strcmp) != NULL)
 			*skip = true;
 
 		return (T_OK);

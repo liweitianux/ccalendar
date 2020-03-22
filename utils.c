@@ -259,3 +259,52 @@ count_char(const char *s, int ch)
 
 	return count;
 }
+
+
+struct node {
+	char		*name;
+	void		*data;
+	struct node	*next;
+};
+
+/*
+ * Create a new list node with the given $name and $data.
+ */
+struct node *
+list_newnode(char *name, void *data)
+{
+	struct node *newp;
+
+	newp = xcalloc(1, sizeof(*newp));
+	newp->name = name;
+	newp->data = data;
+
+	return newp;
+}
+
+/*
+ * Add $newp to the front of list $listp.
+ */
+struct node *
+list_addfront(struct node *listp, struct node *newp)
+{
+	newp->next = listp;
+	return newp;
+}
+
+/*
+ * Lookup the given $name in the list $listp.
+ * The $cmp function compares two names and return 0 if they equal.
+ * Return the associated data with the found node, otherwise NULL.
+ */
+void *
+list_lookup(struct node *listp, const char *name,
+	    int (*cmp)(const char *, const char *))
+{
+	for ( ; listp; listp = listp->next) {
+		if ((*cmp)(name, listp->name) == 0)
+			return listp->data;
+	}
+
+	return NULL;
+}

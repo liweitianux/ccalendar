@@ -16,7 +16,6 @@ Installaion
 Requirements:
 * GCC
 * GNU Make
-* libbsd (on Linux)
 
 Build and installation:
 1. `make [PREFIX=/usr/local]`
