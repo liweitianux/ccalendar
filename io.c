@@ -504,7 +504,7 @@ closecal(FILE *fp)
 	write_mailheader(pdes[1]);
 	rewind(fp);
 	while ((nread = read(fileno(fp), buf, sizeof(buf))) > 0)
-		write(pdes[1], buf, nread);
+		write(pdes[1], buf, (size_t)nread);
 	close(pdes[1]);
 
 done:

@@ -109,20 +109,25 @@ setnnames(void)
 void
 setnsequences(const char *seq)
 {
+	const char *p = seq;
+	size_t len;
+
 	if (count_char(seq, ' ') != NSEQUENCES - 1) {
 		warnx("Invalid SEQUENCE: %s", seq);
 		return;
 	}
 
-	const char *p = seq;
 	for (int i = 0; i < NSEQUENCES; i++) {
 		while (*p != ' ' && *p != '\0')
 			p++;
 
 		if (nsequences[i] != NULL)
 			free(nsequences[i]);
-		nsequences[i] = xcalloc(1, p - seq + 1);
-		strncpy(nsequences[i], seq, p - seq);
+
+		len = (size_t)(p - seq);
+		nsequences[i] = xcalloc(1, len + 1);
+		strncpy(nsequences[i], seq, len);
+
 		seq = ++p;
 	}
 }
