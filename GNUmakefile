@@ -14,7 +14,7 @@ CFLAGS+=	-DCALENDAR_DIR='"$(CALENDAR_DIR)"'
 CFLAGS+=	-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
 		-Wwrite-strings -Wcast-qual -Wcast-align \
 		-Wduplicated-cond -Wduplicated-branches \
-		-Wrestrict -Wnull-dereference -Wconversion
+		-Wrestrict -Wnull-dereference -Wsign-conversion
 
 LIBS=		-lm
 

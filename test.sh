@@ -6,7 +6,7 @@ CFLAGS="-std=c99 -pedantic -O2 -pipe"
 CFLAGS="${CFLAGS} -Wall -Wextra -Wlogical-op -Wshadow -Wformat=2
 	-Wwrite-strings -Wcast-qual -Wcast-align
 	-Wduplicated-cond -Wduplicated-branches
-	-Wrestrict -Wnull-dereference -Wconversion"
+	-Wrestrict -Wnull-dereference -Wsign-conversion"
 CFLAGS="${CFLAGS} $(pkg-config --cflags libbsd-overlay)"
 CFLAGS="${CFLAGS} -DCALENDAR_DIR=\"/usr/local/share/calendar\""
 LDFLAGS="-lm $(pkg-config --libs   libbsd-overlay)"
