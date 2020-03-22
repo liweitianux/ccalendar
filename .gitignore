@@ -1,0 +1,5 @@
+*.gz
+*.o
+/calendar
+/calendar.1
+/tags
