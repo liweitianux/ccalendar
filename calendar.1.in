@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd January 30, 2020
+.Dd March 22, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -201,7 +201,7 @@ If the shared file is not referenced by a full pathname,
 .Xr calendar 1
 searches in the current (or home) directory first, and then in the
 directory
-.Pa /usr/share/calendar .
+.Pa @@CALENDAR_DIR@@ .
 Unrecognized lines, for example empty lines and comment lines,
 are ignored.
 .Pp
@@ -247,7 +247,7 @@ do not send mail if this file exists.
 .El
 .Pp
 The following default calendar files are provided in
-.Pa /usr/share/calendar :
+.Pa @@CALENDAR_DIR@@ :
 .Pp
 .Bl -tag -width calendar.southafrica -compact
 .It Pa calendar.all

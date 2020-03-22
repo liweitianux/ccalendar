@@ -62,7 +62,7 @@ enum {
 };
 
 const char *calendarFile = "calendar"; /* default calendar file */
-static const char *calendarHomes[] = {".calendar", "/usr/share/calendar"};
+static const char *calendarHomes[] = { ".calendar", CALENDAR_DIR };
 static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
 
 static bool allmode = false; /* whether to run for all users */

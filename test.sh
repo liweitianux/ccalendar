@@ -8,6 +8,7 @@ CFLAGS="${CFLAGS} -Wall -Wextra -Wlogical-op -Wshadow -Wformat=2
 	-Wduplicated-cond -Wduplicated-branches
 	-Wrestrict -Wnull-dereference -Wconversion"
 CFLAGS="${CFLAGS} $(pkg-config --cflags libbsd-overlay)"
+CFLAGS="${CFLAGS} -DCALENDAR_DIR=\"/usr/local/share/calendar\""
 LDFLAGS="-lm $(pkg-config --libs   libbsd-overlay)"
 
 [ "$(uname -s)" = "Linux" ] && CFLAGS="${CFLAGS} -D_DEFAULT_SOURCE"
