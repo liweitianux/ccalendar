@@ -16,8 +16,14 @@ CFLAGS+=	-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
 		-Wduplicated-cond -Wduplicated-branches \
 		-Wrestrict -Wnull-dereference -Wconversion
 
+LIBS=		-lm
+
+OS?=		$(shell uname -s)
+ifeq ($(OS),Linux)
+CFLAGS+=	-D_GNU_SOURCE
 CFLAGS+=	$(shell pkg-config --cflags libbsd-overlay)
-LIBS=		$(shell pkg-config --libs   libbsd-overlay) -lm
+LIBS+=		$(shell pkg-config --libs   libbsd-overlay)
+endif
 
 all: $(PROG) $(MAN)
 
