@@ -308,3 +308,23 @@ list_lookup(struct node *listp, const char *name,
 
 	return NULL;
 }
+
+/*
+ * Free all nodes of list $listp.
+ */
+void
+list_freeall(struct node *listp,
+	     void (*free_name)(void *),
+	     void (*free_data)(void *))
+{
+	struct node *next;
+
+	for ( ; listp; listp = next) {
+		next = listp->next;
+		if (free_name)
+			(*free_name)(listp->name);
+		if (free_data)
+			(*free_data)(listp->data);
+		free(listp);
+	}
+}

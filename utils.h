@@ -91,5 +91,7 @@ struct node *	list_newnode(char *name, void *data);
 struct node *	list_addfront(struct node *listp, struct node *newp);
 void *		list_lookup(struct node *listp, const char *name,
 			    int (*cmp)(const char *, const char *));
+void		list_freeall(struct node *listp, void (*free_name)(void *),
+			     void (*free_data)(void *));
 
 #endif

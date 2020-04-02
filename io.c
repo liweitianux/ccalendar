@@ -434,6 +434,9 @@ cal(bool doall)
 		}
 		event_print_all(stdout);
 	}
+
+	list_freeall(definitions, free, NULL);
+	definitions = NULL;
 }
 
 static FILE *
