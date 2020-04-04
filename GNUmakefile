@@ -5,7 +5,7 @@ SRCS=		calendar.c dates.c day.c events.c io.c locale.c ostern.c \
 OBJS=		$(SRCS:.c=.o)
 
 PREFIX?=	/usr/local
-MAN_DIR?=	$(PREFIX)/man
+MAN_DIR?=	$(PREFIX)/share/man
 CALENDAR_DIR?=	$(PREFIX)/share/calendar
 
 CSTD?=		c99
@@ -33,8 +33,8 @@ $(MAN): $(MAN).in
 
 install:
 	install -s -Dm 0755 $(PROG) $(PREFIX)/bin/$(PROG)
-	install -Dm 0644 $(MAN) $(PREFIX)/man/man1/$(MAN)
-	gzip -9 $(PREFIX)/man/man1/$(MAN)
+	install -Dm 0644 $(MAN) $(MAN_DIR)/man1/$(MAN)
+	gzip -9 $(MAN_DIR)/man1/$(MAN)
 	[ -d "$(CALENDAR_DIR)" ] || mkdir -p $(CALENDAR_DIR)
 	cp -R calendars/* $(CALENDAR_DIR)/
 	find $(CALENDAR_DIR)/ -type d | xargs chmod 0755
