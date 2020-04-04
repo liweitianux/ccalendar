@@ -8,6 +8,9 @@ PREFIX?=	/usr/local
 MAN_DIR?=	$(PREFIX)/share/man
 CALENDAR_DIR?=	$(PREFIX)/share/calendar
 
+TMPDIR?=	/tmp
+ARCHBUILD_DIR?=	$(TMPDIR)/$(PROG)-archbuild
+
 CSTD?=		c99
 CFLAGS=		-std=${CSTD} -pedantic -O2 -pipe
 CFLAGS+=	-DCALENDAR_DIR='"$(CALENDAR_DIR)"'
@@ -43,4 +46,14 @@ install:
 clean:
 	rm -f $(PROG) $(OBJS) $(MAN) $(MAN).gz
 
-.PHONY: all install clean
+archpkg:
+	mkdir -p $(ARCHBUILD_DIR)/src
+	cp linux/PKGBUILD $(ARCHBUILD_DIR)/
+	cp -Rp * $(ARCHBUILD_DIR)/src
+	( cd $(ARCHBUILD_DIR) && makepkg )
+	@pkg=`( cd $(ARCHBUILD_DIR); ls $(PROG)-*.pkg.* )` ; \
+		cp -v $(ARCHBUILD_DIR)/$${pkg} . ; \
+		rm -rf $(ARCHBUILD_DIR) ; \
+		echo "Install with: 'sudo pacman -U $${pkg}'"
+
+.PHONY: all install clean archpkg
