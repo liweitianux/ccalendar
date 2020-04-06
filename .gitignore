@@ -1,5 +1,10 @@
+*.deb
 *.gz
+*.html
 *.o
+*.rpm
+*.xz
 /calendar
 /calendar.1
 /tags
+/test
