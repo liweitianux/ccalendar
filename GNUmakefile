@@ -2,6 +2,7 @@ PROG=		calendar
 MAN=		calendar.1
 SRCS=		$(wildcard src/*.c)
 OBJS=		$(SRCS:.c=.o)
+DISTFILES=	GNUmakefile LICENSE README.md calendars src $(MAN).in
 
 PREFIX?=	/usr/local
 MAN_DIR?=	$(PREFIX)/share/man
@@ -48,7 +49,7 @@ clean:
 archpkg:
 	mkdir -p $(ARCHBUILD_DIR)/src
 	cp linux/PKGBUILD $(ARCHBUILD_DIR)/
-	cp -Rp * $(ARCHBUILD_DIR)/src
+	cp -Rp $(DISTFILES) $(ARCHBUILD_DIR)/src/
 	( cd $(ARCHBUILD_DIR) && makepkg )
 	@pkg=`( cd $(ARCHBUILD_DIR); ls $(PROG)-*.pkg.* )` ; \
 		cp -v $(ARCHBUILD_DIR)/$${pkg} . ; \
