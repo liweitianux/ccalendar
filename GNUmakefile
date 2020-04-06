@@ -1,7 +1,6 @@
 PROG=		calendar
 MAN=		calendar.1
-SRCS=		calendar.c dates.c day.c events.c io.c locale.c ostern.c \
-		parsedata.c paskha.c pom.c sunpos.c utils.c
+SRCS=		$(wildcard src/*.c)
 OBJS=		$(SRCS:.c=.o)
 
 PREFIX?=	/usr/local
