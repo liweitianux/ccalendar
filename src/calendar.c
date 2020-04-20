@@ -59,6 +59,7 @@ int
 main(int argc, char *argv[])
 {
 	bool	doall = false;
+	int	ret = 0;
 	int	f_dayAfter = 0;		/* days after current date */
 	int	f_dayBefore = 0;	/* days before current date */
 	int	Friday = 5;		/* day before weekend */
@@ -178,15 +179,15 @@ main(int argc, char *argv[])
 				if (setuid(pw->pw_uid) == -1)
 					err(1, "setuid(%d)", (int)pw->pw_uid);
 
-				cal(doall);
-				exit(0);
+				ret = cal(doall);
+				exit(ret);
 			}
 		}
 	} else {
-		cal(doall);
+		ret = cal(doall);
 	}
 
-	return (0);
+	return (ret);
 }
 
 

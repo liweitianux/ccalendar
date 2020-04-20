@@ -392,7 +392,7 @@ cal_parse(FILE *in, FILE *out)
 	return (true);
 }
 
-void
+int
 cal(bool doall)
 {
 	FILE *fpin;
@@ -401,7 +401,7 @@ cal(bool doall)
 	allmode = doall;
 
 	if ((fpin = opencalin()) == NULL)
-		return;
+		return 1;
 
 	if (allmode) {
 		/*
@@ -416,13 +416,13 @@ cal(bool doall)
 		if ((fd = mkstemp(caloutfile)) < 0) {
 			warn("mkstemp");
 			fclose(fpin);
-			return;
+			return 1;
 		}
 		fpout = fdopen(fd, "w");
 
 		if (!cal_parse(fpin, fpout)) {
 			warnx("Failed to parse calendar files");
-			return;
+			return 1;
 		}
 
 		event_print_all(fpout);
@@ -431,13 +431,15 @@ cal(bool doall)
 	} else {
 		if (!cal_parse(fpin, stdout)) {
 			warnx("Failed to parse calendar files");
-			return;
+			return 1;
 		}
 		event_print_all(stdout);
 	}
 
 	list_freeall(definitions, free, NULL);
 	definitions = NULL;
+
+	return 0;
 }
 
 static FILE *

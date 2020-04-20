@@ -139,7 +139,7 @@ time_t	Mktime(const char *s);
 extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
 extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
 
-void	cal(bool doall);
+int	cal(bool doall);
 
 /* ostern.c / paskha.c */
 int	paskha(int year);
