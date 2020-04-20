@@ -269,7 +269,8 @@ cal_parse(FILE *in, FILE *out)
 	char *pp, p;
 	int flags;
 
-	assert(in != NULL && out != NULL);
+	if (in == NULL)
+		return (false);
 
 	d_first = locale_day_first();
 
