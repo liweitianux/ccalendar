@@ -168,7 +168,7 @@ tokenize(char *line, FILE *out, bool *skip)
 		return true;
 
 	if (string_eqn(line, "include")) {
-		walk = trimlr(line + strlen("include"));
+		walk = triml(line + strlen("include"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
 			return false;
@@ -208,7 +208,7 @@ tokenize(char *line, FILE *out, bool *skip)
 		return true;
 
 	} else if (string_eqn(line, "define")) {
-		walk = trimlr(line + strlen("define"));
+		walk = triml(line + strlen("define"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
 			return false;
@@ -220,7 +220,7 @@ tokenize(char *line, FILE *out, bool *skip)
 		return true;
 
 	} else if (string_eqn(line, "ifndef")) {
-		walk = trimlr(line + strlen("ifndef"));
+		walk = triml(line + strlen("ifndef"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
 			return false;
@@ -269,8 +269,12 @@ cal_parse(FILE *in, FILE *out)
 	d_first = locale_day_first();
 
 	while ((linelen = getline(&line, &linecap, in)) > 0) {
-		if (*line == '#') {
-			if (!tokenize(line+1, out, &skip)) {
+		buf = trimr(line);  /* Need to keep the leading tabs */
+		if (*buf == '\0')
+			continue;
+
+		if (*buf == '#') {
+			if (!tokenize(buf+1, out, &skip)) {
 				free(line);
 				return (false);
 			}
@@ -280,9 +284,6 @@ cal_parse(FILE *in, FILE *out)
 		if (skip)
 			continue;
 
-		buf = trimr(line);
-		if (*buf == '\0')
-			continue;
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
 		if (string_eqn(buf, "LANG=")) {
