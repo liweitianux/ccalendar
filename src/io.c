@@ -164,6 +164,11 @@ tokenize(char *line, FILE *out, bool *skip)
 {
 	char *walk;
 
+	if (string_eqn(line, "endif")) {
+		*skip = false;
+		return (T_OK);
+	}
+
 	if (*skip)
 		return (T_OK);
 
@@ -202,7 +207,6 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		walk++;
 		walk[strlen(walk) - 1] = '\0';
-
 		if (!cal_parse(cal_fopen(walk), out))
 			return (T_ERR);
 
@@ -231,15 +235,10 @@ tokenize(char *line, FILE *out, bool *skip)
 			*skip = true;
 
 		return (T_OK);
-
-	} else if (string_eqn(line, "endif")) {
-		*skip = false;
-		return (T_OK);
-
-	} else {
-		warnx("Unknown token line: %s", line);
-		return (T_ERR);
 	}
+
+	warnx("Unknown token line: %s", line);
+	return (T_ERR);
 }
 
 static bool
