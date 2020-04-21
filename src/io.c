@@ -55,11 +55,6 @@
 #include "parsedata.h"
 #include "utils.h"
 
-enum {
-	T_OK = 0,
-	T_ERR,
-	T_PROCESS,
-};
 
 const char *calendarFile = "calendar"; /* default calendar file */
 static const char *calendarHomes[] = { ".calendar", CALENDAR_DIR };
@@ -86,7 +81,7 @@ static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in, FILE *out);
 static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
-static int	 tokenize(char *line, FILE *out, bool *skip);
+static bool	 tokenize(char *line, FILE *out, bool *skip);
 static char	*triml(char *s);
 static char	*trimlr(char *s);
 static char	*trimr(char *s);
@@ -159,28 +154,28 @@ cal_fopen(const char *file)
 	return (fp);
 }
 
-static int
+static bool
 tokenize(char *line, FILE *out, bool *skip)
 {
 	char *walk;
 
 	if (string_eqn(line, "endif")) {
 		*skip = false;
-		return (T_OK);
+		return true;
 	}
 
-	if (*skip)
-		return (T_OK);
+	if (*skip)  /* deal with nested #ifndef */
+		return true;
 
 	if (string_eqn(line, "include")) {
 		walk = trimlr(line + strlen("include"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
-			return (T_ERR);
+			return false;
 		}
 		if (*walk != '<' && *walk != '\"') {
 			warnx("Expecting '<' or '\"' after #include");
-			return (T_ERR);
+			return false;
 		}
 
 		char a = *walk;
@@ -190,55 +185,55 @@ tokenize(char *line, FILE *out, bool *skip)
 		case '>':
 			if (a != '<') {
 				warnx("Unterminated include expecting '\"'");
-				return (T_ERR);
+				return false;
 			}
 			break;
 		case '\"':
 			if (a != '\"') {
 				warnx("Unterminated include expecting '>'");
-				return (T_ERR);
+				return false;
 			}
 			break;
 		default:
 			warnx("Unterminated include expecting '%c'",
 			      (a == '<') ? '>' : '\"' );
-			return (T_ERR);
+			return false;
 		}
 
 		walk++;
 		walk[strlen(walk) - 1] = '\0';
 		if (!cal_parse(cal_fopen(walk), out))
-			return (T_ERR);
+			return false;
 
-		return (T_OK);
+		return true;
 
 	} else if (string_eqn(line, "define")) {
 		walk = trimlr(line + strlen("define"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
-			return (T_ERR);
+			return false;
 		}
 
 		struct node *new = list_newnode(xstrdup(walk), NULL);
 		definitions = list_addfront(definitions, new);
 
-		return (T_OK);
+		return true;
 
 	} else if (string_eqn(line, "ifndef")) {
 		walk = trimlr(line + strlen("ifndef"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
-			return (T_ERR);
+			return false;
 		}
 
 		if (list_lookup(definitions, walk, strcmp, NULL))
 			*skip = true;
 
-		return (T_OK);
+		return true;
 	}
 
 	warnx("Unknown token line: %s", line);
-	return (T_ERR);
+	return false;
 }
 
 static bool
@@ -275,17 +270,11 @@ cal_parse(FILE *in, FILE *out)
 
 	while ((linelen = getline(&line, &linecap, in)) > 0) {
 		if (*line == '#') {
-			switch (tokenize(line+1, out, &skip)) {
-			case T_ERR:
+			if (!tokenize(line+1, out, &skip)) {
 				free(line);
 				return (false);
-			case T_OK:
-				continue;
-			case T_PROCESS:
-				break;
-			default:
-				break;
 			}
+			continue;
 		}
 
 		if (skip)
