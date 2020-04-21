@@ -297,16 +297,19 @@ list_addfront(struct node *listp, struct node *newp)
  * The $cmp function compares two names and return 0 if they equal.
  * Return the associated data with the found node, otherwise NULL.
  */
-void *
+bool
 list_lookup(struct node *listp, const char *name,
-	    int (*cmp)(const char *, const char *))
+	    int (*cmp)(const char *, const char *), void **data_out)
 {
 	for ( ; listp; listp = listp->next) {
-		if ((*cmp)(name, listp->name) == 0)
-			return listp->data;
+		if ((*cmp)(name, listp->name) == 0) {
+			if (data_out)
+				*data_out = listp->data;
+			return true;
+		}
 	}
 
-	return NULL;
+	return false;
 }
 
 /*

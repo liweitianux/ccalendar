@@ -227,7 +227,7 @@ tokenize(char *line, FILE *out, bool *skip)
 			return (T_ERR);
 		}
 
-		if (list_lookup(definitions, walk, strcmp) != NULL)
+		if (list_lookup(definitions, walk, strcmp, NULL))
 			*skip = true;
 
 		return (T_OK);
