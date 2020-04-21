@@ -159,7 +159,7 @@ tokenize(char *line, FILE *out, bool *skip)
 {
 	char *walk;
 
-	if (string_eqn(line, "endif")) {
+	if (string_eqn(line, "#endif")) {
 		*skip = false;
 		return true;
 	}
@@ -167,8 +167,8 @@ tokenize(char *line, FILE *out, bool *skip)
 	if (*skip)  /* deal with nested #ifndef */
 		return true;
 
-	if (string_eqn(line, "include")) {
-		walk = triml(line + strlen("include"));
+	if (string_eqn(line, "#include")) {
+		walk = triml(line + sizeof("#include"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
 			return false;
@@ -207,8 +207,8 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return true;
 
-	} else if (string_eqn(line, "define")) {
-		walk = triml(line + strlen("define"));
+	} else if (string_eqn(line, "#define")) {
+		walk = triml(line + sizeof("#define"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
 			return false;
@@ -219,8 +219,8 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return true;
 
-	} else if (string_eqn(line, "ifndef")) {
-		walk = triml(line + strlen("ifndef"));
+	} else if (string_eqn(line, "#ifndef")) {
+		walk = triml(line + sizeof("#ifndef"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
 			return false;
@@ -274,7 +274,7 @@ cal_parse(FILE *in, FILE *out)
 			continue;
 
 		if (*buf == '#') {
-			if (!tokenize(buf+1, out, &skip)) {
+			if (!tokenize(buf, out, &skip)) {
 				free(line);
 				return (false);
 			}
