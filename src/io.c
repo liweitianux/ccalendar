@@ -249,22 +249,20 @@ locale_day_first(void)
 static bool
 cal_parse(FILE *in, FILE *out)
 {
-	struct tm tm = { 0 };
-	char *line = NULL;
-	char *buf;
-	size_t linecap = 0;
-	ssize_t linelen;
-	int count = 0;
-	int i;
-	int month[MAXCOUNT];
-	int day[MAXCOUNT];
-	int year[MAXCOUNT];
-	bool d_first;
-	bool skip = false;
-	bool locale_changed = false;
-	char dbuf[80];
-	char *pp, p;
-	int flags;
+	struct tm	tm = { 0 };
+	ssize_t		linelen;
+	size_t		linecap = 0;
+	char		*line = NULL;
+	char		*buf, *pp;
+	char		dbuf[80];
+	bool		d_first;
+	bool		skip = false;
+	bool		locale_changed = false;
+	int		flags;
+	int		count = 0;
+	int		month[MAXCOUNT];
+	int		day[MAXCOUNT];
+	int		year[MAXCOUNT];
 
 	if (in == NULL)
 		return (false);
@@ -286,7 +284,6 @@ cal_parse(FILE *in, FILE *out)
 
 		if (skip)
 			continue;
-
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
 		if (string_startswith(buf, "LANG=")) {
@@ -327,7 +324,7 @@ cal_parse(FILE *in, FILE *out)
 		 * added to the previous line
 		 */
 		if (buf[0] == '\t') {
-			for (i = 0; i < count; i++)
+			for (int i = 0; i < count; i++)
 				event_continue(events[i], buf);
 			continue;
 		}
@@ -343,10 +340,10 @@ cal_parse(FILE *in, FILE *out)
 		while (isspace((unsigned char)pp[-1]))
 			pp--;
 
-		p = *pp;
+		char ch = *pp;
 		*pp = '\0';
 		count = parsedaymonth(buf, year, month, day, &flags, extradata);
-		*pp = p;
+		*pp = ch;
 		if (count == 0) {
 			logdebug("%s() ignored: |%s|\n", __func__, buf);
 			continue;
@@ -356,7 +353,7 @@ cal_parse(FILE *in, FILE *out)
 		while (pp[1] == '\t')
 			pp++;
 
-		for (i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			tm.tm_year = year[i] - 1900;
 			tm.tm_mon = month[i] - 1;
 			tm.tm_mday = day[i];
