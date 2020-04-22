@@ -160,7 +160,7 @@ determinestyle(const char *date, int *flags,
 		fprintf(stderr, "-------\ndate: |%s|\n", date);
 
 #define CHECKSPECIAL(s1, s2, type)					\
-	if (string_eqn(s1, s2)) {					\
+	if (string_startswith(s1, s2)) {				\
 		*flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
 		if (strlen(s1) == strlen(s2)) {				\
 			strcpy(specialday, s1);				\

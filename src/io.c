@@ -167,8 +167,8 @@ tokenize(char *line, FILE *out, bool *skip)
 	if (*skip)  /* deal with nested #ifndef */
 		return true;
 
-	if (string_eqn(line, "#include ") ||
-	    string_eqn(line, "#include\t")) {
+	if (string_startswith(line, "#include ") ||
+	    string_startswith(line, "#include\t")) {
 		walk = triml(line + sizeof("#include"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #include");
@@ -208,8 +208,8 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return true;
 
-	} else if (string_eqn(line, "#define ") ||
-	           string_eqn(line, "#define\t")) {
+	} else if (string_startswith(line, "#define ") ||
+	           string_startswith(line, "#define\t")) {
 		walk = triml(line + sizeof("#define"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #define");
@@ -221,8 +221,8 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		return true;
 
-	} else if (string_eqn(line, "#ifndef ") ||
-	           string_eqn(line, "#ifndef\t")) {
+	} else if (string_startswith(line, "#ifndef ") ||
+	           string_startswith(line, "#ifndef\t")) {
 		walk = triml(line + sizeof("#ifndef"));
 		if (*walk == '\0') {
 			warnx("Expecting arguments after #ifndef");
@@ -289,7 +289,7 @@ cal_parse(FILE *in, FILE *out)
 
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
-		if (string_eqn(buf, "LANG=")) {
+		if (string_startswith(buf, "LANG=")) {
 			setlocale(LC_ALL, buf + strlen("LANG="));
 			d_first = locale_day_first();
 			setnnames();
@@ -317,7 +317,7 @@ cal_parse(FILE *in, FILE *out)
 		REPLACE("DecSolstice=", ndecsolstice);
 #undef	REPLACE
 
-		if (string_eqn(buf, "SEQUENCE=")) {
+		if (string_startswith(buf, "SEQUENCE=")) {
 			setnsequences(buf + strlen("SEQUENCE="));
 			continue;
 		}
