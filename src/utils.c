@@ -320,14 +320,15 @@ list_freeall(struct node *listp,
 	     void (*free_name)(void *),
 	     void (*free_data)(void *))
 {
-	struct node *next;
+	struct node *cur;
 
-	for ( ; listp; listp = next) {
-		next = listp->next;
+	while (listp) {
+		cur = listp;
+		listp = listp->next;
 		if (free_name)
-			(*free_name)(listp->name);
+			(*free_name)(cur->name);
 		if (free_data)
-			(*free_data)(listp->data);
-		free(listp);
+			(*free_data)(cur->data);
+		free(cur);
 	}
 }
