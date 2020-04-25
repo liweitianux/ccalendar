@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd March 22, 2020
+.Dd April 25, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -204,6 +204,11 @@ directory
 .Pa @@CALENDAR_DIR@@ .
 Unrecognized lines, for example empty lines and comment lines,
 are ignored.
+Both the C-style comment
+.Pq Li /* ... */
+and C++-style comment
+.Pq Li // ...
+are supported.
 .Pp
 Some possible calendar entries (<tab> characters highlighted by
 \fB\et\fR sequence):
@@ -363,6 +368,7 @@ internal preprocessor only recognizes
 .Sy #endif ,
 and
 .Sy #define .
+Quoted or escaped comment marks are not supported yet.
 .Pp
 There is no possibility to properly specify the local position
 needed for solar and lunar calculations.

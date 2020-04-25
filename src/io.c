@@ -55,6 +55,7 @@
 #include "parsedata.h"
 #include "utils.h"
 
+enum { C_NONE, C_LINE, C_BLOCK };
 
 const char *calendarFile = "calendar"; /* default calendar file */
 static const char *calendarHomes[] = { ".calendar", CALENDAR_DIR };
@@ -81,6 +82,7 @@ static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in, FILE *out);
 static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
+static char	*skip_comment(char *line, int *comment);
 static bool	 tokenize(char *line, FILE *out, bool *skip);
 static char	*triml(char *s);
 static char	*trimlr(char *s);
@@ -114,6 +116,47 @@ trimlr(char *s)
 {
 	return trimr(triml(s));
 }
+
+/*
+ * XXX: Quoted or escaped comment marks are not supported yet.
+ */
+static char *
+skip_comment(char *line, int *comment)
+{
+	char *p, *pp;
+
+	if (*comment == C_LINE) {
+		*line = '\0';
+		*comment = C_NONE;
+		return line;
+	} else if (*comment == C_BLOCK) {
+		for (p = line, pp = p + 1; *p; p++, pp = p + 1) {
+			if (*p == '*' && *pp == '/') {
+				*comment = C_NONE;
+				return p + 2;
+			}
+		}
+		*line = '\0';
+		return line;
+	} else {
+		*comment = C_NONE;
+		for (p = line, pp = p + 1; *p; p++, pp = p + 1) {
+			if (*p == '/' && (*pp == '/' || *pp == '*')) {
+				*comment = (*pp == '/') ? C_LINE : C_BLOCK;
+				break;
+			}
+		}
+		if (*comment != C_NONE) {
+			pp = skip_comment(p, comment);
+			if (pp > p)
+				memmove(p, pp, strlen(pp) + 1);
+		}
+		return line;
+	}
+
+	return line;
+}
+
 
 static FILE *
 cal_fopen(const char *file)
@@ -154,6 +197,9 @@ cal_fopen(const char *file)
 	return (fp);
 }
 
+/*
+ * NOTE: input 'line' should have trailing comment and whitespace trimed
+ */
 static bool
 tokenize(char *line, FILE *out, bool *skip)
 {
@@ -260,6 +306,7 @@ cal_parse(FILE *in, FILE *out)
 	bool		locale_changed = false;
 	int		flags;
 	int		count = 0;
+	int		comment = C_NONE;
 	int		month[MAXCOUNT];
 	int		day[MAXCOUNT];
 	int		year[MAXCOUNT];
@@ -270,7 +317,8 @@ cal_parse(FILE *in, FILE *out)
 	d_first = locale_day_first();
 
 	while ((linelen = getline(&line, &linecap, in)) > 0) {
-		buf = trimr(line);  /* Need to keep the leading tabs */
+		buf = skip_comment(line, &comment);
+		buf = trimr(buf);  /* Need to keep the leading tabs */
 		if (*buf == '\0')
 			continue;
 
