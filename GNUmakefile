@@ -28,6 +28,9 @@ endif
 
 all: $(PROG) $(MAN)
 
+debug: $(PROG)
+debug: CFLAGS+=-DDEBUG
+
 $(PROG): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
 
@@ -56,4 +59,4 @@ archpkg:
 		rm -rf $(ARCHBUILD_DIR) ; \
 		echo "Install with: 'sudo pacman -U $${pkg}'"
 
-.PHONY: all install clean archpkg
+.PHONY: all debug install clean archpkg
