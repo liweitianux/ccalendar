@@ -76,8 +76,6 @@ static const char *getdayofweekname(int i);
 static const char *getmonthname(int i);
 static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
-static const char *parse_int_ranged(const char *s, size_t len, int min,
-				    int max, int *result);
 static bool	 parse_index(const char *s, int *index);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 			  int yy, int mm, int dd, char *extra);
@@ -1099,7 +1097,7 @@ dodebug(const char *type)
  * Return the pointer to the next character of the parsed string on success,
  * otherwise return NULL.
  */
-static const char *
+const char *
 parse_int_ranged(const char *s, size_t len, int min, int max, int *result)
 {
 	if (strlen(s) < len)

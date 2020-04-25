@@ -39,6 +39,7 @@
 #include <time.h>
 
 #include "calendar.h"
+#include "parsedata.h"
 
 int	year1, year2;
 
@@ -65,35 +66,50 @@ settimes(time_t now, int before, int after, int friday,
 }
 
 /*
- * Parse 'day[.month[.year]]' into unix time (since 1970)
- * day: two digits; month: two digits; year: digits
+ * Parse '[[[cc]yy]mm]dd' date string into UNIX timestamp (since 1970)
  */
 time_t
-Mktime(const char *s)
+Mktime(const char *date)
 {
 	time_t t;
+	size_t len;
 	struct tm tm;
-	int d, m, y;
+	int val;
+
+	len = strlen(date);
+	if (len < 2)
+		return (time_t)-1;
 
 	time(&t);
 	localtime_r(&t, &tm);
+	tm.tm_sec = tm.tm_min = 0;
+	/* Avoid getting caught by a timezone shift; set time to noon */
+	tm.tm_hour = 12;
+	tm.tm_wday = tm.tm_isdst = 0;
 
-	switch (sscanf(s, "%d.%d.%d", &d, &m, &y)) {
-	case 3:
-		if (y > 1900)
-			y -= 1900;
-		tm.tm_year = y;
-		/* FALLTHROUGH */
-	case 2:
-		tm.tm_mon = m - 1;
-		/* FALLTHROUGH */
-	case 1:
-		tm.tm_mday = d;
+	if (parse_int_ranged(date+len-2, 2, 1, 31, &tm.tm_mday) == NULL)
+		return (time_t)-1;
+
+	if (len >= 4) {
+		if (parse_int_ranged(date+len-4, 2, 1, 12, &val) == NULL)
+			return (time_t)-1;
+		tm.tm_mon = val - 1;
+	}
+
+	if (len >= 6) {
+		if (parse_int_ranged(date, len-4, 0, 9999, &val) == NULL)
+			return (time_t)-1;
+		if (val < 69)  /* Y2K */
+			tm.tm_year = val + 100;
+		else if (val < 100)
+			tm.tm_year = val;
+		else
+			tm.tm_year = val - 1900;
 	}
 
 #ifdef DEBUG
-	fprintf(stderr, "%s: %ld %ld %s\n", __func__,
-			(long)mktime(&tm), (long)t, asctime(&tm));
+	t = mktime(&tm);
+	fprintf(stderr, "%s: %ld, %s\n", __func__, (long)t, asctime(&tm));
 #endif
-	return (mktime(&tm));
+	return mktime(&tm);
 }

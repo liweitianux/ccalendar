@@ -133,7 +133,7 @@ void	setnsequences(const char *seq);
 /* day.c */
 void	settimes(time_t now, int before, int after, int friday,
 		 struct tm *tp1, struct tm *tp2);
-time_t	Mktime(const char *s);
+time_t	Mktime(const char *date);
 
 /* io.c */
 extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;

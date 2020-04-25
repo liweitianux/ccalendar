@@ -123,6 +123,8 @@ main(int argc, char *argv[])
 
 		case 't': /* specify date */
 			f_time = Mktime(optarg);
+			if (f_time <= 0)
+				errx(1, "invalid date: |%s|", optarg);
 			localtime_r(&f_time, &tm_now);
 			break;
 
@@ -197,7 +199,7 @@ usage(void)
 	fprintf(stderr, "%s\n%s\n%s\n",
 	    "usage: calendar [-A days] [-a] [-B days] [-D sun|moon] [-d]",
 	    "                [-F friday] [-f calendarfile] [-l longitude]",
-	    "                [-t dd[.mm[.year]]] [-U utcoffset] [-W days]"
+	    "                [-t [[[cc]yy]mm]dd] [-U utcoffset] [-W days]"
 	    );
 	exit(1);
 }

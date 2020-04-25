@@ -45,14 +45,7 @@
 .Op Fl f Ar calendarfile
 .Op Fl h
 .Op Fl l Ar longitude
-.Oo
-.Bk -words
-.Fl t Ar dd Ns
-.Sm off
-.Op . Ar mm Op . Ar year
-.Sm on
-.Ek
-.Oc
+.Op Fl t Ar [[[cc]yy]mm]dd
 .Op Fl U Ar UTC-offset
 .Op Fl W Ar num
 .Sh DESCRIPTION
@@ -97,13 +90,10 @@ Show the utility usage.
 Perform lunar and solar calculations from this longitude.
 If neither longitude nor UTC offset is specified, the calculations will
 be based on the difference between UTC time and localtime.
-.It Xo Fl t
-.Sm off
-.Ar dd
-.Op . Ar mm Op . Ar year
-.Sm on
-.Xc
-For test purposes only: set date directly to the argument value.
+.It Fl t Ar [[[cc]yy]mm]dd
+Act like the specified value is
+.Dq today
+instead of using the current date.
 .It Fl U Ar UTC-offset
 Perform lunar and solar calculations from this UTC offset (in hours).
 If neither UTC offset nor longitude is specified, the calculations
