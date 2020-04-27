@@ -122,7 +122,7 @@ main(int argc, char *argv[])
 			break;
 
 		case 't': /* specify date */
-			if (!Mktime(optarg, &f_time))
+			if (!parse_date(optarg, &f_time))
 				errx(1, "invalid date: |%s|", optarg);
 			localtime_r(&f_time, &tm_now);
 			break;

@@ -76,6 +76,8 @@ static const char *getdayofweekname(int i);
 static const char *getmonthname(int i);
 static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
+static const char *parse_int_ranged(const char *s, size_t len, int min,
+				    int max, int *result);
 static bool	 parse_index(const char *s, int *index);
 static void	 remember(int *index, int *y, int *m, int *d, char **ed,
 			  int yy, int mm, int dd, char *extra);
@@ -1097,7 +1099,7 @@ dodebug(const char *type)
  * Return the pointer to the next character of the parsed string on success,
  * otherwise return NULL.
  */
-const char *
+static const char *
 parse_int_ranged(const char *s, size_t len, int min, int max, int *result)
 {
 	if (strlen(s) < len)
@@ -1239,6 +1241,57 @@ parse_location(const char *s, double *latitude, double *longitude,
 		warnx("%s: unknown value: '%s'", __func__, p);
 		return false;
 	}
+
+	return true;
+}
+
+/*
+ * Parse date string of format '[[[cc]yy]mm]dd' into a UNIX timestamp,
+ * i.e., seconds since the UNIX epoch (1970-01-01T00:00:00Z).
+ * Can be negative, which represents a time before the UNIX epoch.
+ * Return true on success, otherwise false.
+ */
+bool
+parse_date(const char *date, time_t *t_out)
+{
+	time_t t;
+	size_t len;
+	struct tm tm;
+	int val;
+
+	len = strlen(date);
+	if (len < 2)
+		return false;
+
+	time(&t);
+	localtime_r(&t, &tm);
+	tm.tm_sec = tm.tm_min = 0;
+	/* Avoid getting caught by a timezone shift; set time to noon */
+	tm.tm_hour = 12;
+	tm.tm_wday = tm.tm_isdst = 0;
+
+	if (parse_int_ranged(date+len-2, 2, 1, 31, &tm.tm_mday) == NULL)
+		return false;
+
+	if (len >= 4) {
+		if (parse_int_ranged(date+len-4, 2, 1, 12, &val) == NULL)
+			return false;
+		tm.tm_mon = val - 1;
+	}
+
+	if (len >= 6) {
+		if (parse_int_ranged(date, len-4, 0, 9999, &val) == NULL)
+			return false;
+		if (val < 69)  /* Y2K */
+			tm.tm_year = val + 100;
+		else if (val < 100)
+			tm.tm_year = val;
+		else
+			tm.tm_year = val - 1900;
+	}
+
+	*t_out = mktime(&tm);
+	logdebug("%s(): %ld, %s\n", __func__, (long)*t_out, asctime(&tm));
 
 	return true;
 }
