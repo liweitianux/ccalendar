@@ -68,8 +68,8 @@ settimes(time_t now, int before, int after, int friday,
 /*
  * Parse '[[[cc]yy]mm]dd' date string into UNIX timestamp (since 1970)
  */
-time_t
-Mktime(const char *date)
+bool
+Mktime(const char *date, time_t *t_out)
 {
 	time_t t;
 	size_t len;
@@ -78,7 +78,7 @@ Mktime(const char *date)
 
 	len = strlen(date);
 	if (len < 2)
-		return (time_t)-1;
+		return false;
 
 	time(&t);
 	localtime_r(&t, &tm);
@@ -88,17 +88,17 @@ Mktime(const char *date)
 	tm.tm_wday = tm.tm_isdst = 0;
 
 	if (parse_int_ranged(date+len-2, 2, 1, 31, &tm.tm_mday) == NULL)
-		return (time_t)-1;
+		return false;
 
 	if (len >= 4) {
 		if (parse_int_ranged(date+len-4, 2, 1, 12, &val) == NULL)
-			return (time_t)-1;
+			return false;
 		tm.tm_mon = val - 1;
 	}
 
 	if (len >= 6) {
 		if (parse_int_ranged(date, len-4, 0, 9999, &val) == NULL)
-			return (time_t)-1;
+			return false;
 		if (val < 69)  /* Y2K */
 			tm.tm_year = val + 100;
 		else if (val < 100)
@@ -107,9 +107,8 @@ Mktime(const char *date)
 			tm.tm_year = val - 1900;
 	}
 
-#ifdef DEBUG
-	t = mktime(&tm);
-	fprintf(stderr, "%s: %ld, %s\n", __func__, (long)t, asctime(&tm));
-#endif
-	return mktime(&tm);
+	*t_out = mktime(&tm);
+	logdebug("%s(): %ld, %s\n", __func__, (long)*t_out, asctime(&tm));
+
+	return true;
 }
