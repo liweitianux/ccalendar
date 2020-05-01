@@ -53,7 +53,7 @@ double		UTCOffset = 0.0;
 double		EastLongitude = 0.0;
 struct tm	tm_now = { 0 };  /* time/date of calendar events to remind */
 
-static void	usage(void) __dead2;
+static void	usage(const char *progname) __dead2;
 
 int
 main(int argc, char *argv[])
@@ -135,14 +135,12 @@ main(int argc, char *argv[])
 		case 'h':
 		case '?':
 		default:
-			usage();
+			usage(argv[0]);
 		}
 	}
-	argc -= optind;
-	argv += optind;
 
-	if (argc)
-		usage();
+	if (argc > optind)
+		usage(argv[0]);
 
 	setnnames();
 	settimes(f_time, f_dayBefore, f_dayAfter, Friday, &tp1, &tp2);
@@ -193,12 +191,13 @@ main(int argc, char *argv[])
 
 
 static void __dead2
-usage(void)
+usage(const char *progname)
 {
-	fprintf(stderr, "%s\n%s\n%s\n",
-	    "usage: calendar [-A days] [-a] [-B days] [-D sun|moon] [-d]",
-	    "                [-F friday] [-f calendarfile] [-l longitude]",
-	    "                [-t [[[cc]yy]mm]dd] [-U utcoffset] [-W days]"
-	    );
+	fprintf(stderr,
+		"usage:\n"
+		"%s [-A days] [-a] [-B days] [-D sun|moon] [-d]\n"
+		"\t[-F friday] [-f calendarfile] [-l longitude]\n"
+		"\t[-t [[[cc]yy]mm]dd] [-U utcoffset] [-W days]\n",
+		progname);
 	exit(1);
 }
