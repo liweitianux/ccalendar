@@ -766,7 +766,7 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			continue;
 		}
 
-		warnx("%s(): unprocessed date: |%s|\n", __func__, date);
+		warnx("%s(): unprocessed date: |%s|", __func__, date);
 		if (Options.debug) {
 			show_datestyle(lflags, month, imonth, dayofmonth,
 				       idayofmonth, dayofweek, idayofweek,
