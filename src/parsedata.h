@@ -38,6 +38,7 @@
 #define PARSEDATA_H_
 
 #include <stdbool.h>
+#include <time.h>
 
 #define	F_NONE			0x00000
 #define	F_MONTH			0x00001
