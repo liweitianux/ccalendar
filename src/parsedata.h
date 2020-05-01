@@ -38,7 +38,6 @@
 #define PARSEDATA_H_
 
 #include <stdbool.h>
-#include <time.h>
 
 #define	F_NONE			0x00000
 #define	F_MONTH			0x00001
@@ -84,6 +83,6 @@ void	dodebug(const char *type);
 bool	parse_timezone(const char *s, long *result);
 bool	parse_location(const char *s, double *latitude, double *longitude,
 		       double *elevation);
-bool	parse_date(const char *date, time_t *t_out);
+bool	parse_date(const char *date, int *rd_out);
 
 #endif

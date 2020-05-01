@@ -52,6 +52,8 @@
 #include <unistd.h>
 
 #include "calendar.h"
+#include "basics.h"
+#include "gregorian.h"
 #include "parsedata.h"
 #include "utils.h"
 
@@ -553,12 +555,15 @@ write_mailheader(int fd)
 {
 	uid_t uid = getuid();
 	struct passwd *pw = getpwuid(uid);
+	struct g_date date;
 	FILE *fp = fdopen(fd, "w");
 	char dayname[32] = { 0 };
+	enum dayofweek dow;
 
-	setlocale(LC_TIME, "C");
-	strftime(dayname, sizeof(dayname), "%A, %d %B %Y", &Options.now);
-	setlocale(LC_TIME, "");
+	gregorian_from_fixed(Options.today, &date);
+	dow = dayofweek_from_fixed(Options.today);
+	sprintf(dayname, "%s, %02d %s %04d",
+		fdays[dow], date.day, fmonths[date.month-1], date.year);
 
 	fprintf(fp,
 		"From: %s (Reminder Service)\n"

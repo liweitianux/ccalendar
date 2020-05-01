@@ -38,6 +38,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "gregorian.h"
+
 #define	SECSPERDAY	(24 * 60 * 60)
 #define	SECSPERHOUR	(60 * 60)
 #define	SECSPERMINUTE	(60)
@@ -66,7 +68,7 @@
 
 struct cal_options {
 	const char *calendarFile;  /* name of calendar file */
-	struct tm now;  /* time/date of calendar events to remind */
+	int today;  /* R.D. of today to remind events */
 	int year1;  /* year of the beginning day */
 	int year2;  /* year of the ending day */
 	double UTCOffset;
@@ -176,7 +178,7 @@ struct cal_day {
 extern int cumdaytab[][14];
 extern int monthdaytab[][14];
 
-void	generatedates(struct tm *tp1, struct tm *tp2);
+void	generatedates(struct g_date *date1, struct g_date *date2);
 void	dumpdates(void);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);

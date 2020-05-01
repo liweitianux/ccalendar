@@ -65,7 +65,7 @@ createdate(int y, int m, int d)
 	pyp = NULL;
 	py = hyear;
 	while (py != NULL) {
-		if (py->year == y + 1900)
+		if (py->year == y)
 			break;
 		pyp = py;
 		py = py->nextyear;
@@ -76,11 +76,11 @@ createdate(int y, int m, int d)
 		time_t t;
 
 		py = xcalloc(1, sizeof(*py));
-		py->year = y + 1900;
+		py->year = y;
 		py->easter = easter(y);
 		py->paskha = paskha(y);
 
-		td.tm_year = y;
+		td.tm_year = y - 1900;
 		td.tm_mon = 0;
 		td.tm_mday = 1;
 		t = mktime(&td);
@@ -138,18 +138,18 @@ createdate(int y, int m, int d)
 }
 
 void
-generatedates(struct tm *tp1, struct tm *tp2)
+generatedates(struct g_date *date1, struct g_date *date2)
 {
 	int y1, m1, d1;
 	int y2, m2, d2;
 	int y, m, d;
 
-	y1 = tp1->tm_year;
-	m1 = tp1->tm_mon + 1;
-	d1 = tp1->tm_mday;
-	y2 = tp2->tm_year;
-	m2 = tp2->tm_mon + 1;
-	d2 = tp2->tm_mday;
+	y1 = date1->year;
+	m1 = date1->month;
+	d1 = date1->day;
+	y2 = date2->year;
+	m2 = date2->month;
+	d2 = date2->day;
 
 	if (y1 == y2) {
 		if (m1 == m2) {

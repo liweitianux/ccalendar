@@ -46,6 +46,8 @@
 #include <unistd.h>
 
 #include "calendar.h"
+#include "basics.h"
+#include "gregorian.h"
 #include "parsedata.h"
 
 struct cal_options Options = {
@@ -56,6 +58,8 @@ struct cal_options Options = {
 };
 
 static void	usage(const char *progname) __dead2;
+static int	get_fixed_of_today(void);
+static double	get_utc_offset(void);
 
 int
 main(int argc, char *argv[])
@@ -64,18 +68,15 @@ main(int argc, char *argv[])
 	int	ret = 0;
 	int	f_dayAfter = 0;		/* days after current date */
 	int	f_dayBefore = 0;	/* days before current date */
-	int	Friday = 5;		/* day before weekend */
+	int	Friday = 5;		/* days before weekend */
 	int	ch;
-	time_t	f_time, t;
-	struct tm tp1, tp2;
+	enum dayofweek dow;
+	struct g_date gdate1, gdate2;
 	struct passwd *pw;
 	const char *debug_type = NULL;
 
-	setlocale(LC_ALL, "");
-	tzset();
-	f_time = time(NULL);
-	localtime_r(&f_time, &Options.now);
-	Options.UTCOffset = Options.now.tm_gmtoff / FSECSPERHOUR;
+	Options.today = get_fixed_of_today();
+	Options.UTCOffset = get_utc_offset();
 	Options.EastLongitude = Options.UTCOffset * 15;
 
 	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hl:t:U:W:?")) != -1) {
@@ -124,9 +125,8 @@ main(int argc, char *argv[])
 			break;
 
 		case 't': /* specify date */
-			if (!parse_date(optarg, &f_time))
+			if (!parse_date(optarg, &Options.today))
 				errx(1, "invalid date: |%s|", optarg);
-			localtime_r(&f_time, &Options.now);
 			break;
 
 		case 'U': /* Change UTC offset */
@@ -145,19 +145,18 @@ main(int argc, char *argv[])
 		usage(argv[0]);
 
 	/* Friday displays Monday's events */
+	dow = dayofweek_from_fixed(Options.today);
 	if (f_dayAfter == 0 && Friday != -1)
-		f_dayAfter = (Options.now.tm_wday == Friday) ? 3 : 1;
+		f_dayAfter = ((int)dow == Friday) ? 3 : 1;
 
-	t = f_time - SECSPERDAY * f_dayBefore;
-	localtime_r(&t, &tp1);
-	Options.year1 = 1900 + tp1.tm_year;
+	gregorian_from_fixed(Options.today - f_dayBefore, &gdate1);
+	Options.year1 = gdate1.year;
+	gregorian_from_fixed(Options.today + f_dayAfter, &gdate2);
+	Options.year2 = gdate2.year;
 
-	t = f_time + SECSPERDAY * f_dayAfter;
-	localtime_r(&t, &tp2);
-	Options.year2 = 1900 + tp2.tm_year;
+	generatedates(&gdate1, &gdate2);
 
-	generatedates(&tp1, &tp2);
-
+	setlocale(LC_ALL, "");
 	setnnames();
 
 	/*
@@ -203,6 +202,37 @@ main(int argc, char *argv[])
 	return (ret);
 }
 
+
+static int
+get_fixed_of_today(void)
+{
+	time_t now;
+	struct tm tm;
+	struct g_date gdate;
+
+	now = time(NULL);
+	tzset();
+	localtime_r(&now, &tm);
+
+	gdate.year = tm.tm_year + 1900;
+	gdate.month = tm.tm_mon + 1;
+	gdate.day = tm.tm_mday;
+
+	return fixed_from_gregorian(&gdate);
+}
+
+static double
+get_utc_offset(void)
+{
+	time_t now;
+	struct tm tm;
+
+	now = time(NULL);
+	tzset();
+	localtime_r(&now, &tm);
+
+	return (tm.tm_gmtoff / 3600.0);
+}
 
 static void __dead2
 usage(const char *progname)
