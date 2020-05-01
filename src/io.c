@@ -84,7 +84,6 @@ static FILE	*opencalin(void);
 static char	*skip_comment(char *line, int *comment);
 static bool	 tokenize(char *line, FILE *out, bool *skip);
 static char	*triml(char *s);
-static char	*trimlr(char *s);
 static char	*trimr(char *s);
 static void	 write_mailheader(int fd);
 
@@ -108,12 +107,6 @@ trimr(char *s)
 	s[l] = '\0';
 
 	return s;
-}
-
-static char *
-trimlr(char *s)
-{
-	return trimr(triml(s));
 }
 
 /*
