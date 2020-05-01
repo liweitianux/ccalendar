@@ -64,15 +64,18 @@
 #define	MAXCOUNT	125
 
 
-/* Not yet categorized */
+struct cal_options {
+	const char *calendarFile;  /* name of calendar file */
+	struct tm now;  /* time/date of calendar events to remind */
+	int year1;  /* year of the beginning day */
+	int year2;  /* year of the ending day */
+	double UTCOffset;
+	double EastLongitude;
+	bool debug;
+};
 
-extern bool debug;
-extern int year1, year2;
-extern time_t t1, t2;
-extern const char *calendarFile;
-extern struct tm tm_now;  /* time/date of calendar events to remind */
-extern double UTCOffset;
-extern double EastLongitude;
+extern struct cal_options Options;
+
 
 static inline bool
 isleap(int y)
@@ -83,7 +86,7 @@ isleap(int y)
 static inline void
 logdebug(const char *format, ...)
 {
-	if (!debug)
+	if (!Options.debug)
 		return;
 
 	va_list args;

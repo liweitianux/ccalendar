@@ -57,7 +57,6 @@
 
 enum { C_NONE, C_LINE, C_BLOCK };
 
-const char *calendarFile = "calendar"; /* default calendar file */
 static const char *calendarHomes[] = { ".calendar", CALENDAR_DIR };
 static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
 
@@ -486,22 +485,23 @@ opencalin(void)
 	FILE *fpin = NULL;
 
 	/* open up calendar file */
-	if ((fpin = fopen(calendarFile, "r")) == NULL) {
+	if ((fpin = fopen(Options.calendarFile, "r")) == NULL) {
 		if (allmode) {
 			if (chdir(calendarHomes[0]) != 0)
 				return (NULL);
 			if (stat(calendarNoMail, &sbuf) == 0)
 				return (NULL);
-			if ((fpin = fopen(calendarFile, "r")) == NULL)
+			if ((fpin = fopen(Options.calendarFile, "r")) == NULL)
 				return (NULL);
 		} else {
-			fpin = cal_fopen(calendarFile);
+			fpin = cal_fopen(Options.calendarFile);
 		}
 	}
 
 	if (fpin == NULL) {
 		errx(1, "No calendar file: \"%s\" or \"~/%s/%s\"",
-				calendarFile, calendarHomes[0], calendarFile);
+				Options.calendarFile, calendarHomes[0],
+				Options.calendarFile);
 	}
 
 	return (fpin);
@@ -564,7 +564,7 @@ write_mailheader(int fd)
 	char dayname[32] = { 0 };
 
 	setlocale(LC_TIME, "C");
-	strftime(dayname, sizeof(dayname), "%A, %d %B %Y", &tm_now);
+	strftime(dayname, sizeof(dayname), "%A, %d %B %Y", &Options.now);
 	setlocale(LC_TIME, "");
 
 	fprintf(fp,

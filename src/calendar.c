@@ -48,10 +48,12 @@
 #include "calendar.h"
 #include "parsedata.h"
 
-bool		debug = false;
-double		UTCOffset = 0.0;
-double		EastLongitude = 0.0;
-struct tm	tm_now = { 0 };  /* time/date of calendar events to remind */
+struct cal_options Options = {
+	.calendarFile = "calendar",  /* name of default calendar file */
+	.UTCOffset = 0.0,
+	.EastLongitude = 0.0,
+	.debug = false,
+};
 
 static void	usage(const char *progname) __dead2;
 
@@ -72,9 +74,9 @@ main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	tzset();
 	f_time = time(NULL);
-	localtime_r(&f_time, &tm_now);
-	UTCOffset = tm_now.tm_gmtoff / FSECSPERHOUR;
-	EastLongitude = UTCOffset * 15;
+	localtime_r(&f_time, &Options.now);
+	Options.UTCOffset = Options.now.tm_gmtoff / FSECSPERHOUR;
+	Options.EastLongitude = Options.UTCOffset * 15;
 
 	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hl:t:U:W:?")) != -1) {
 		switch (ch) {
@@ -105,7 +107,7 @@ main(int argc, char *argv[])
 			break;
 
 		case 'd': /* debug output of current date */
-			debug = true;
+			Options.debug = true;
 			break;
 
 		case 'F': /* Change the time: When does weekend start? */
@@ -113,23 +115,23 @@ main(int argc, char *argv[])
 			break;
 
 		case 'f': /* other calendar file */
-			calendarFile = optarg;
+			Options.calendarFile = optarg;
 			break;
 
 		case 'l': /* Change longitudal position */
-			EastLongitude = strtod(optarg, NULL);
-			UTCOffset = EastLongitude / 15;
+			Options.EastLongitude = strtod(optarg, NULL);
+			Options.UTCOffset = Options.EastLongitude / 15;
 			break;
 
 		case 't': /* specify date */
 			if (!parse_date(optarg, &f_time))
 				errx(1, "invalid date: |%s|", optarg);
-			localtime_r(&f_time, &tm_now);
+			localtime_r(&f_time, &Options.now);
 			break;
 
 		case 'U': /* Change UTC offset */
-			UTCOffset = strtod(optarg, NULL);
-			EastLongitude = UTCOffset * 15;
+			Options.UTCOffset = strtod(optarg, NULL);
+			Options.EastLongitude = Options.UTCOffset * 15;
 			break;
 
 		case 'h':
@@ -154,7 +156,7 @@ main(int argc, char *argv[])
 		err(1, "setenv");
 	tzset();
 
-	if (debug)
+	if (Options.debug)
 		dumpdates();
 
 	if (debug_type != NULL) {

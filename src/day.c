@@ -41,8 +41,6 @@
 #include "calendar.h"
 #include "parsedata.h"
 
-int	year1, year2;
-
 
 void
 settimes(time_t now, int before, int after, int friday,
@@ -59,8 +57,9 @@ settimes(time_t now, int before, int after, int friday,
 
 	t = now - SECSPERDAY * before;
 	localtime_r(&t, tp1);
-	year1 = 1900 + tp1->tm_year;
+	Options.year1 = 1900 + tp1->tm_year;
+
 	t = now + SECSPERDAY * after;
 	localtime_r(&t, tp2);
-	year2 = 1900 + tp2->tm_year;
+	Options.year2 = 1900 + tp2->tm_year;
 }
