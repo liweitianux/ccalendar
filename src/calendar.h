@@ -133,10 +133,6 @@ extern char *nsequences[];		/* national sequence names */
 void	setnnames(void);
 void	setnsequences(const char *seq);
 
-/* day.c */
-void	settimes(time_t now, int before, int after, int friday,
-		 struct tm *tp1, struct tm *tp2);
-
 /* io.c */
 extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
 extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;

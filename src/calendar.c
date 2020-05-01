@@ -66,7 +66,7 @@ main(int argc, char *argv[])
 	int	f_dayBefore = 0;	/* days before current date */
 	int	Friday = 5;		/* day before weekend */
 	int	ch;
-	time_t	f_time;
+	time_t	f_time, t;
 	struct tm tp1, tp2;
 	struct passwd *pw;
 	const char *debug_type = NULL;
@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 			doall = true;
 			break;
 
-		case 'W': /* we don't need no steenking Fridays */
+		case 'W': /* don't need to specially deal with Fridays */
 			Friday = -1;
 			/* FALLTHROUGH */
 		case 'A': /* days after current date */
@@ -144,9 +144,21 @@ main(int argc, char *argv[])
 	if (argc > optind)
 		usage(argv[0]);
 
-	setnnames();
-	settimes(f_time, f_dayBefore, f_dayAfter, Friday, &tp1, &tp2);
+	/* Friday displays Monday's events */
+	if (f_dayAfter == 0 && Friday != -1)
+		f_dayAfter = (Options.now.tm_wday == Friday) ? 3 : 1;
+
+	t = f_time - SECSPERDAY * f_dayBefore;
+	localtime_r(&t, &tp1);
+	Options.year1 = 1900 + tp1.tm_year;
+
+	t = f_time + SECSPERDAY * f_dayAfter;
+	localtime_r(&t, &tp2);
+	Options.year2 = 1900 + tp2.tm_year;
+
 	generatedates(&tp1, &tp2);
+
+	setnnames();
 
 	/*
 	 * FROM now on, we are working in UTC.
