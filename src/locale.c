@@ -51,7 +51,7 @@ const char *days[NDAYS+1] = {
 };
 
 const char *fmonths[NMONTHS+1] = {
-	"January", "February", "March", "April", "May", "June", "Juli",
+	"January", "February", "March", "April", "May", "June", "July",
 	"August", "September", "October", "November", "December", NULL,
 };
 
