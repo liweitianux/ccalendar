@@ -113,7 +113,7 @@ setnsequences(const char *seq)
 	size_t len;
 
 	if (count_char(seq, ' ') != NSEQUENCES - 1) {
-		warnx("Invalid SEQUENCE: %s", seq);
+		warnx("Invalid SEQUENCE: |%s|", seq);
 		return;
 	}
 

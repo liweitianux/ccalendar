@@ -83,7 +83,7 @@ main(int argc, char *argv[])
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
-			if (getuid())
+			if (getuid() != 0)
 				errx(1, "must be root to run with '-a'");
 			doall = true;
 			break;
