@@ -572,8 +572,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			d = (idayofweek - dow + 8) % 7;
 			while (d <= 366) {
 				if ((dp = find_yd(year, d))) {
-					rm = dp->month->month;
-					rd = dp->dayofmonth;
+					rm = cal_day_get_month(dp);
+					rd = cal_day_get_day(dp);
 					remember(&remindex, yearp, monthp,
 						 dayp, edp, year, rm, rd,
 						 NULL);
@@ -641,8 +641,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_EASTER)) {
 			dp = find_yd(year, yinfo->ieaster + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, NULL);
 			}
@@ -654,8 +654,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_PASKHA)) {
 			dp = find_yd(year, yinfo->ipaskha + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, NULL);
 			}
@@ -667,8 +667,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_CNY)) {
 			dp = find_yd(year, yinfo->firstcnyday + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, NULL);
 			}
@@ -683,8 +683,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 					(int)floor(yinfo->ffullmoon[i]) +
 					imodifieroffset);
 				if (dp) {
-					rm = dp->month->month;
-					rd = dp->dayofmonth;
+					rm = cal_day_get_month(dp);
+					rd = cal_day_get_day(dp);
 					ed = floattotime(yinfo->ffullmoon[i]);
 					remember(&remindex, yearp, monthp,
 						 dayp, edp, year, rm, rd, ed);
@@ -701,8 +701,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 					(int)floor(yinfo->fnewmoon[i]) +
 					imodifieroffset);
 				if (dp) {
-					rm = dp->month->month;
-					rd = dp->dayofmonth;
+					rm = cal_day_get_month(dp);
+					rd = cal_day_get_day(dp);
 					ed = floattotime(yinfo->fnewmoon[i]);
 					remember(&remindex, yearp, monthp,
 						 dayp, edp, year, rm, rd, ed);
@@ -717,8 +717,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			dp = find_yd(year,
 				(int)yinfo->equinoxdays[0] + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				ed = floattotime(yinfo->equinoxdays[0]);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, ed);
@@ -730,8 +730,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			dp = find_yd(year,
 				(int)yinfo->equinoxdays[1] + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				ed = floattotime(yinfo->equinoxdays[1]);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, ed);
@@ -745,8 +745,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			dp = find_yd(year,
 				(int)yinfo->solsticedays[0] + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				ed = floattotime(yinfo->solsticedays[0]);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, ed);
@@ -758,8 +758,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 			dp = find_yd(year,
 				(int)yinfo->solsticedays[1] + imodifieroffset);
 			if (dp) {
-				rm = dp->month->month;
-				rd = dp->dayofmonth;
+				rm = cal_day_get_month(dp);
+				rd = cal_day_get_day(dp);
 				ed = floattotime(yinfo->solsticedays[1]);
 				remember(&remindex, yearp, monthp, dayp,
 					 edp, year, rm, rd, ed);

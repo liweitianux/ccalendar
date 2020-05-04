@@ -38,6 +38,35 @@
 #include "calendar.h"
 #include "utils.h"
 
+struct cal_year {
+	int year;	/* 19xx, 20xx, 21xx */
+	int easter;	/* Julian day */
+	int paskha;	/* Julian day */
+	int cny;	/* Julian day */
+	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
+	struct cal_month *months;
+	struct cal_year *nextyear;
+};
+
+struct cal_month {
+	int month;			/* 01 .. 12 */
+	int firstdayjulian;		/* 000 .. 366 */
+	int firstdayofweek;		/* 0 .. 6 */
+	struct cal_year *year;		/* points back */
+	struct cal_day *days;
+	struct cal_month *nextmonth;
+};
+
+struct cal_day {
+	int dayofmonth;			/* 01 .. 31 */
+	int julianday;			/* 000 .. 366 */
+	int dayofweek;			/* 0 .. 6 */
+	struct cal_day *nextday;
+	struct cal_month *month;	/* points back */
+	struct cal_year *year;		/* points back */
+	struct event *events;
+};
+
 static struct cal_year *hyear = NULL;
 
 /* 1-based month, 0-based days, cumulative */
@@ -53,6 +82,19 @@ int	monthdaytab[][14] = {
 };
 
 static void createdate(int y, int m, int d);
+
+
+int
+cal_day_get_month(struct cal_day *dayp)
+{
+	return dayp->month->month;
+}
+
+int
+cal_day_get_day(struct cal_day *dayp)
+{
+	return dayp->dayofmonth;
+}
 
 
 static void
