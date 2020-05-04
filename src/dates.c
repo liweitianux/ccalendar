@@ -28,6 +28,7 @@
  * $FreeBSD: head/usr.bin/calendar/dates.c 326276 2017-11-27 15:37:16Z pfg $
  */
 
+#include <assert.h>
 #include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -354,10 +355,7 @@ addtodate(struct event *e, int year, int month, int day)
 	struct cal_day *d;
 
 	d = find_ymd(year, month, day);
-	if (d == NULL) {
-		errx(1, "%s: find_ymd(%d, %d, %d) failed",
-				__func__, year, month, day);
-	}
+	assert(d != NULL);
 
 	e->next = d->events;
 	d->events = e;
