@@ -40,9 +40,6 @@
 
 struct cal_year {
 	int year;	/* 19xx, 20xx, 21xx */
-	int easter;	/* Julian day */
-	int paskha;	/* Julian day */
-	int cny;	/* Julian day */
 	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
 	struct cal_month *months;
 	struct cal_year *nextyear;
@@ -120,8 +117,6 @@ createdate(int y, int m, int d)
 
 		py = xcalloc(1, sizeof(*py));
 		py->year = y;
-		py->easter = easter(y);
-		py->paskha = paskha(y);
 
 		td.tm_year = y - 1900;
 		td.tm_mon = 0;
