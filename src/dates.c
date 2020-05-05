@@ -33,7 +33,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include "calendar.h"
 #include "basics.h"
@@ -42,7 +41,6 @@
 
 struct cal_year {
 	int year;	/* 19xx, 20xx, 21xx */
-	int firstdayofweek; /* day of week on Jan 1; values: 0 .. 6 */
 	struct cal_month *months;
 	struct cal_year *nextyear;
 };
@@ -50,7 +48,6 @@ struct cal_year {
 struct cal_month {
 	int month;			/* 01 .. 12 */
 	int firstdayjulian;		/* 000 .. 366 */
-	int firstdayofweek;		/* 0 .. 6 */
 	struct cal_year *year;		/* points back */
 	struct cal_day *days;
 	struct cal_month *nextmonth;
@@ -114,19 +111,8 @@ createdate(int y, int m, int d)
 	}
 
 	if (py == NULL) {
-		struct tm td = { 0 };
-		time_t t;
-
 		py = xcalloc(1, sizeof(*py));
 		py->year = y;
-
-		td.tm_year = y - 1900;
-		td.tm_mon = 0;
-		td.tm_mday = 1;
-		t = mktime(&td);
-		localtime_r(&t, &td);
-		py->firstdayofweek = td.tm_wday;
-
 		if (pyp != NULL)
 			pyp->nextyear = py;
 	}
@@ -148,8 +134,6 @@ createdate(int y, int m, int d)
 		pm->month = m;
 		cumday = cumdaytab[isleap(y)];
 		pm->firstdayjulian = cumday[m] + 2;
-		pm->firstdayofweek =
-		    (py->firstdayofweek + pm->firstdayjulian - 1) % 7;
 		if (pmp != NULL)
 			pmp->nextmonth = pm;
 	}
@@ -169,7 +153,6 @@ createdate(int y, int m, int d)
 		pd->year = py;
 		pd->dayofmonth = d;
 		pd->julianday = pm->firstdayjulian + d - 1;
-		pd->dayofweek = (pm->firstdayofweek + d - 1) % 7;
 		if (pdp != NULL)
 			pdp->nextday = pd;
 	}
@@ -248,18 +231,29 @@ dumpdates(void)
 	struct cal_year *yp;
 	struct cal_month *mp;
 	struct cal_day *dp;
+	struct g_date date;
+	int rd, dow;
 
 	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
-		fprintf(stderr, "%-5d (wday:%d)\n",
-			yp->year, yp->firstdayofweek);
+		date.year = yp->year;
+		date.month = 1;
+		date.day = 1;
+		rd = fixed_from_gregorian(&date);
+		dow = (int)dayofweek_from_fixed(rd);
+		fprintf(stderr, "%-5d (rd:%d, dow:%d)\n", yp->year, rd, dow);
 		for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
-			fprintf(stderr, "-- %-5d (julian:%d, dow:%d)\n",
-				mp->month, mp->firstdayjulian,
-				mp->firstdayofweek);
+			date.month = mp->month;
+			date.day = 1;
+			rd = fixed_from_gregorian(&date);
+			dow = (int)dayofweek_from_fixed(rd);
+			fprintf(stderr, "-- %-5d (rd:%d, dow:%d)\n",
+				mp->month, rd, dow);
 			for (dp = mp->days; dp != NULL; dp = dp->nextday) {
-				fprintf(stderr, "  -- %-5d (julian:%d, dow:%d)\n",
-					dp->dayofmonth, dp->julianday,
-					dp->dayofweek);
+				date.day = dp->dayofmonth;
+				rd = fixed_from_gregorian(&date);
+				dow = (int)dayofweek_from_fixed(rd);
+				fprintf(stderr, "  -- %-5d (rd:%d, dow:%d)\n",
+					dp->dayofmonth, rd, dow);
 			}
 		}
 	}
