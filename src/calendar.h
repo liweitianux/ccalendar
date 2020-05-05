@@ -69,6 +69,8 @@
 struct cal_options {
 	const char *calendarFile;  /* name of calendar file */
 	int today;  /* R.D. of today to remind events */
+	int days_before;  /* number of days before today to remind events */
+	int days_after;  /* number of days after today to remind events */
 	int year1;  /* year of the beginning day */
 	int year2;  /* year of the ending day */
 	double UTCOffset;

@@ -52,6 +52,8 @@
 
 struct cal_options Options = {
 	.calendarFile = "calendar",  /* name of default calendar file */
+	.days_before = 0,
+	.days_after = 0,
 	.UTCOffset = 0.0,
 	.EastLongitude = 0.0,
 	.debug = false,
@@ -66,9 +68,7 @@ main(int argc, char *argv[])
 {
 	bool	doall = false;
 	int	ret = 0;
-	int	f_dayAfter = 0;		/* days after current date */
-	int	f_dayBefore = 0;	/* days before current date */
-	int	Friday = 5;		/* days before weekend */
+	int	Friday = 5;  /* days before weekend */
 	int	ch;
 	enum dayofweek dow;
 	struct g_date gdate1, gdate2;
@@ -92,14 +92,14 @@ main(int argc, char *argv[])
 			Friday = -1;
 			/* FALLTHROUGH */
 		case 'A': /* days after current date */
-			f_dayAfter = atoi(optarg);
-			if (f_dayAfter < 0)
+			Options.days_after = atoi(optarg);
+			if (Options.days_after < 0)
 				errx(1, "number of days must be positive");
 			break;
 
 		case 'B': /* days before current date */
-			f_dayBefore = atoi(optarg);
-			if (f_dayBefore < 0)
+			Options.days_before = atoi(optarg);
+			if (Options.days_before < 0)
 				errx(1, "number of days must be positive");
 			break;
 
@@ -146,12 +146,12 @@ main(int argc, char *argv[])
 
 	/* Friday displays Monday's events */
 	dow = dayofweek_from_fixed(Options.today);
-	if (f_dayAfter == 0 && Friday != -1)
-		f_dayAfter = ((int)dow == Friday) ? 3 : 1;
+	if (Options.days_after == 0 && Friday != -1)
+		Options.days_after = ((int)dow == Friday) ? 3 : 1;
 
-	gregorian_from_fixed(Options.today - f_dayBefore, &gdate1);
+	gregorian_from_fixed(Options.today - Options.days_before, &gdate1);
 	Options.year1 = gdate1.year;
-	gregorian_from_fixed(Options.today + f_dayAfter, &gdate2);
+	gregorian_from_fixed(Options.today + Options.days_after, &gdate2);
 	Options.year2 = gdate2.year;
 
 	generatedates(&gdate1, &gdate2);

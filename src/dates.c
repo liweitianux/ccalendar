@@ -36,6 +36,8 @@
 #include <time.h>
 
 #include "calendar.h"
+#include "basics.h"
+#include "gregorian.h"
 #include "utils.h"
 
 struct cal_year {
@@ -266,35 +268,29 @@ dumpdates(void)
 int
 first_dayofweek_of_year(int yy)
 {
-	struct cal_year *yp;
+	if (yy < Options.year1 || yy > Options.year2)
+		return -1;  /* out-of-range */
 
-	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
-		if (yp->year == yy)
-			return yp->firstdayofweek;
-	}
-
-	return -1;
+	struct g_date date = { yy, 1, 1 };
+	int rd = fixed_from_gregorian(&date);
+	return (int)dayofweek_from_fixed(rd);
 }
 
 int
 first_dayofweek_of_month(int yy, int mm)
 {
-	struct cal_year *yp;
-	struct cal_month *mp;
+	int firstday, lastday;
 
-	for (yp = hyear; yp != NULL; yp = yp->nextyear) {
-		if (yp->year == yy)
-			break;
-	}
-	if (yp == NULL)
-		return -1;
+	struct g_date date = { yy, mm, 1 };
+	firstday = fixed_from_gregorian(&date);
+	date.month++;
+	lastday = fixed_from_gregorian(&date) - 1;
 
-	for (mp = yp->months; mp != NULL; mp = mp->nextmonth) {
-		if (mp->month == mm)
-			return mp->firstdayofweek;
-	}
+	if (firstday < (Options.today - Options.days_before) ||
+	    lastday > (Options.today + Options.days_after))
+		return -1;  /* out-of-range */
 
-	return -1;
+	return (int)dayofweek_from_fixed(firstday);
 }
 
 bool
