@@ -326,6 +326,15 @@ at the beginning of a line.
 .Xr at 1 ,
 .Xr mail 1 ,
 .Xr cron 8
+.Pp
+.Bl -tag
+.It [RD18]
+Edward M. Reingold and Nachum Dershowitz,
+.Em Calendrical Calculations: The Ultimate Edition
+(4th Edition).
+Cambridge University Press, 2018.
+ISBN: 9781107057623
+.El
 .Sh HISTORY
 A
 .Nm
