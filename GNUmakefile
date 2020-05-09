@@ -11,13 +11,14 @@ CALENDAR_DIR?=	$(PREFIX)/share/calendar
 TMPDIR?=	/tmp
 ARCHBUILD_DIR?=	$(TMPDIR)/$(PROG)-archbuild
 
-CSTD?=		c99
-CFLAGS=		-std=${CSTD} -pedantic -O2 -pipe
-CFLAGS+=	-DCALENDAR_DIR='"$(CALENDAR_DIR)"'
-CFLAGS+=	-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
+CFLAGS?=	-O2 -pipe \
+		-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
 		-Wwrite-strings -Wcast-qual -Wcast-align \
 		-Wduplicated-cond -Wduplicated-branches \
 		-Wrestrict -Wnull-dereference -Wsign-conversion
+
+CFLAGS+=	-std=c99 -pedantic \
+		-DCALENDAR_DIR='"$(CALENDAR_DIR)"'
 
 LIBS=		-lm
 
