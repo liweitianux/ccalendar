@@ -10,6 +10,7 @@ CALENDAR_DIR?=	$(PREFIX)/share/calendar
 
 TMPDIR?=	/tmp
 ARCHBUILD_DIR?=	$(TMPDIR)/$(PROG)-archbuild
+RPMBUILD_DIR?=	$(TMPDIR)/$(PROG)-rpmbuild
 
 CFLAGS?=	-O2 -pipe \
 		-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
@@ -22,6 +23,7 @@ CFLAGS+=	-std=c99 -pedantic \
 
 LIBS=		-lm
 
+ARCH?=		$(shell uname -m)
 OS?=		$(shell uname -s)
 ifeq ($(OS),Linux)
 CFLAGS+=	-D_GNU_SOURCE -D__dead2=
@@ -60,4 +62,15 @@ archpkg:
 		rm -rf $(ARCHBUILD_DIR) ; \
 		echo "Install with: 'sudo pacman -U $${pkg}'"
 
-.PHONY: all debug install clean archpkg
+rpm:
+	mkdir -p $(RPMBUILD_DIR)/BUILD
+	cp -Rp $(DISTFILES) $(RPMBUILD_DIR)/BUILD/
+	rpmbuild -bb -v \
+		--define="_topdir $(RPMBUILD_DIR)" \
+		linux/$(PROG).spec
+	@pkg=`( cd $(RPMBUILD_DIR)/RPMS/$(ARCH); ls $(PROG)-*.rpm )` ; \
+		cp -v $(RPMBUILD_DIR)/RPMS/$(ARCH)/$${pkg} . ; \
+		rm -rf $(RPMBUILD_DIR) ; \
+		echo "Install with: 'sudo rpm -iv $${pkg}'"
+
+.PHONY: all debug install clean archpkg rpm
