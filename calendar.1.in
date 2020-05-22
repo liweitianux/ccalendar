@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd April 25, 2020
+.Dd May 22, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -84,6 +84,9 @@ Default is 5.
 Use
 .Pa calendarfile
 as the default calendar file.
+If specified as
+.Pa - ,
+then read from standard input.
 .It Fl h
 Show the utility usage.
 .It Fl l Ar longitude

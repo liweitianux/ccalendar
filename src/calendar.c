@@ -117,6 +117,8 @@ main(int argc, char *argv[])
 
 		case 'f': /* other calendar file */
 			Options.calendarFile = optarg;
+			if (strcmp(optarg, "-") == 0)
+				Options.calendarFile = "/dev/stdin";
 			break;
 
 		case 'l': /* Change longitudal position */
