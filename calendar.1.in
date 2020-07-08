@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd May 22, 2020
+.Dd July 8, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -97,6 +97,19 @@ be based on the difference between UTC time and localtime.
 Act like the specified value is
 .Dq today
 instead of using the current date.
+If
+.Ar yy
+is specified, but
+.Ar cc
+is not,
+a value for
+.Ar yy
+between 69 and 99 results in a
+.Ar cc
+value of 19.
+Otherwise, a
+.Ar cc
+value of 20 is used.
 .It Fl U Ar UTC-offset
 Perform lunar and solar calculations from this UTC offset (in hours).
 If neither UTC offset nor longitude is specified, the calculations
