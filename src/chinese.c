@@ -84,24 +84,6 @@ chinese_zone(int rd)
 }
 
 /*
- * Location and timezone (in fraction of days) of Beijing adopted in Chinese
- * calendar calculations.
- * Ref: Sec.(19.1), Eq.(19.2)
- */
-static struct location
-chinese_location(int rd)
-{
-	struct location loc = {
-		.latitude = angle2deg(116, 25, 0),
-		.longitude = angle2deg(39, 55, 0),
-		.elevation = 43.5,
-		.zone = chinese_zone(rd),
-	};
-
-	return loc;
-}
-
-/*
  * The universal time (UT) of (clock) midnight at the start of the fixed date
  * $rd in China.
  * Ref: Sec.(19.1), Eq.(19.7)
