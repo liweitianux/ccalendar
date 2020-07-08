@@ -33,8 +33,6 @@
  */
 
 #include <sys/param.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 #include <assert.h>
@@ -476,7 +474,6 @@ cal(bool doall)
 static FILE *
 opencalin(void)
 {
-	struct stat sbuf;
 	FILE *fpin = NULL;
 
 	/* open up calendar file */
@@ -484,7 +481,7 @@ opencalin(void)
 		if (allmode) {
 			if (chdir(calendarHomes[0]) != 0)
 				return (NULL);
-			if (stat(calendarNoMail, &sbuf) == 0)
+			if (access(calendarNoMail, F_OK) == 0)
 				return (NULL);
 			if ((fpin = fopen(Options.calendarFile, "r")) == NULL)
 				return (NULL);
