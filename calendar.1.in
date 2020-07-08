@@ -51,9 +51,8 @@
 .Sh DESCRIPTION
 The
 .Nm
-utility checks the current directory for a file named
-.Pa calendar
-and displays lines that fall into the specified date range.
+utility processes calendar files and displays lines that fall into the
+specified date range.
 On the day before a weekend (normally Friday), events for the next
 three days are displayed.
 .Pp
@@ -77,8 +76,9 @@ Print UTC offset, longitude and moon or sun information.
 .It Fl d
 Debug option: print current date information.
 .It Fl F Ar friday
-Specify which day of the week is ``Friday'' (the day before the
-weekend begins).
+Specify which day of the week is
+.Dq Friday
+(the day before the weekend begins).
 Default is 5.
 .It Fl f Pa calendarfile
 Use
