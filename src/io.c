@@ -434,20 +434,14 @@ cal(bool doall)
 
 	if (allmode) {
 		/*
-		 * Set output to a temporary file, so don't send mail
-		 * if no output
+		 * Use a temporary output file, so we can skip sending mail
+		 * if there is no output.
 		 */
-		char caloutfile[MAXPATHLEN];
-		int fd;
-
-		snprintf(caloutfile, sizeof(caloutfile),
-			 "%s/_calendarXXXXXX", _PATH_TMP);
-		if ((fd = mkstemp(caloutfile)) < 0) {
-			warn("mkstemp");
+		if ((fpout = tmpfile()) == NULL) {
+			warn("tmpfile");
 			fclose(fpin);
 			return 1;
 		}
-		fpout = fdopen(fd, "w");
 
 		if (!cal_parse(fpin, fpout)) {
 			warnx("Failed to parse calendar files");
@@ -456,7 +450,7 @@ cal(bool doall)
 
 		event_print_all(fpout);
 		closecal(fpout);
-		unlink(caloutfile);
+
 	} else {
 		if (!cal_parse(fpin, stdout)) {
 			warnx("Failed to parse calendar files");
