@@ -79,6 +79,7 @@ char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in, FILE *out);
+static void	 cd_home(void);
 static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
 static char	*skip_comment(char *line, int *comment);
@@ -155,17 +156,8 @@ cal_fopen(const char *file)
 {
 	FILE *fp = NULL;
 	char *cwd = NULL;
-	char *home;
 	char cwdpath[MAXPATHLEN];
 	size_t i;
-
-	if (!allmode) {
-		home = getenv("HOME");
-		if (home == NULL || *home == '\0')
-			errx(1, "Cannot get home directory");
-		if (chdir(home) != 0)
-			errx(1, "Cannot enter home directory: \"%s\"", home);
-	}
 
 	if (getcwd(cwdpath, sizeof(cwdpath)) != NULL)
 		cwd = cwdpath;
@@ -469,25 +461,26 @@ static FILE *
 opencalin(void)
 {
 	FILE *fpin = NULL;
+	char fpath[MAXPATHLEN];
 
-	/* open up calendar file */
-	if ((fpin = fopen(Options.calendarFile, "r")) == NULL) {
-		if (allmode) {
-			if (chdir(calendarHomes[0]) != 0)
-				return (NULL);
-			if (access(calendarNoMail, F_OK) == 0)
-				return (NULL);
-			if ((fpin = fopen(Options.calendarFile, "r")) == NULL)
-				return (NULL);
-		} else {
-			fpin = cal_fopen(Options.calendarFile);
-		}
+	if (allmode) {
+		/* already in $HOME */
+		snprintf(fpath, sizeof(fpath), "%s/%s",
+			 calendarHomes[0], calendarNoMail);
+		if (access(fpath, F_OK) == 0)
+			return (NULL);
+	} else {
+		fpin = fopen(Options.calendarFile, "r");
+		cd_home();
 	}
 
 	if (fpin == NULL) {
-		errx(1, "No calendar file: \"%s\" or \"~/%s/%s\"",
-				Options.calendarFile, calendarHomes[0],
-				Options.calendarFile);
+		snprintf(fpath, sizeof(fpath), "%s/%s",
+			 calendarHomes[0], Options.calendarFile);
+		if ((fpin = fopen(fpath, "r")) == NULL) {
+			errx(1, "No calendar file: '%s' or '~/%s'",
+					Options.calendarFile, fpath);
+		}
 	}
 
 	return (fpin);
@@ -565,4 +558,16 @@ write_mailheader(int fd)
 		pw->pw_name, pw->pw_name, dayname);
 	fflush(fp);
 	/* No need to close fp */
+}
+
+static void
+cd_home(void)
+{
+	char *home;
+
+	home = getenv("HOME");
+	if (home == NULL || *home == '\0')
+		errx(1, "Cannot get home directory");
+	if (chdir(home) != 0)
+		errx(1, "Cannot enter home directory: \"%s\"", home);
 }
