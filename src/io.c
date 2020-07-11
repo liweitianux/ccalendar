@@ -62,8 +62,8 @@ static const char *calendarFile = "calendar";
 /* systemd-wide calendar file to use if user doesn't have one */
 static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
 /* paths to search for calendar files for inclusion */
-static const char *calendarHomes[] = {
-	".calendar",
+static const char *calendarDirs[] = {
+	".calendar",  /* relative to $HOME */
 	CALENDAR_ETCDIR,
 	CALENDAR_DIR,
 };
@@ -168,9 +168,9 @@ cal_fopen(const char *file)
 	char fpath[MAXPATHLEN];
 	size_t i;
 
-	for (i = 0; i < nitems(calendarHomes); i++) {
+	for (i = 0; i < nitems(calendarDirs); i++) {
 		snprintf(fpath, sizeof(fpath), "%s/%s",
-			 calendarHomes[i], file);
+			 calendarDirs[i], file);
 		if ((fp = fopen(fpath, "r")) != NULL)
 			return (fp);
 	}
@@ -467,7 +467,7 @@ opencalin(void)
 	if (allmode) {
 		/* already in $HOME */
 		snprintf(fpath, sizeof(fpath), "%s/%s",
-			 calendarHomes[0], calendarNoMail);
+			 calendarDirs[0], calendarNoMail);
 		if (access(fpath, F_OK) == 0)
 			return (NULL);
 	} else {
@@ -480,7 +480,7 @@ opencalin(void)
 			errx(1, "No calendar file: '%s'", calfile);
 
 		snprintf(fpath, sizeof(fpath), "%s/%s",
-			 calendarHomes[0], calendarFile);
+			 calendarDirs[0], calendarFile);
 		if ((fpin = fopen(fpath, "r")) == NULL &&
 		    (fpin = fopen(calendarFileSys, "r")) == NULL) {
 			errx(1, "No calendar file: '%s' or '~/%s'",
