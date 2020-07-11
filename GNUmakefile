@@ -33,7 +33,7 @@ LIBS=		-lm
 ARCH?=		$(shell uname -m)
 OS?=		$(shell uname -s)
 ifeq ($(OS),Linux)
-CFLAGS+=	-D_GNU_SOURCE -D__dead2=
+CFLAGS+=	-D_GNU_SOURCE -D__dead2='__attribute__((__noreturn__))'
 endif
 
 all: $(PROG) $(MAN) $(CALFILE)
