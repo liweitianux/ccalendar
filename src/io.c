@@ -163,30 +163,18 @@ static FILE *
 cal_fopen(const char *file)
 {
 	FILE *fp = NULL;
-	char *cwd = NULL;
-	char cwdpath[MAXPATHLEN];
+	char fpath[MAXPATHLEN];
 	size_t i;
 
-	if (getcwd(cwdpath, sizeof(cwdpath)) != NULL)
-		cwd = cwdpath;
-	else
-		warnx("Cannot get current working directory");
-
 	for (i = 0; i < nitems(calendarHomes); i++) {
-		if (chdir(calendarHomes[i]) != 0)
-			continue;
-
-		if ((fp = fopen(file, "r")) != NULL)
-			break;
+		snprintf(fpath, sizeof(fpath), "%s/%s",
+			 calendarHomes[i], file);
+		if ((fp = fopen(fpath, "r")) != NULL)
+			return (fp);
 	}
 
-	if (cwd && chdir(cwdpath) != 0)
-		warnx("Cannot back to original directory: \"%s\"", cwdpath);
-
-	if (fp == NULL)
-		warnx("Cannot open calendar file \"%s\"", file);
-
-	return (fp);
+	warnx("Cannot open calendar file: '%s'", file);
+	return (NULL);
 }
 
 /*
