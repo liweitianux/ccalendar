@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd July 8, 2020
+.Dd July 11, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -205,9 +205,13 @@ and
 .Sy #define .
 If the shared file is not referenced by a full pathname,
 .Xr calendar 1
-searches in the current (or home) directory first, and then in the
-directory
-.Pa @@CALENDAR_DIR@@ .
+searches in its home directory
+.Pa ( ~/.calendar )
+first, then in the
+.Pa @@CALENDAR_ETCDIR@@
+directory, and finally in the
+.Pa @@CALENDAR_DIR@@
+directory.
 Unrecognized lines, for example empty lines and comment lines,
 are ignored.
 Both the C-style comment
@@ -242,9 +246,9 @@ Paskha\fB\et\fROrthodox Easter
 
 .Ed
 .Sh FILES
-.Bl -tag -width calendar.christian -compact
+.Bl -tag -width calendar.123456789012 -compact
 .It Pa calendar
-file in current directory.
+calendar file to find in current directory.
 .It Pa ~/.calendar
 .Pa calendar
 HOME directory.
@@ -255,6 +259,10 @@ is done into this directory if it exists.
 calendar file to use if no calendar file exists in the current directory.
 .It Pa ~/.calendar/nomail
 do not send mail if this file exists.
+.It Pa @@CALENDAR_ETCDIR@@/default
+system-wide default calendar file, which is used if the
+.Pa ~/.calendar/calendar
+doesn't exist.
 .El
 .Pp
 The following default calendar files are provided in

@@ -57,8 +57,16 @@
 
 enum { C_NONE, C_LINE, C_BLOCK };
 
-static const char *calendarHomes[] = { ".calendar", CALENDAR_DIR };
-static const char *calendarNoMail = "nomail"; /* don't sent mail if file exist */
+/* systemd-wide calendar file to use if user doesn't have one */
+static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
+/* paths to search for calendar files for inclusion */
+static const char *calendarHomes[] = {
+	".calendar",
+	CALENDAR_ETCDIR,
+	CALENDAR_DIR,
+};
+/* don't send mail if this file exists in ~/.calendar */
+static const char *calendarNoMail = "nomail";
 
 static bool allmode = false; /* whether to run for all users */
 
@@ -477,7 +485,8 @@ opencalin(void)
 	if (fpin == NULL) {
 		snprintf(fpath, sizeof(fpath), "%s/%s",
 			 calendarHomes[0], Options.calendarFile);
-		if ((fpin = fopen(fpath, "r")) == NULL) {
+		if ((fpin = fopen(fpath, "r")) == NULL &&
+		    (fpin = fopen(calendarFileSys, "r")) == NULL) {
 			errx(1, "No calendar file: '%s' or '~/%s'",
 					Options.calendarFile, fpath);
 		}

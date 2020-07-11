@@ -6,5 +6,6 @@
 *.xz
 /calendar
 /calendar.1
+/etc/default
 /tags
 /test

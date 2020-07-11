@@ -1,0 +1,18 @@
+/*
+ * This is the system-wide default calendar file, used if calendar(1)
+ * is invoked by a user without a '~/.calendar/calendar' file.
+ * This file may be edited or even deleted to reflect local policy.
+ *
+ * The following paths are searched in order to find calendar files for
+ * inclusion:
+ *     ~/.calendar
+ *     @@CALENDAR_ETCDIR@@
+ *     @@CALENDAR_DIR@@
+ *
+ * If you want to modify the calendar files installed at
+ * '@@CALENDAR_DIR@@', copy them to '@@CALENDAR_ETCDIR@@'
+ * or '~/.calendar' and edit there, so that the changes will be kept
+ * after system upgrade.
+ */
+
+#include <calendar.world>

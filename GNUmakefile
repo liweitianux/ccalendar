@@ -2,11 +2,17 @@ PROG=		calendar
 MAN=		calendar.1
 SRCS=		$(wildcard src/*.c)
 OBJS=		$(SRCS:.c=.o)
-DISTFILES=	GNUmakefile LICENSE README.md calendars src $(MAN).in
+CALFILE=	etc/default
+DISTFILES=	GNUmakefile LICENSE README.md calendars etc src $(MAN).in
 
 PREFIX?=	/usr/local
-MAN_DIR?=	$(PREFIX)/share/man
+ETC_DIR?=	$(PREFIX)/etc
+CALENDAR_ETCDIR?=$(ETC_DIR)/calendar
 CALENDAR_DIR?=	$(PREFIX)/share/calendar
+MAN_DIR?=	$(PREFIX)/share/man
+
+SED_EXPR?=	-e 's|@@CALENDAR_ETCDIR@@|$(CALENDAR_ETCDIR)|' \
+		-e 's|@@CALENDAR_DIR@@|$(CALENDAR_DIR)|'
 
 TMPDIR?=	/tmp
 ARCHBUILD_DIR?=	$(TMPDIR)/$(PROG)-archbuild
@@ -19,6 +25,7 @@ CFLAGS?=	-O2 -pipe \
 		-Wrestrict -Wnull-dereference -Wsign-conversion
 
 CFLAGS+=	-std=c99 -pedantic \
+		-DCALENDAR_ETCDIR='"$(CALENDAR_ETCDIR)"' \
 		-DCALENDAR_DIR='"$(CALENDAR_DIR)"'
 
 LIBS=		-lm
@@ -29,7 +36,7 @@ ifeq ($(OS),Linux)
 CFLAGS+=	-D_GNU_SOURCE -D__dead2=
 endif
 
-all: $(PROG) $(MAN)
+all: $(PROG) $(MAN) $(CALFILE)
 
 debug: $(PROG)
 debug: CFLAGS+=-DDEBUG
@@ -37,20 +44,21 @@ debug: CFLAGS+=-DDEBUG
 $(PROG): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
 
-$(MAN): $(MAN).in
-	sed -e 's|@@CALENDAR_DIR@@|$(CALENDAR_DIR)|' $(MAN).in > $@
+$(MAN) $(CALFILE):
+	sed $(SED_EXPR) $@.in > $@
 
 install:
 	install -s -Dm 0755 $(PROG) $(PREFIX)/bin/$(PROG)
 	install -Dm 0644 $(MAN) $(MAN_DIR)/man1/$(MAN)
 	gzip -9 $(MAN_DIR)/man1/$(MAN)
+	install -Dm 0644 $(CALFILE) $(CALENDAR_ETCDIR)/$(notdir $(CALFILE))
 	[ -d "$(CALENDAR_DIR)" ] || mkdir -p $(CALENDAR_DIR)
 	cp -R calendars/* $(CALENDAR_DIR)/
 	find $(CALENDAR_DIR)/ -type d | xargs chmod 0755
 	find $(CALENDAR_DIR)/ -type f | xargs chmod 0644
 
 clean:
-	rm -f $(PROG) $(OBJS) $(MAN) $(MAN).gz
+	rm -f $(PROG) $(OBJS) $(MAN) $(MAN).gz $(CALFILE)
 
 archpkg:
 	mkdir -p $(ARCHBUILD_DIR)/src
