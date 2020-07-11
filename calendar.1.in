@@ -87,6 +87,9 @@ as the default calendar file.
 If specified as
 .Pa - ,
 then read from standard input.
+Note that this flag cannot be used together with the
+.Fl a
+flag.
 .It Fl h
 Show the utility usage.
 .It Fl l Ar longitude

@@ -146,6 +146,9 @@ main(int argc, char *argv[])
 	if (argc > optind)
 		usage(argv[0]);
 
+	if (doall && Options.calendarFile != NULL)
+		errx(1, "flags -a and -f cannot be used together");
+
 	/* Friday displays Monday's events */
 	dow = dayofweek_from_fixed(Options.today);
 	if (Options.days_after == 0 && Friday != -1)
