@@ -51,7 +51,7 @@
 #include "parsedata.h"
 
 struct cal_options Options = {
-	.calendarFile = "calendar",  /* name of default calendar file */
+	.calendarFile = NULL,
 	.days_before = 0,
 	.days_after = 0,
 	.UTCOffset = 0.0,

@@ -57,6 +57,8 @@
 
 enum { C_NONE, C_LINE, C_BLOCK };
 
+/* default calendar file to use if exists in current dir or ~/.calendar */
+static const char *calendarFile = "calendar";
 /* systemd-wide calendar file to use if user doesn't have one */
 static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
 /* paths to search for calendar files for inclusion */
@@ -457,7 +459,10 @@ static FILE *
 opencalin(void)
 {
 	FILE *fpin = NULL;
+	const char *calfile;
 	char fpath[MAXPATHLEN];
+
+	calfile = Options.calendarFile ? Options.calendarFile : calendarFile;
 
 	if (allmode) {
 		/* already in $HOME */
@@ -466,17 +471,20 @@ opencalin(void)
 		if (access(fpath, F_OK) == 0)
 			return (NULL);
 	} else {
-		fpin = fopen(Options.calendarFile, "r");
+		fpin = fopen(calfile, "r");
 		cd_home();
 	}
 
 	if (fpin == NULL) {
+		if (Options.calendarFile)
+			errx(1, "No calendar file: '%s'", calfile);
+
 		snprintf(fpath, sizeof(fpath), "%s/%s",
-			 calendarHomes[0], Options.calendarFile);
+			 calendarHomes[0], calendarFile);
 		if ((fpin = fopen(fpath, "r")) == NULL &&
 		    (fpin = fopen(calendarFileSys, "r")) == NULL) {
 			errx(1, "No calendar file: '%s' or '~/%s'",
-					Options.calendarFile, fpath);
+					calendarFile, fpath);
 		}
 	}
 
