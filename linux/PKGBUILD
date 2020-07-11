@@ -1,18 +1,20 @@
 # Maintainer: Aaron LI <aly@aaronly.me>
 
 pkgname=calendar
-pkgver=0.1
+pkgver=0.1.0
 pkgrel=1
 pkgdesc="UNIX calendar(1) reminder service with Chinese calendar support"
 url="https://github.com/liweitianux/ccalendar"
 license=('BSD')
 arch=('i686' 'x86_64')
+backup=("etc/${pkgname}/default")
 
 build() {
-	make PREFIX=/usr
+	make PREFIX=/usr ETC_DIR=/etc
 }
 
 package() {
-	make install PREFIX=${pkgdir}/usr
-	install -Dm 644 LICENSE ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE
+	make install PREFIX=${pkgdir}/usr ETC_DIR=${pkgdir}/etc
+	install -Dm 444 README.md ${pkgdir}/usr/share/doc/${pkgname}/README.md
+	install -Dm 444 LICENSE ${pkgdir}/usr/share/licenses/${pkgname}/LICENSE
 }
