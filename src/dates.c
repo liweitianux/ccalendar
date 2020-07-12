@@ -130,8 +130,8 @@ first_dayofweek_of_month(int yy, int mm)
 	date.month++;
 	lastday = fixed_from_gregorian(&date) - 1;
 
-	if (firstday < (Options.today - Options.days_before) ||
-	    lastday > (Options.today + Options.days_after))
+	if (firstday > (Options.today + Options.days_after) ||
+	    lastday < (Options.today - Options.days_before))
 		return -1;  /* out-of-range */
 
 	return (int)dayofweek_from_fixed(firstday);
