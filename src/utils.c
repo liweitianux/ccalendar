@@ -261,6 +261,10 @@ count_char(const char *s, int ch)
 }
 
 
+/*
+ * Linked list implementation
+ */
+
 struct node {
 	char		*name;
 	void		*data;

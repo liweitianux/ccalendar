@@ -60,19 +60,19 @@ struct dateinfo {
 };
 
 struct yearinfo {
-	int year;
-	int ieaster;
-	int ipaskha;
-	int firstcnyday;
-	double ffullmoon[MAXMOONS];
-	double fnewmoon[MAXMOONS];
-	double ffullmooncny[MAXMOONS];
-	double fnewmooncny[MAXMOONS];
-	int ichinesemonths[MAXMOONS];
-	double equinoxdays[2];
-	double solsticedays[2];
-	int *monthdays;
-	struct yearinfo *next;
+	struct yearinfo	*next;
+	int	*monthdays;  /* number of days in each month */
+	int	 year;
+	int	 ieaster;  /* day of year of Easter */
+	int	 ipaskha;  /* day of year of Paskha */
+	int	 firstcnyday;  /* day of year of ChineseNewYear */
+	int	 ichinesemonths[MAXMOONS];
+	double	ffullmoon[MAXMOONS];
+	double	fnewmoon[MAXMOONS];
+	double	ffullmooncny[MAXMOONS];
+	double	fnewmooncny[MAXMOONS];
+	double	equinoxdays[2];
+	double	solsticedays[2];
 };
 static struct yearinfo *yearinfo_list = NULL;
 
@@ -475,12 +475,10 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 	remindex = 0;
 
 	for (int year = Options.year1; year <= Options.year2; year++) {
-		int lflags = *flags;
-
-		if ((lflags & F_YEAR) != 0 && di.iyear != year)
+		if ((di.flags & F_YEAR) != 0 && di.iyear != year)
 			continue;
 
-		lflags &= ~F_YEAR;
+		int lflags = di.flags & ~F_YEAR;
 
 		/* Get important dates for this year */
 		for (yinfo = yearinfo_list; yinfo; yinfo = yinfo->next) {
@@ -1123,7 +1121,7 @@ parse_timezone(const char *s, long *result)
 }
 
 /*
- * Parse a angle/coordinate string in format of a signle float number or
+ * Parse a angle/coordinate string in format of a single float number or
  * [+-]d:m:s, where 'd' and 'm' are degrees and minutes of integer type,
  * and 's' is seconds of float type.
  * Return true on success, otherwise false.
