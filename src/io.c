@@ -372,8 +372,11 @@ cal_parse(FILE *in, FILE *out)
 
 		char ch = *pp;
 		*pp = '\0';
-		count = parsedaymonth(buf, year, month, day, &flags, extradata);
+		snprintf(dbuf, sizeof(dbuf), "%s", buf);
 		*pp = ch;
+
+		count = parsedaymonth(dbuf, year, month, day, &flags,
+				      extradata, buf);
 		if (count == 0) {
 			logdebug("%s() ignored: |%s|\n", __func__, buf);
 			continue;
