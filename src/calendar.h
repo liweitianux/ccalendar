@@ -153,7 +153,7 @@ struct cal_day;
 extern int cumdaytab[][14];
 extern int monthdaytab[][14];
 
-void	generatedates(struct g_date *date1, struct g_date *date2);
+void	generatedates(int rd1, int rd2);
 void	dumpdates(void);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);

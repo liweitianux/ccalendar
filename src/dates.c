@@ -161,18 +161,22 @@ createdate(int y, int m, int d)
 }
 
 void
-generatedates(struct g_date *date1, struct g_date *date2)
+generatedates(int rd1, int rd2)
 {
+	struct g_date gdate;
 	int y1, m1, d1;
 	int y2, m2, d2;
 	int y, m, d;
 
-	y1 = date1->year;
-	m1 = date1->month;
-	d1 = date1->day;
-	y2 = date2->year;
-	m2 = date2->month;
-	d2 = date2->day;
+	gregorian_from_fixed(rd1, &gdate);
+	y1 = gdate.year;
+	m1 = gdate.month;
+	d1 = gdate.day;
+
+	gregorian_from_fixed(rd2, &gdate);
+	y2 = gdate.year;
+	m2 = gdate.month;
+	d2 = gdate.day;
 
 	if (y1 == y2) {
 		if (m1 == m2) {

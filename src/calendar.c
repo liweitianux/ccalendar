@@ -71,7 +71,6 @@ main(int argc, char *argv[])
 	int	Friday = 5;  /* days before weekend */
 	int	ch;
 	enum dayofweek dow;
-	struct g_date gdate1, gdate2;
 	struct passwd *pw;
 	const char *debug_type = NULL;
 
@@ -154,12 +153,12 @@ main(int argc, char *argv[])
 	if (Options.days_after == 0 && Friday != -1)
 		Options.days_after = ((int)dow == Friday) ? 3 : 1;
 
-	gregorian_from_fixed(Options.today - Options.days_before, &gdate1);
-	Options.year1 = gdate1.year;
-	gregorian_from_fixed(Options.today + Options.days_after, &gdate2);
-	Options.year2 = gdate2.year;
-
-	generatedates(&gdate1, &gdate2);
+	Options.year1 = gregorian_year_from_fixed(
+			Options.today - Options.days_before);
+	Options.year2 = gregorian_year_from_fixed(
+			Options.today + Options.days_after);
+	generatedates(Options.today - Options.days_before,
+		      Options.today + Options.days_after);
 
 	setlocale(LC_ALL, "");
 	setnnames();
