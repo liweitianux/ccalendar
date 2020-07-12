@@ -438,6 +438,8 @@ cal(bool doall)
 
 		if (!cal_parse(fpin, fpout)) {
 			warnx("Failed to parse calendar files");
+			fclose(fpin);
+			fclose(fpout);
 			return 1;
 		}
 
