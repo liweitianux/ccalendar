@@ -86,6 +86,9 @@ char *	xstrdup(const char *str);
 
 size_t	count_char(const char *s, int ch);
 
+char *	triml(char *s);
+char *	trimr(char *s);
+
 struct node;
 struct node *	list_newnode(char *name, void *data);
 struct node *	list_addfront(struct node *listp, struct node *newp);

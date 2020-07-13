@@ -94,31 +94,8 @@ static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
 static char	*skip_comment(char *line, int *comment);
 static bool	 tokenize(char *line, FILE *out, bool *skip);
-static char	*triml(char *s);
-static char	*trimr(char *s);
 static void	 write_mailheader(int fd);
 
-
-static char *
-triml(char *s)
-{
-	while (isspace((unsigned char)*s))
-		s++;
-
-	return s;
-}
-
-static char *
-trimr(char *s)
-{
-	size_t l = strlen(s);
-
-	while (l > 0 && isspace((unsigned char) s[l-1]))
-		l--;
-	s[l] = '\0';
-
-	return s;
-}
 
 /*
  * XXX: Quoted or escaped comment marks are not supported yet.

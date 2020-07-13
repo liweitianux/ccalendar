@@ -39,6 +39,7 @@
  * 2018, Cambridge University Press
  */
 
+#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <math.h>
@@ -258,6 +259,28 @@ count_char(const char *s, int ch)
 	}
 
 	return count;
+}
+
+
+char *
+triml(char *s)
+{
+	while (isspace((unsigned char)*s))
+		s++;
+
+	return s;
+}
+
+char *
+trimr(char *s)
+{
+	size_t l = strlen(s);
+
+	while (l > 0 && isspace((unsigned char) s[l-1]))
+		l--;
+	s[l] = '\0';
+
+	return s;
 }
 
 

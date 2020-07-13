@@ -97,12 +97,13 @@ setnnames(void)
 		strftime(buf, sizeof(buf), "%b", &tm);
 		if (nmonths[i] != NULL)
 			free(nmonths[i]);
-		nmonths[i] = xstrdup(buf);
+		/* The month may have a leading blank (e.g., on *BSDs) */
+		nmonths[i] = xstrdup(triml(buf));
 
 		strftime(buf, sizeof(buf), "%B", &tm);
 		if (fnmonths[i] != NULL)
 			free(fnmonths[i]);
-		fnmonths[i] = xstrdup(buf);
+		fnmonths[i] = xstrdup(triml(buf));
 	}
 }
 
