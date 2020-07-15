@@ -248,7 +248,9 @@ static bool
 locale_day_first(void)
 {
 	char *d_fmt = nl_langinfo(D_FMT);
-	return (strstr(d_fmt, "%d") < strstr(d_fmt, "%m"));
+	logdebug("%s(): d_fmt=|%s|\n", __func__, d_fmt);
+	/* NOTE: BSDs use '%e' in D_FMT while Linux uses '%d' */
+	return (strpbrk(d_fmt, "ed") < strchr(d_fmt, 'm'));
 }
 
 static bool
