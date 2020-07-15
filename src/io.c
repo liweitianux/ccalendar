@@ -296,7 +296,10 @@ cal_parse(FILE *in, FILE *out)
 
 		/* Parse special definitions: LANG, Easter, Paskha etc */
 		if (string_startswith(buf, "LANG=")) {
-			setlocale(LC_ALL, buf + strlen("LANG="));
+			const char *lang = buf + strlen("LANG=");
+
+			if (setlocale(LC_ALL, lang) == NULL)
+				warnx("Failed to set LC_ALL='%s'", lang);
 			d_first = locale_day_first();
 			setnnames();
 			locale_changed = true;
