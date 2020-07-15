@@ -303,6 +303,9 @@ cal_parse(FILE *in, FILE *out)
 			d_first = locale_day_first();
 			setnnames();
 			locale_changed = true;
+			logdebug("%s(): set LC_ALL='%s' (day_first=%s)\n",
+				 __func__, lang, d_first ? "true" : "false");
+
 			continue;
 		}
 
@@ -344,9 +347,11 @@ cal_parse(FILE *in, FILE *out)
 		/* Get rid of leading spaces (non-standard) */
 		buf = triml(buf);
 
-		/* No tab in the line, then not a valid line */
-		if ((pp = strchr(buf, '\t')) == NULL)
+		/* No tab in the line, then not a valid line, e.g., comment */
+		if ((pp = strchr(buf, '\t')) == NULL) {
+			logdebug("%s() ignored invalid: |%s|\n", __func__, buf);
 			continue;
+		}
 
 		/* Trim spaces in front of the tab */
 		while (isspace((unsigned char)pp[-1]))
