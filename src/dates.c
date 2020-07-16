@@ -140,17 +140,11 @@ first_dayofweek_of_month(int yy, int mm)
 bool
 walkthrough_dates(struct event **e)
 {
-	static struct cal_day *dp = NULL;
-	static bool inited = false;
+	static struct cal_day **dp = &cal_days;
 
-	if (dp == NULL && !inited) {
-		dp = cal_days;
-		inited = true;
-	}
-
-	if (dp != NULL) {
-		*e = dp->events;
-		dp = dp->next;
+	if (*dp != NULL) {
+		*e = (*dp)->events;
+		dp = &(*dp)->next;
 		return true;
 	}
 
