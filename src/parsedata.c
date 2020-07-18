@@ -711,9 +711,9 @@ calc_yearinfo(int year)
 	yinfo->monthdays = monthdaytab[isleap(year)];
 	yinfo->ieaster = easter(year);
 	yinfo->ipaskha = paskha(year);
-	fpom(year, Options.UTCOffset, yinfo->ffullmoon, yinfo->fnewmoon);
+	fpom(year, Options.utc_offset, yinfo->ffullmoon, yinfo->fnewmoon);
 	fpom(year, UTCOFFSET_CNY, yinfo->ffullmooncny, yinfo->fnewmooncny);
-	fequinoxsolstice(year, Options.UTCOffset, yinfo->equinoxdays,
+	fequinoxsolstice(year, Options.utc_offset, yinfo->equinoxdays,
 			 yinfo->solsticedays);
 
 	/* CNY: Match day with sun longitude at 330° with new moon */
@@ -967,14 +967,14 @@ dodebug(const char *type)
 {
 	int year;
 
-	printf("UTCOffset: %g\n", Options.UTCOffset);
+	printf("UTC offset: %d [s]\n", Options.utc_offset);
 
 	if (strcmp(type, "moon") == 0) {
 		double ffullmoon[MAXMOONS], fnewmoon[MAXMOONS];
 		int i;
 
 		for (year = Options.year1; year <= Options.year2; year++) {
-			fpom(year, Options.UTCOffset, ffullmoon, fnewmoon);
+			fpom(year, Options.utc_offset, ffullmoon, fnewmoon);
 			printf("Full moon %d:\t", year);
 			for (i = 0; ffullmoon[i] >= 0; i++) {
 				printf("%g (%s) ", ffullmoon[i],
@@ -994,7 +994,7 @@ dodebug(const char *type)
 		double equinoxdays[2], solsticedays[2];
 		for (year = Options.year1; year <= Options.year2; year++) {
 			printf("Sun in %d:\n", year);
-			fequinoxsolstice(year, Options.UTCOffset, equinoxdays,
+			fequinoxsolstice(year, Options.utc_offset, equinoxdays,
 			    solsticedays);
 			printf("e[0] - %g (%s)\n",
 			    equinoxdays[0],

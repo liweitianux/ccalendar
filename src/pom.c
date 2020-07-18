@@ -66,7 +66,7 @@ static double	potm(double onday);
 static double	potm_minute(double onday, int olddir);
 
 void
-pom(int year, double utcoffset, int *fms, int *nms)
+pom(int year, int utcoffset, int *fms, int *nms)
 {
 	double ffms[MAXMOONS];
 	double fnms[MAXMOONS];
@@ -84,7 +84,7 @@ pom(int year, double utcoffset, int *fms, int *nms)
 }
 
 void
-fpom(int year, double utcoffset, double *ffms, double *fnms)
+fpom(int year, int utcoffset, double *ffms, double *fnms)
 {
 	time_t tt;
 	struct tm GMT, tmd_today, tmd_tomorrow;
@@ -147,7 +147,7 @@ fpom(int year, double utcoffset, double *ffms, double *fnms)
 		newdir = today > tomorrow ? -1 : +1;
 		if (olddir != newdir) {
 			t = potm_minute(days_today - 1, olddir) +
-			     utcoffset / FHOURSPERDAY;
+			     utcoffset / FSECSPERDAY;
 			if (olddir == -1 && newdir == +1) {
 				*pfnms = d - 1 + t;
 				pfnms++;

@@ -74,7 +74,7 @@
  * All the astronomical calculations are carried out for the meridian 120
  * degrees east of Greenwich.
  */
-#define UTCOFFSET_CNY		8.0
+#define UTCOFFSET_CNY		(8.0 * 3600.0)
 
 int	parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 		      char **edp, const char *line);

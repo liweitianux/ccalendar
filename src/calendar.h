@@ -68,13 +68,13 @@ struct location;
 struct cal_options {
 	struct location *location;
 	const char *calendarFile;  /* name of calendar file */
+	double time;  /* [0, 1) time of now in fraction of day */
 	int today;  /* R.D. of today to remind events */
 	int days_before;  /* number of days before today to remind events */
 	int days_after;  /* number of days after today to remind events */
 	int year1;  /* year of the beginning day */
 	int year2;  /* year of the ending day */
-	double time;  /* [0, 1) time of now in fraction of day */
-	double UTCOffset;
+	int utc_offset;  /* number of seconds east of UTC */
 	bool debug;
 };
 
@@ -146,13 +146,13 @@ void	event_print_all(FILE *fp);
 
 /* pom.c */
 #define	MAXMOONS	18
-void	pom(int year, double UTCoffset, int *fms, int *nms);
-void	fpom(int year, double UTCoffset, double *ffms, double *fnms);
+void	pom(int year, int utcoffset, int *fms, int *nms);
+void	fpom(int year, int utcoffset, double *ffms, double *fnms);
 
 /* sunpos.c */
-void	equinoxsolstice(int year, double UTCoffset, int *equinoxdays,
+void	equinoxsolstice(int year, int utcoffset, int *equinoxdays,
 			int *solsticedays);
-void	fequinoxsolstice(int year, double UTCoffset, double *equinoxdays,
+void	fequinoxsolstice(int year, int utcoffset, double *equinoxdays,
 			 double *solsticedays);
 int	calculatesunlongitude30(int year, int degreeGMToffset,
 				int *ichinesemonths);

@@ -65,7 +65,7 @@ struct cal_options Options = {
 static void	usage(const char *progname) __dead2;
 static double	get_time_of_now(void);
 static int	get_fixed_of_today(void);
-static double	get_utc_offset(void);
+static int	get_utc_offset(void);
 
 
 int
@@ -84,8 +84,8 @@ main(int argc, char *argv[])
 	Options.location = &loc;
 	Options.time = get_time_of_now();
 	Options.today = get_fixed_of_today();
-	Options.UTCOffset = get_utc_offset();
-	loc.zone = Options.UTCOffset / 24.0;
+	Options.utc_offset = get_utc_offset();
+	loc.zone = Options.utc_offset / (3600.0 * 24.0);
 
 	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hL:l:s:t:U:W:?")) != -1) {
 		switch (ch) {
@@ -145,9 +145,9 @@ main(int argc, char *argv[])
 				errx(1, "invalid date: |%s|", optarg);
 			break;
 
-		case 'U': /* Change UTC offset */
-			Options.UTCOffset = strtod(optarg, NULL);
-			loc.zone = Options.UTCOffset / 24.0;
+		case 'U': /* specify timezone */
+			Options.utc_offset = strtod(optarg, NULL) * 3600.0;
+			loc.zone = Options.utc_offset / (3600.0 * 24.0);
 			break;
 
 		case 'h':
@@ -266,7 +266,7 @@ get_fixed_of_today(void)
 	return fixed_from_gregorian(&gdate);
 }
 
-static double
+static int
 get_utc_offset(void)
 {
 	time_t now;
@@ -276,7 +276,7 @@ get_utc_offset(void)
 	tzset();
 	localtime_r(&now, &tm);
 
-	return (tm.tm_gmtoff / 3600.0);
+	return tm.tm_gmtoff;
 }
 
 static void __dead2
