@@ -129,9 +129,6 @@ int	easter(int year);
 struct cal_day;
 struct event;
 
-extern int cumdaytab[][14];
-extern int monthdaytab[][14];
-
 void	generatedates(int rd1, int rd2);
 void	dumpdates(void);
 int	first_dayofweek_of_year(int y);

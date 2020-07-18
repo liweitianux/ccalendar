@@ -34,6 +34,12 @@
 
 #include "calendar.h"
 
+/* 1-based month, 0-based days, cumulative */
+static int cumdaytab[][14] = {
+	{ 0, -1, 30, 58, 89, 119, 150, 180, 211, 242, 272, 303, 333, 364 },
+	{ 0, -1, 30, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
+};
+
 static int	j2g(int year);
 
 /*

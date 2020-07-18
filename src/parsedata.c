@@ -63,18 +63,24 @@ struct dateinfo {
 };
 
 struct yearinfo {
-	struct yearinfo	*next;
+	struct yearinfo *next;
 	int	*monthdays;  /* number of days in each month */
-	int	 year;
-	int	 ieaster;  /* day of year of Easter */
-	int	 ipaskha;  /* day of year of Paskha */
-	int	 firstcnyday;  /* day of year of ChineseNewYear */
+	int	year;
+	int	ieaster;  /* day of year of Easter */
+	int	ipaskha;  /* day of year of Paskha */
+	int	firstcnyday;  /* day of year of ChineseNewYear */
 	double	ffullmoon[MAXMOONS];
 	double	fnewmoon[MAXMOONS];
 	double	equinoxdays[2];
 	double	solsticedays[2];
 };
 static struct yearinfo *yearinfo_list = NULL;
+
+/* 1-based month, individual */
+static int monthdaytab[][14] = {
+	{ 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30 },
+	{ 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30 },
+};
 
 static struct yearinfo *calc_yearinfo(int year);
 static bool	 checkdayofweek(const char *s, size_t *len, int *offset,

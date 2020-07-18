@@ -44,17 +44,6 @@
 #include "utils.h"
 
 
-/* 1-based month, 0-based days, cumulative */
-int	cumdaytab[][14] = {
-	{0, -1, 30, 58, 89, 119, 150, 180, 211, 242, 272, 303, 333, 364},
-	{0, -1, 30, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
-};
-/* 1-based month, individual */
-int	monthdaytab[][14] = {
-	{0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30},
-	{0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30},
-};
-
 struct event {
 	bool		 variable;  /* Whether a variable event ? */
 	char		*date;  /* human readable */
