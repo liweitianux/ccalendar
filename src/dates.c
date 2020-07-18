@@ -183,14 +183,17 @@ find_ymd(int yy, int mm, int dd)
 	return NULL;
 }
 
-void
+struct event *
 addtodate(struct event *e, int year, int month, int day)
 {
 	struct cal_day *d;
+	struct event *eold;
 
 	d = find_ymd(year, month, day);
 	assert(d != NULL);
 
-	e->next = d->events;
+	eold = d->events;
 	d->events = e;
+
+	return eold;
 }

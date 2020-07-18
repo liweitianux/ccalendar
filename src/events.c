@@ -37,11 +37,23 @@
 #include "calendar.h"
 #include "utils.h"
 
+struct event {
+	int	year;
+	int	month;
+	int	day;
+	bool	variable;  /* Whether a variable event ? */
+	char	*date;  /* human readable */
+	char	*text;
+	char	*extra;
+	struct event *next;
+};
+
+
 struct event *
 event_add(int year, int month, int day, char *date, bool variable,
 	  char *txt, char *extra)
 {
-	struct event *e;
+	struct event *e, *eold;
 
 	e = xcalloc(1, sizeof(*e));
 	e->month = month;
@@ -53,7 +65,9 @@ event_add(int year, int month, int day, char *date, bool variable,
 	if (extra != NULL && extra[0] != '\0')
 		e->extra = xstrdup(extra);
 
-	addtodate(e, year, month, day);
+	eold = addtodate(e, year, month, day);
+	e->next = eold;
+
 	return (e);
 }
 

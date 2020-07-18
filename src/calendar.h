@@ -101,26 +101,12 @@ logdebug(const char *format, ...)
 
 
 /* events.c */
-/*
- * Event sorting related functions:
- * - Use event_add() to create a new event
- * - Use event_continue() to add more text to the last added event
- * - Use event_print_all() to display them in time chronological order
- */
+struct event;
+
 struct event *event_add(int year, int month, int day, char *date,
 			bool variable, char *txt, char *extra);
 void	event_continue(struct event *events, char *txt);
 void	event_print_all(FILE *fp);
-struct event {
-	int	year;
-	int	month;
-	int	day;
-	bool	variable;  /* Whether a variable event ? */
-	char	*date;  /* human readable */
-	char	*text;
-	char	*extra;
-	struct event *next;
-};
 
 /* locale.c */
 extern const char *fdays[];		/* full day names */
@@ -158,7 +144,7 @@ void	dumpdates(void);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);
 bool	walkthrough_dates(struct event **e);
-void	addtodate(struct event *e, int year, int month, int day);
+struct event *addtodate(struct event *e, int year, int month, int day);
 struct cal_day *find_yd(int yy, int dd);
 struct cal_day *find_ymd(int yy, int mm, int dd);
 int	cal_day_get_month(struct cal_day *dayp);
