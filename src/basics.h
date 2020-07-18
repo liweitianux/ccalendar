@@ -61,6 +61,7 @@ enum dayofweek {
 enum dayofweek	dayofweek_from_fixed(int rd);
 int	kday_onbefore(enum dayofweek k, int rd);
 int	nth_kday(int n, enum dayofweek k, struct g_date *date);
+int	dayofyear_from_fixed(int rd);
 
 double	julian_centuries(double t);
 double	sidereal_from_moment(double t);

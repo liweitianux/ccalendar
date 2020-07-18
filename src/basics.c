@@ -48,7 +48,7 @@
 #include "utils.h"
 
 /*
- * Determine the day of week of the fixed data $rd.
+ * Determine the day of week of the fixed date $rd.
  * Ref: Sec.(1.12), Eq.(1.60)
  */
 enum dayofweek
@@ -317,6 +317,18 @@ refraction(double elevation)
 	double avg = 34.0 / 60.0;
 
 	return avg + dip + dip2;
+}
+
+/*
+ * Determine the day of year of the fixed date $rd.
+ */
+int
+dayofyear_from_fixed(int rd)
+{
+	int year = gregorian_year_from_fixed(rd);
+	struct g_date date = { year - 1, 12, 31 };
+
+	return rd - fixed_from_gregorian(&date);
 }
 
 /*

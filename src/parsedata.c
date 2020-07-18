@@ -38,6 +38,8 @@
 #include <time.h>
 
 #include "calendar.h"
+#include "basics.h"
+#include "chinese.h"
 #include "gregorian.h"
 #include "parsedata.h"
 #include "utils.h"
@@ -66,11 +68,8 @@ struct yearinfo {
 	int	 ieaster;  /* day of year of Easter */
 	int	 ipaskha;  /* day of year of Paskha */
 	int	 firstcnyday;  /* day of year of ChineseNewYear */
-	int	 ichinesemonths[MAXMOONS];
 	double	ffullmoon[MAXMOONS];
 	double	fnewmoon[MAXMOONS];
-	double	ffullmooncny[MAXMOONS];
-	double	fnewmooncny[MAXMOONS];
 	double	equinoxdays[2];
 	double	solsticedays[2];
 };
@@ -711,21 +710,10 @@ calc_yearinfo(int year)
 	yinfo->monthdays = monthdaytab[isleap(year)];
 	yinfo->ieaster = easter(year);
 	yinfo->ipaskha = paskha(year);
+	yinfo->firstcnyday = dayofyear_from_fixed(chinese_new_year(year));
 	fpom(year, Options.utc_offset, yinfo->ffullmoon, yinfo->fnewmoon);
-	fpom(year, UTCOFFSET_CNY, yinfo->ffullmooncny, yinfo->fnewmooncny);
 	fequinoxsolstice(year, Options.utc_offset, yinfo->equinoxdays,
 			 yinfo->solsticedays);
-
-	/* CNY: Match day with sun longitude at 330° with new moon */
-	yinfo->firstcnyday = calculatesunlongitude30(
-			year, UTCOFFSET_CNY, yinfo->ichinesemonths);
-	for (int m = 0; yinfo->fnewmooncny[m] >= 0; m++) {
-		if (yinfo->fnewmooncny[m] > yinfo->firstcnyday) {
-			yinfo->firstcnyday =
-				(int)floor(yinfo->fnewmooncny[m-1]);
-			break;
-		}
-	}
 
 	return yinfo;
 }

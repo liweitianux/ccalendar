@@ -154,7 +154,5 @@ void	equinoxsolstice(int year, int utcoffset, int *equinoxdays,
 			int *solsticedays);
 void	fequinoxsolstice(int year, int utcoffset, double *equinoxdays,
 			 double *solsticedays);
-int	calculatesunlongitude30(int year, int degreeGMToffset,
-				int *ichinesemonths);
 
 #endif
