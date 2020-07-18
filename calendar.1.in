@@ -228,7 +228,7 @@ This limited subset consists of
 and
 .Sy #define .
 If the shared file is not referenced by a full pathname,
-.Xr calendar 1
+.Nm
 searches in its home directory
 .Pa ( ~/.calendar )
 first, then in the
@@ -374,8 +374,7 @@ at the beginning of a line.
 .Xr at 1 ,
 .Xr mail 1 ,
 .Xr cron 8
-.Pp
-.Bl -tag
+.Bl -tag -width indent
 .It [RD18]
 Edward M. Reingold and Nachum Dershowitz,
 .Em Calendrical Calculations: The Ultimate Edition
