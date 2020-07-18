@@ -47,7 +47,7 @@
 .Op Fl L Ar latitude,longitude[,elevation]
 .Op Fl s Ar chinese|moon|sun
 .Op Fl t Ar [[[cc]yy]mm]dd
-.Op Fl U Ar UTC-offset
+.Op Fl U Ar \(+-hh[[:]mm]
 .Op Fl W Ar num
 .Sh DESCRIPTION
 The
@@ -133,10 +133,9 @@ value of 19.
 Otherwise, a
 .Ar cc
 value of 20 is used.
-.It Fl U Ar UTC-offset
-Perform lunar and solar calculations from this UTC offset (in hours).
-If neither UTC offset nor longitude is specified, the calculations
-will be based on the difference between UTC time and localtime.
+.It Fl U Ar \(+-hh[[:]mm]
+Specify the timezone with a UTC offset.
+If not specified, the timezone of localtime is used.
 .It Fl W Ar num
 Print lines from today and the next
 .Ar num

@@ -1047,7 +1047,7 @@ parse_int_ranged(const char *s, size_t len, int min, int max, int *result)
  * Return true on success, otherwise false.
  */
 bool
-parse_timezone(const char *s, long *result)
+parse_timezone(const char *s, int *result)
 {
 	if (*s != '+' && *s != '-')
 		return false;
@@ -1066,7 +1066,7 @@ parse_timezone(const char *s, long *result)
 	if (*s != '\0')
 		return false;
 
-	long offset = hh * 3600L + mm * 60L;
+	int offset = hh * 3600L + mm * 60L;
 	*result = (sign == '+') ? offset : -offset;
 
 	return true;

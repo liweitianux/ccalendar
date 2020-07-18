@@ -80,7 +80,7 @@ int	parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 		      char **edp, const char *line);
 void	dodebug(const char *type);
 
-bool	parse_timezone(const char *s, long *result);
+bool	parse_timezone(const char *s, int *result);
 bool	parse_location(const char *s, double *latitude, double *longitude,
 		       double *elevation);
 bool	parse_date(const char *date, int *rd_out);

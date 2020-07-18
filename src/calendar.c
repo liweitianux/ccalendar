@@ -146,7 +146,8 @@ main(int argc, char *argv[])
 			break;
 
 		case 'U': /* specify timezone */
-			Options.utc_offset = strtod(optarg, NULL) * 3600.0;
+			if (!parse_timezone(optarg, &Options.utc_offset))
+				errx(1, "invalid timezone: '%s'", optarg);
 			loc.zone = Options.utc_offset / (3600.0 * 24.0);
 			break;
 
@@ -286,7 +287,7 @@ usage(const char *progname)
 		"usage:\n"
 		"%s [-A days] [-a] [-B days] [-D sun|moon] [-d]\n"
 		"\t[-F friday] [-f calendarfile] [-L latitude,longitude[,elevation]]\n"
-		"\t[-s chinese|moon|sun] [-t [[[cc]yy]mm]dd] [-U utcoffset] [-W days]\n",
+		"\t[-s chinese|moon|sun] [-t [[[cc]yy]mm]dd] [-U ±hh[[:]mm]] [-W days]\n",
 		progname);
 	exit(1);
 }
