@@ -85,7 +85,6 @@ main(int argc, char *argv[])
 	Options.time = get_time_of_now();
 	Options.today = get_fixed_of_today();
 	Options.UTCOffset = get_utc_offset();
-	Options.EastLongitude = Options.UTCOffset * 15;
 	loc.zone = Options.UTCOffset / 24.0;
 
 	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hL:l:s:t:U:W:?")) != -1) {
@@ -137,12 +136,6 @@ main(int argc, char *argv[])
 			}
 			break;
 
-		case 'l': /* Change longitudinal position */
-			Options.EastLongitude = strtod(optarg, NULL);
-			Options.UTCOffset = Options.EastLongitude / 15;
-			loc.zone = Options.UTCOffset / 24.0;
-			break;
-
 		case 's': /* show info of specified category */
 			show_info = optarg;
 			break;
@@ -154,7 +147,6 @@ main(int argc, char *argv[])
 
 		case 'U': /* Change UTC offset */
 			Options.UTCOffset = strtod(optarg, NULL);
-			Options.EastLongitude = Options.UTCOffset * 15;
 			loc.zone = Options.UTCOffset / 24.0;
 			break;
 
@@ -294,8 +286,7 @@ usage(const char *progname)
 		"usage:\n"
 		"%s [-A days] [-a] [-B days] [-D sun|moon] [-d]\n"
 		"\t[-F friday] [-f calendarfile] [-L latitude,longitude[,elevation]]\n"
-		"\t[-l longitude] [-s chinese|moon|sun] [-t [[[cc]yy]mm]dd]\n"
-		"\t[-U utcoffset] [-W days]\n",
+		"\t[-s chinese|moon|sun] [-t [[[cc]yy]mm]dd] [-U utcoffset] [-W days]\n",
 		progname);
 	exit(1);
 }

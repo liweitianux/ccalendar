@@ -968,7 +968,6 @@ dodebug(const char *type)
 	int year;
 
 	printf("UTCOffset: %g\n", Options.UTCOffset);
-	printf("EastLongitude: %g\n", Options.EastLongitude);
 
 	if (strcmp(type, "moon") == 0) {
 		double ffullmoon[MAXMOONS], fnewmoon[MAXMOONS];

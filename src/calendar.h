@@ -75,7 +75,6 @@ struct cal_options {
 	int year2;  /* year of the ending day */
 	double time;  /* [0, 1) time of now in fraction of day */
 	double UTCOffset;
-	double EastLongitude;
 	bool debug;
 };
 

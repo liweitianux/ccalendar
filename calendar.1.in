@@ -45,7 +45,6 @@
 .Op Fl f Ar calendarfile
 .Op Fl h
 .Op Fl L Ar latitude,longitude[,elevation]
-.Op Fl l Ar longitude
 .Op Fl s Ar chinese|moon|sun
 .Op Fl t Ar [[[cc]yy]mm]dd
 .Op Fl U Ar UTC-offset
@@ -106,10 +105,6 @@ The
 .Ar elevation
 argument is optional and is given in units of meters.
 All of the three arguments are default to 0.
-.It Fl l Ar longitude
-Perform lunar and solar calculations from this longitude.
-If neither longitude nor UTC offset is specified, the calculations will
-be based on the difference between UTC time and localtime.
 .It Fl s Ar chinese|moon|sun
 Show information of the specified category:
 .Pp
