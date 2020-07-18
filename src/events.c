@@ -38,9 +38,6 @@
 #include "utils.h"
 
 struct event {
-	int	year;
-	int	month;
-	int	day;
 	bool	variable;  /* Whether a variable event ? */
 	char	*date;  /* human readable */
 	char	*text;
@@ -56,8 +53,6 @@ event_add(int year, int month, int day, char *date, bool variable,
 	struct event *e, *eold;
 
 	e = xcalloc(1, sizeof(*e));
-	e->month = month;
-	e->day = day;
 	e->variable = variable;
 	e->date = xstrdup(date);
 	e->text = xstrdup(txt);
