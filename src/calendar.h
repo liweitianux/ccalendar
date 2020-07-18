@@ -149,10 +149,4 @@ void	event_print_all(FILE *fp);
 void	pom(int year, int utcoffset, int *fms, int *nms);
 void	fpom(int year, int utcoffset, double *ffms, double *fnms);
 
-/* sunpos.c */
-void	equinoxsolstice(int year, int utcoffset, int *equinoxdays,
-			int *solsticedays);
-void	fequinoxsolstice(int year, int utcoffset, double *equinoxdays,
-			 double *solsticedays);
-
 #endif

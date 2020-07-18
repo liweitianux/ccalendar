@@ -42,6 +42,7 @@
 #include "chinese.h"
 #include "gregorian.h"
 #include "parsedata.h"
+#include "sun.h"
 #include "utils.h"
 
 struct dateinfo {
@@ -82,7 +83,6 @@ static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
 static int	 dayofweek_of_month(int dow, int offset, int month, int year);
 static bool	 determinestyle(const char *date, struct dateinfo *di);
-static char	*floattoday(int year, double f);
 static char	*floattotime(double f);
 static const char *getdayofweekname(int i);
 static const char *getmonthname(int i);
@@ -704,16 +704,49 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 static struct yearinfo *
 calc_yearinfo(int year)
 {
-	struct yearinfo *yinfo = xcalloc(1, sizeof(*yinfo));
+	struct yearinfo *yinfo;
+	struct g_date date = { year - 1, 12, 31 };
+	double t;
+	int day0, day_approx;
 
+	day0 = fixed_from_gregorian(&date);
+
+	yinfo = xcalloc(1, sizeof(*yinfo));
 	yinfo->year = year;
 	yinfo->monthdays = monthdaytab[isleap(year)];
 	yinfo->ieaster = easter(year);
 	yinfo->ipaskha = paskha(year);
 	yinfo->firstcnyday = dayofyear_from_fixed(chinese_new_year(year));
 	fpom(year, Options.utc_offset, yinfo->ffullmoon, yinfo->fnewmoon);
-	fequinoxsolstice(year, Options.utc_offset, yinfo->equinoxdays,
-			 yinfo->solsticedays);
+
+	/*
+	 * Solar events
+	 */
+	date.year = year;
+	/* March Equinox, 0 degree */
+	date.month = 3;
+	date.day = 1;
+	day_approx = fixed_from_gregorian(&date);
+	t = solar_longitude_atafter(0, day_approx) + Options.location->zone;
+	yinfo->equinoxdays[0] = t - day0;
+	/* June Solstice, 90 degree */
+	date.month = 6;
+	date.day = 1;
+	day_approx = fixed_from_gregorian(&date);
+	t = solar_longitude_atafter(90, day_approx) + Options.location->zone;
+	yinfo->solsticedays[0] = t - day0;
+	/* September Equinox, 180 degree */
+	date.month = 9;
+	date.day = 1;
+	day_approx = fixed_from_gregorian(&date);
+	t = solar_longitude_atafter(180, day_approx) + Options.location->zone;
+	yinfo->equinoxdays[1] = t - day0;
+	/* December Solstice, 270 degree */
+	date.month = 12;
+	date.day = 1;
+	day_approx = fixed_from_gregorian(&date);
+	t = solar_longitude_atafter(270, day_approx) + Options.location->zone;
+	yinfo->solsticedays[1] = t - day0;
 
 	return yinfo;
 }
@@ -923,30 +956,6 @@ floattotime(double f)
 	ss = i;
 
 	sprintf(buf, "%02d:%02d:%02d", hh, mm, ss);
-	return (buf);
-}
-
-static char *
-floattoday(int year, double f)
-{
-	static char buf[100];
-	int i, m, d, hh, mm, ss;
-	int *cumdays = cumdaytab[isleap(year)];
-
-	for (i = 0; 1 + cumdays[i] < f; i++)
-		;
-	m = --i;
-	d = (int)floor(f - 1 - cumdays[i]);
-	f -= floor(f);
-	i = (int)round(f * SECSPERDAY);
-
-	hh = i / SECSPERHOUR;
-	i %= SECSPERHOUR;
-	mm = i / SECSPERMINUTE;
-	i %= SECSPERMINUTE;
-	ss = i;
-
-	sprintf(buf, "%02d-%02d %02d:%02d:%02d", m, d, hh, mm, ss);
 	return (buf);
 }
 
