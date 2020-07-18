@@ -36,9 +36,6 @@
 
 #include <stdarg.h>
 #include <stdbool.h>
-#include <time.h>
-
-#include "gregorian.h"
 
 #define	SECSPERDAY	(24 * 60 * 60)
 #define	SECSPERHOUR	(60 * 60)
