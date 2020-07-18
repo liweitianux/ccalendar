@@ -54,6 +54,13 @@ int	monthdaytab[][14] = {
 	{0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30},
 };
 
+struct event {
+	bool		 variable;  /* Whether a variable event ? */
+	char		*date;  /* human readable */
+	char		*text;
+	char		*extra;
+	struct event	*next;
+};
 
 struct cal_day {
 	int		 rd;
@@ -61,6 +68,8 @@ struct cal_day {
 	struct event	*events;
 };
 static struct cal_day *cal_days = NULL;
+
+static void	addtodate(struct event *e, int year, int month, int day);
 
 
 int
@@ -137,20 +146,6 @@ first_dayofweek_of_month(int yy, int mm)
 	return (int)dayofweek_from_fixed(firstday);
 }
 
-bool
-walkthrough_dates(struct event **e)
-{
-	static struct cal_day **dp = &cal_days;
-
-	if (*dp != NULL) {
-		*e = (*dp)->events;
-		dp = &(*dp)->next;
-		return true;
-	}
-
-	return false;
-}
-
 struct cal_day *
 find_yd(int yy, int dd)
 {
@@ -183,17 +178,64 @@ find_ymd(int yy, int mm, int dd)
 	return NULL;
 }
 
-struct event *
+static void
 addtodate(struct event *e, int year, int month, int day)
 {
 	struct cal_day *d;
-	struct event *eold;
 
 	d = find_ymd(year, month, day);
 	assert(d != NULL);
 
-	eold = d->events;
+	e->next = d->events;
 	d->events = e;
+}
 
-	return eold;
+struct event *
+event_add(int year, int month, int day, char *date, bool variable,
+	  char *txt, char *extra)
+{
+	struct event *e;
+
+	e = xcalloc(1, sizeof(*e));
+	e->variable = variable;
+	e->date = xstrdup(date);
+	e->text = xstrdup(txt);
+	e->extra = NULL;
+	if (extra != NULL && extra[0] != '\0')
+		e->extra = xstrdup(extra);
+
+	addtodate(e, year, month, day);
+	return (e);
+}
+
+void
+event_continue(struct event *e, char *txt)
+{
+	char *text;
+	size_t len;
+
+	/* Includes a '\n' and a NUL */
+	len = strlen(e->text) + strlen(txt) + 2;
+	text = xcalloc(1, len);
+	snprintf(text, len, "%s\n%s", e->text, txt);
+	free(e->text);
+	e->text = text;
+}
+
+void
+event_print_all(FILE *fp)
+{
+	struct event *e;
+	struct cal_day *dp;
+
+	for (dp = cal_days; dp != NULL; dp = dp->next) {
+		for (e = dp->events; e != NULL; e = e->next) {
+			fprintf(fp, "%s%c%s%s%s%s\n", e->date,
+				e->variable ? '*' : ' ', e->text,
+				e->extra != NULL ? " (" : "",
+				e->extra != NULL ? e->extra : "",
+				e->extra != NULL ? ")" : ""
+			);
+		}
+	}
 }
