@@ -71,10 +71,7 @@ static const char *calendarDirs[] = {
 static const char *calendarNoMail = "nomail";
 
 static bool allmode = false; /* whether to run for all users */
-
 static struct node *definitions = NULL;
-static struct event *events[MAXCOUNT] = { NULL };
-static char *extradata[MAXCOUNT] = { NULL };
 
 /* National names for special days */
 char *neaster = NULL;
@@ -268,9 +265,11 @@ cal_parse(FILE *in, FILE *out)
 	int		flags;
 	int		count = 0;
 	int		comment = C_NONE;
-	int		month[MAXCOUNT];
-	int		day[MAXCOUNT];
-	int		year[MAXCOUNT];
+	int		month[MAXCOUNT] = { 0 };
+	int		day[MAXCOUNT] = { 0 };
+	int		year[MAXCOUNT] = { 0 };
+	struct event	*events[MAXCOUNT] = { NULL };
+	char		*extradata[MAXCOUNT] = { NULL };
 
 	if (in == NULL)
 		return (false);
