@@ -78,7 +78,6 @@ main(int argc, char *argv[])
 	enum dayofweek dow;
 	struct passwd *pw;
 	struct location loc = { 0 };
-	const char *debug_type = NULL;
 	const char *show_info = NULL;
 
 	Options.location = &loc;
@@ -87,7 +86,7 @@ main(int argc, char *argv[])
 	Options.utc_offset = get_utc_offset();
 	loc.zone = Options.utc_offset / (3600.0 * 24.0);
 
-	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hL:l:s:t:U:W:?")) != -1) {
+	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:t:U:W:?")) != -1) {
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
@@ -109,10 +108,6 @@ main(int argc, char *argv[])
 			Options.days_before = atoi(optarg);
 			if (Options.days_before < 0)
 				errx(1, "number of days must be positive");
-			break;
-
-		case 'D': /* debug output of sun and moon info */
-			debug_type = optarg;
 			break;
 
 		case 'd': /* debug output of current date */
@@ -186,11 +181,6 @@ main(int argc, char *argv[])
 
 	if (Options.debug)
 		dumpdates();
-
-	if (debug_type != NULL) {
-		dodebug(debug_type);
-		exit(0);
-	}
 
 	if (show_info != NULL) {
 		if (strcmp(show_info, "chinese") == 0) {
@@ -285,8 +275,8 @@ usage(const char *progname)
 {
 	fprintf(stderr,
 		"usage:\n"
-		"%s [-A days] [-a] [-B days] [-D sun|moon] [-d]\n"
-		"\t[-F friday] [-f calendarfile] [-L latitude,longitude[,elevation]]\n"
+		"%s [-A days] [-a] [-B days] [-d] [-F friday]\n"
+		"\t[-f calendarfile] [-L latitude,longitude[,elevation]]\n"
 		"\t[-s chinese|moon|sun] [-t [[[cc]yy]mm]dd] [-U ±hh[[:]mm]] [-W days]\n",
 		progname);
 	exit(1);

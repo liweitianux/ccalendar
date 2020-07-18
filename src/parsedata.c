@@ -950,57 +950,6 @@ floattoday(int year, double f)
 	return (buf);
 }
 
-void
-dodebug(const char *type)
-{
-	int year;
-
-	printf("UTC offset: %d [s]\n", Options.utc_offset);
-
-	if (strcmp(type, "moon") == 0) {
-		double ffullmoon[MAXMOONS], fnewmoon[MAXMOONS];
-		int i;
-
-		for (year = Options.year1; year <= Options.year2; year++) {
-			fpom(year, Options.utc_offset, ffullmoon, fnewmoon);
-			printf("Full moon %d:\t", year);
-			for (i = 0; ffullmoon[i] >= 0; i++) {
-				printf("%g (%s) ", ffullmoon[i],
-				    floattoday(year, ffullmoon[i]));
-			}
-			printf("\nNew moon %d:\t", year);
-			for (i = 0; fnewmoon[i] >= 0; i++) {
-				printf("%g (%s) ", fnewmoon[i],
-				    floattoday(year, fnewmoon[i]));
-			}
-			printf("\n");
-		}
-		return;
-	}
-
-	if (strcmp(type, "sun") == 0) {
-		double equinoxdays[2], solsticedays[2];
-		for (year = Options.year1; year <= Options.year2; year++) {
-			printf("Sun in %d:\n", year);
-			fequinoxsolstice(year, Options.utc_offset, equinoxdays,
-			    solsticedays);
-			printf("e[0] - %g (%s)\n",
-			    equinoxdays[0],
-			    floattoday(year, equinoxdays[0]));
-			printf("e[1] - %g (%s)\n",
-			    equinoxdays[1],
-			    floattoday(year, equinoxdays[1]));
-			printf("s[0] - %g (%s)\n",
-			    solsticedays[0],
-			    floattoday(year, solsticedays[0]));
-			printf("s[1] - %g (%s)\n",
-			    solsticedays[1],
-			    floattoday(year, solsticedays[1]));
-		}
-		return;
-	}
-}
-
 
 /*
  * Parse the specified length of a string to an integer and check its range.
