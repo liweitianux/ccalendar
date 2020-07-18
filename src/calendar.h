@@ -138,11 +138,9 @@ int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);
 struct cal_day *find_yd(int yy, int dd);
 struct cal_day *find_ymd(int yy, int mm, int dd);
-int	cal_day_get_month(struct cal_day *dayp);
-int	cal_day_get_day(struct cal_day *dayp);
 
-struct event *event_add(int year, int month, int day, char *date,
-			bool variable, char *txt, char *extra);
+struct event *event_add(struct cal_day *dp, bool day_first, bool variable,
+			char *txt, char *extra);
 void	event_continue(struct event *events, char *txt);
 void	event_print_all(FILE *fp);
 

@@ -92,8 +92,8 @@ static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
 static bool	 parse_index(const char *s, int *index);
-static void	 remember(int *index, int *y, int *m, int *d, char **ed,
-			  int yy, int mm, int dd, char *extra);
+static void	 remember(int *index, struct cal_day **cd, struct cal_day *dp,
+			  char **ed, char *extra);
 static void	 show_datestyle(struct dateinfo *di);
 static char	*showflags(int flags);
 
@@ -454,14 +454,14 @@ dayofweek_of_month(int dow, int index, int month, int year)
 }
 
 int
-parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
-	      int *flags, char **edp, const char *line)
+parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
+	      char **edp, const char *line)
 {
 	struct dateinfo di = { 0 };
 	struct cal_day *dp;
 	struct yearinfo *yinfo;
 	char *ed;
-	int remindex, d, m, dow, rm, rd;
+	int remindex, d, m, dow;
 
 	di.flags = F_NONE;
 
@@ -493,20 +493,18 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 
 		/* Specified month and day (fixed or variable) */
 		if ((lflags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH)) {
-			if (find_ymd(year, di.imonth, di.idayofmonth) == NULL)
-				continue;
-			remember(&remindex, yearp, monthp, dayp, edp,
-				 year, di.imonth, di.idayofmonth, NULL);
+			dp = find_ymd(year, di.imonth, di.idayofmonth);
+			if (dp != NULL)
+				remember(&remindex, dayp, dp, edp, NULL);
 			continue;
 		}
 
 		/* Same day every month */
 		if (lflags == (F_ALLMONTH | F_DAYOFMONTH)) {
 			for (m = 1; m <= NMONTHS; m++) {
-				if (find_ymd(year, m, di.idayofmonth) == NULL)
-					continue;
-				remember(&remindex, yearp, monthp, dayp, edp,
-					 year, m, di.idayofmonth, NULL);
+				dp = find_ymd(year, m, di.idayofmonth);
+				if (dp != NULL)
+					remember(&remindex, dayp, dp, edp, NULL);
 			}
 			continue;
 		}
@@ -514,10 +512,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* Every day of a month */
 		if (lflags == (F_ALLDAY | F_MONTH)) {
 			for (d = 1; d <= yinfo->monthdays[di.imonth]; d++) {
-				if (find_ymd(year, di.imonth, d) == NULL)
-					continue;
-				remember(&remindex, yearp, monthp, dayp, edp,
-					 year, di.imonth, d, NULL);
+				dp = find_ymd(year, di.imonth, d);
+				if (dp != NULL)
+					remember(&remindex, dayp, dp, edp, NULL);
 			}
 			continue;
 		}
@@ -525,10 +522,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		/* One day of every month */
 		if (lflags == (F_ALLMONTH | F_DAYOFWEEK)) {
 			for (m = 1; m <= NMONTHS; m++) {
-				if (find_ymd(year, m, di.idayofmonth) == NULL)
-					continue;
-				remember(&remindex, yearp, monthp, dayp, edp,
-					 year, m, di.idayofmonth, NULL);
+				dp = find_ymd(year, m, di.idayofmonth);
+				if (dp != NULL)
+					remember(&remindex, dayp, dp, edp, NULL);
 			}
 			continue;
 		}
@@ -540,13 +536,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				continue;
 			d = (di.idayofweek - dow + 8) % 7;
 			while (d <= 366) {
-				if ((dp = find_yd(year, d))) {
-					rm = cal_day_get_month(dp);
-					rd = cal_day_get_day(dp);
-					remember(&remindex, yearp, monthp,
-						 dayp, edp, year, rm, rd,
-						 NULL);
-				}
+				dp = find_yd(year, d);
+				if (dp != NULL)
+					remember(&remindex, dayp, dp, edp, NULL);
 				d += 7;
 			}
 			continue;
@@ -562,11 +554,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 						di.imodifierindex, m, year);
 				if (d == -1)  /* not in the date range */
 					continue;
-				if (find_ymd(year, m, d)) {
-					remember(&remindex, yearp, monthp,
-						 dayp, edp, year, m, d, NULL);
-					continue;
-				}
+				dp = find_ymd(year, m, d);
+				if (dp != NULL)
+					remember(&remindex, dayp, dp, edp, NULL);
 			}
 			continue;
 		}
@@ -580,11 +570,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 					di.imodifierindex, di.imonth, year);
 			if (d == -1)  /* not in the date range */
 				continue;
-			if (find_ymd(year, di.imonth, d)) {
-				remember(&remindex, yearp, monthp,
-					 dayp, edp, year, di.imonth, d, NULL);
-				continue;
-			}
+			dp = find_ymd(year, di.imonth, d);
+			if (dp != NULL)
+				remember(&remindex, dayp, dp, edp, NULL);
 			continue;
 		}
 
@@ -595,11 +583,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				continue;
 			d = (di.idayofweek - dow + 8) % 7;
 			while (d <= yinfo->monthdays[di.imonth]) {
-				if (find_ymd(year, di.imonth, d)) {
-					remember(&remindex, yearp, monthp,
-						 dayp, edp, year, di.imonth,
-						 d, NULL);
-				}
+				dp = find_ymd(year, di.imonth, d);
+				if (dp != NULL)
+					remember(&remindex, dayp, dp, edp, NULL);
 				d += 7;
 			}
 			continue;
@@ -609,12 +595,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_EASTER)) {
 			dp = find_yd(year, yinfo->ieaster + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, NULL);
-			}
+			if (dp != NULL)
+				remember(&remindex, dayp, dp, edp, NULL);
 			continue;
 		}
 
@@ -622,12 +604,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_PASKHA)) {
 			dp = find_yd(year, yinfo->ipaskha + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, NULL);
-			}
+			if (dp != NULL)
+				remember(&remindex, dayp, dp, edp, NULL);
 			continue;
 		}
 
@@ -635,12 +613,8 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		if ((lflags & ~F_MODIFIEROFFSET) ==
 		    (F_SPECIALDAY | F_VARIABLE | F_CNY)) {
 			dp = find_yd(year, yinfo->firstcnyday + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, NULL);
-			}
+			if (dp != NULL)
+				remember(&remindex, dayp, dp, edp, NULL);
 			continue;
 		}
 
@@ -651,12 +625,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				dp = find_yd(year,
 					(int)floor(yinfo->ffullmoon[i]) +
 					di.imodifieroffset);
-				if (dp) {
-					rm = cal_day_get_month(dp);
-					rd = cal_day_get_day(dp);
+				if (dp != NULL) {
 					ed = floattotime(yinfo->ffullmoon[i]);
-					remember(&remindex, yearp, monthp,
-						 dayp, edp, year, rm, rd, ed);
+					remember(&remindex, dayp, dp, edp, ed);
 				}
 			}
 			continue;
@@ -669,12 +640,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 				dp = find_yd(year,
 					(int)floor(yinfo->fnewmoon[i]) +
 					di.imodifieroffset);
-				if (dp) {
-					rm = cal_day_get_month(dp);
-					rd = cal_day_get_day(dp);
+				if (dp != NULL) {
 					ed = floattotime(yinfo->fnewmoon[i]);
-					remember(&remindex, yearp, monthp,
-						 dayp, edp, year, rm, rd, ed);
+					remember(&remindex, dayp, dp, edp, ed);
 				}
 			}
 			continue;
@@ -685,12 +653,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_MAREQUINOX)) {
 			dp = find_yd(year,
 				(int)yinfo->equinoxdays[0] + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
+			if (dp != NULL) {
 				ed = floattotime(yinfo->equinoxdays[0]);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, ed);
+				remember(&remindex, dayp, dp, edp, ed);
 			}
 			continue;
 		}
@@ -698,12 +663,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_SEPEQUINOX)) {
 			dp = find_yd(year,
 				(int)yinfo->equinoxdays[1] + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
+			if (dp != NULL) {
 				ed = floattotime(yinfo->equinoxdays[1]);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, ed);
+				remember(&remindex, dayp, dp, edp, ed);
 			}
 			continue;
 		}
@@ -713,12 +675,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_JUNSOLSTICE)) {
 			dp = find_yd(year,
 				(int)yinfo->solsticedays[0] + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
+			if (dp != NULL) {
 				ed = floattotime(yinfo->solsticedays[0]);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, ed);
+				remember(&remindex, dayp, dp, edp, ed);
 			}
 			continue;
 		}
@@ -726,12 +685,9 @@ parsedaymonth(const char *date, int *yearp, int *monthp, int *dayp,
 		    (F_SPECIALDAY | F_VARIABLE | F_DECSOLSTICE)) {
 			dp = find_yd(year,
 				(int)yinfo->solsticedays[1] + di.imodifieroffset);
-			if (dp) {
-				rm = cal_day_get_month(dp);
-				rd = cal_day_get_day(dp);
+			if (dp != NULL) {
 				ed = floattotime(yinfo->solsticedays[1]);
-				remember(&remindex, yearp, monthp, dayp,
-					 edp, year, rm, rd, ed);
+				remember(&remindex, dayp, dp, edp, ed);
 			}
 			continue;
 		}
@@ -775,8 +731,8 @@ calc_yearinfo(int year)
 }
 
 static void
-remember(int *index, int *y, int *m, int *d, char **ed,
-	 int yy, int mm, int dd, char *extra)
+remember(int *index, struct cal_day **cd, struct cal_day *dp,
+	 char **ed, char *extra)
 {
 	static bool warned = false;
 
@@ -787,12 +743,9 @@ remember(int *index, int *y, int *m, int *d, char **ed,
 		return;
 	}
 
-	y[*index] = yy;
-	m[*index] = mm;
-	d[*index] = dd;
+	cd[*index] = dp;
 	ed[*index] = extra;
-
-	*index += 1;
+	(*index)++;
 }
 
 static const char *

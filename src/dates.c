@@ -36,6 +36,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "calendar.h"
 #include "basics.h"
@@ -68,27 +69,6 @@ struct cal_day {
 	struct event	*events;
 };
 static struct cal_day *cal_days = NULL;
-
-static void	addtodate(struct event *e, int year, int month, int day);
-
-
-int
-cal_day_get_month(struct cal_day *dayp)
-{
-	struct g_date gdate;
-
-	gregorian_from_fixed(dayp->rd, &gdate);
-	return gdate.month;
-}
-
-int
-cal_day_get_day(struct cal_day *dayp)
-{
-	struct g_date gdate;
-
-	gregorian_from_fixed(dayp->rd, &gdate);
-	return gdate.day;
-}
 
 
 void
@@ -178,33 +158,32 @@ find_ymd(int yy, int mm, int dd)
 	return NULL;
 }
 
-static void
-addtodate(struct event *e, int year, int month, int day)
-{
-	struct cal_day *d;
-
-	d = find_ymd(year, month, day);
-	assert(d != NULL);
-
-	e->next = d->events;
-	d->events = e;
-}
-
 struct event *
-event_add(int year, int month, int day, char *date, bool variable,
+event_add(struct cal_day *dp, bool day_first, bool variable,
 	  char *txt, char *extra)
 {
+	static char dbuf[32];
+	struct g_date gdate = { 0 };
+	struct tm tm = { 0 };
 	struct event *e;
+
+	gregorian_from_fixed(dp->rd, &gdate);
+	tm.tm_year = gdate.year - 1900;
+	tm.tm_mon = gdate.month - 1;
+	tm.tm_mday = gdate.day;
+	strftime(dbuf, sizeof(dbuf), (day_first ? "%e %b" : "%b %e"), &tm);
 
 	e = xcalloc(1, sizeof(*e));
 	e->variable = variable;
-	e->date = xstrdup(date);
+	e->date = xstrdup(dbuf);
 	e->text = xstrdup(txt);
 	e->extra = NULL;
 	if (extra != NULL && extra[0] != '\0')
 		e->extra = xstrdup(extra);
 
-	addtodate(e, year, month, day);
+	e->next = dp->events;
+	dp->events = e;
+
 	return (e);
 }
 

@@ -46,7 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "calendar.h"
@@ -253,7 +252,6 @@ locale_day_first(void)
 static bool
 cal_parse(FILE *in, FILE *out)
 {
-	struct tm	tm = { 0 };
 	ssize_t		linelen;
 	size_t		linecap = 0;
 	char		*line = NULL;
@@ -265,9 +263,7 @@ cal_parse(FILE *in, FILE *out)
 	int		flags;
 	int		count = 0;
 	int		comment = C_NONE;
-	int		month[MAXCOUNT] = { 0 };
-	int		day[MAXCOUNT] = { 0 };
-	int		year[MAXCOUNT] = { 0 };
+	struct cal_day	*cdays[MAXCOUNT] = { NULL };
 	struct event	*events[MAXCOUNT] = { NULL };
 	char		*extradata[MAXCOUNT] = { NULL };
 
@@ -361,8 +357,7 @@ cal_parse(FILE *in, FILE *out)
 		snprintf(dbuf, sizeof(dbuf), "%s", buf);
 		*pp = ch;
 
-		count = parsedaymonth(dbuf, year, month, day, &flags,
-				      extradata, buf);
+		count = parsedaymonth(dbuf, &flags, cdays, extradata, buf);
 		if (count == 0) {
 			logdebug("%s() ignored: |%s|\n", __func__, buf);
 			continue;
@@ -373,13 +368,8 @@ cal_parse(FILE *in, FILE *out)
 			pp++;
 
 		for (int i = 0; i < count; i++) {
-			tm.tm_year = year[i] - 1900;
-			tm.tm_mon = month[i] - 1;
-			tm.tm_mday = day[i];
-			strftime(dbuf, sizeof(dbuf),
-				 d_first ? "%e %b" : "%b %e", &tm);
 			logdebug("%s() got: |%s|\n", __func__, pp);
-			events[i] = event_add(year[i], month[i], day[i], dbuf,
+			events[i] = event_add(cdays[i], d_first,
 					      ((flags & F_VARIABLE) != 0),
 					      pp, extradata[i]);
 		}
