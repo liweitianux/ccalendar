@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd July 11, 2020
+.Dd July 18, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -44,7 +44,9 @@
 .Op Fl F Ar friday
 .Op Fl f Ar calendarfile
 .Op Fl h
+.Op Fl L Ar latitude,longitude[,elevation]
 .Op Fl l Ar longitude
+.Op Fl s Ar chinese|moon|sun
 .Op Fl t Ar [[[cc]yy]mm]dd
 .Op Fl U Ar UTC-offset
 .Op Fl W Ar num
@@ -92,10 +94,33 @@ Note that this flag cannot be used together with the
 flag.
 .It Fl h
 Show the utility usage.
+.It Fl L Ar latitude,longitude[,elevation]
+Specify the location for use in some calculations, such as the current
+Sun and Moon positions and their rise and set times.
+The
+.Ar latitude
+and
+.Ar longitude
+arguments are given in units of degrees.
+The
+.Ar elevation
+argument is optional and is given in units of meters.
+All of the three arguments are default to 0.
 .It Fl l Ar longitude
 Perform lunar and solar calculations from this longitude.
 If neither longitude nor UTC offset is specified, the calculations will
 be based on the difference between UTC time and localtime.
+.It Fl s Ar chinese|moon|sun
+Show information of the specified category:
+.Pp
+.Bl -tag -width chinese -compact
+.It Va chinese
+Show the Chinese calendar and the 24 solar terms in this year.
+.It Va moon
+Show Moon position, phases, rise and set times, and lunar events in this year.
+.It Va sun
+Show Sun position, rise and set times, and solar events in this year.
+.El
 .It Fl t Ar [[[cc]yy]mm]dd
 Act like the specified value is
 .Dq today
@@ -133,7 +158,8 @@ To handle the local name of sequences, you can specify them as:
 in the calendar file as early as possible.
 .Pp
 The names of the following special days are recognized:
-.Bl -tag -width 123456789012345 -compact
+.Pp
+.Bl -tag -offset indent -width 123456789012345 -compact
 .It Easter
 Catholic Easter.
 .It Paskha
@@ -153,6 +179,7 @@ The solar solstice in December.
 .It ChineseNewYear
 The first day of the Chinese year.
 .El
+.Pp
 These names may be reassigned to their local names via an assignment
 like
 .Dq Easter=Pasen

@@ -46,22 +46,27 @@
 #include <unistd.h>
 
 #include "calendar.h"
+#include "chinese.h"
 #include "basics.h"
 #include "gregorian.h"
+#include "moon.h"
 #include "parsedata.h"
+#include "sun.h"
+
 
 struct cal_options Options = {
 	.calendarFile = NULL,
 	.days_before = 0,
 	.days_after = 0,
-	.UTCOffset = 0.0,
-	.EastLongitude = 0.0,
+	.time = 0.5,  /* noon */
 	.debug = false,
 };
 
 static void	usage(const char *progname) __dead2;
+static double	get_time_of_now(void);
 static int	get_fixed_of_today(void);
 static double	get_utc_offset(void);
+
 
 int
 main(int argc, char *argv[])
@@ -72,13 +77,18 @@ main(int argc, char *argv[])
 	int	ch;
 	enum dayofweek dow;
 	struct passwd *pw;
+	struct location loc = { 0 };
 	const char *debug_type = NULL;
+	const char *show_info = NULL;
 
+	Options.location = &loc;
+	Options.time = get_time_of_now();
 	Options.today = get_fixed_of_today();
 	Options.UTCOffset = get_utc_offset();
 	Options.EastLongitude = Options.UTCOffset * 15;
+	loc.zone = Options.UTCOffset / 24.0;
 
-	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hl:t:U:W:?")) != -1) {
+	while ((ch = getopt(argc, argv, "-A:aB:D:dF:f:hL:l:s:t:U:W:?")) != -1) {
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
@@ -120,9 +130,21 @@ main(int argc, char *argv[])
 				Options.calendarFile = "/dev/stdin";
 			break;
 
-		case 'l': /* Change longitudal position */
+		case 'L': /* location */
+			if (!parse_location(optarg, &loc.latitude,
+					    &loc.longitude, &loc.elevation)) {
+				errx(1, "invalid location: '%s'", optarg);
+			}
+			break;
+
+		case 'l': /* Change longitudinal position */
 			Options.EastLongitude = strtod(optarg, NULL);
 			Options.UTCOffset = Options.EastLongitude / 15;
+			loc.zone = Options.UTCOffset / 24.0;
+			break;
+
+		case 's': /* show info of specified category */
+			show_info = optarg;
 			break;
 
 		case 't': /* specify date */
@@ -133,6 +155,7 @@ main(int argc, char *argv[])
 		case 'U': /* Change UTC offset */
 			Options.UTCOffset = strtod(optarg, NULL);
 			Options.EastLongitude = Options.UTCOffset * 15;
+			loc.zone = Options.UTCOffset / 24.0;
 			break;
 
 		case 'h':
@@ -163,19 +186,32 @@ main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	setnnames();
 
-	/*
-	 * FROM now on, we are working in UTC.
-	 * This will only affect moon and sun related events anyway.
-	 */
 	if (setenv("TZ", "UTC", 1) != 0)
 		err(1, "setenv");
 	tzset();
+	/* We're in UTC from now on */
 
 	if (Options.debug)
 		dumpdates();
 
 	if (debug_type != NULL) {
 		dodebug(debug_type);
+		exit(0);
+	}
+
+	if (show_info != NULL) {
+		if (strcmp(show_info, "chinese") == 0) {
+			show_chinese_calendar(Options.today);
+		} else if (strcmp(show_info, "moon") == 0) {
+			show_moon_info(Options.today + Options.time,
+				       Options.location);
+		} else if (strcmp(show_info, "sun") == 0) {
+			show_sun_info(Options.today + Options.time,
+				      Options.location);
+		} else {
+			errx(1, "unknown -s value: '%s'", show_info);
+		}
+
 		exit(0);
 	}
 
@@ -206,6 +242,19 @@ main(int argc, char *argv[])
 	return (ret);
 }
 
+
+static double
+get_time_of_now(void)
+{
+	time_t now;
+	struct tm tm;
+
+	now = time(NULL);
+	tzset();
+	localtime_r(&now, &tm);
+
+	return (tm.tm_hour + tm.tm_min/60.0 + tm.tm_sec/3600.0) / 24.0;
+}
 
 static int
 get_fixed_of_today(void)
@@ -244,8 +293,9 @@ usage(const char *progname)
 	fprintf(stderr,
 		"usage:\n"
 		"%s [-A days] [-a] [-B days] [-D sun|moon] [-d]\n"
-		"\t[-F friday] [-f calendarfile] [-l longitude]\n"
-		"\t[-t [[[cc]yy]mm]dd] [-U utcoffset] [-W days]\n",
+		"\t[-F friday] [-f calendarfile] [-L latitude,longitude[,elevation]]\n"
+		"\t[-l longitude] [-s chinese|moon|sun] [-t [[[cc]yy]mm]dd]\n"
+		"\t[-U utcoffset] [-W days]\n",
 		progname);
 	exit(1);
 }

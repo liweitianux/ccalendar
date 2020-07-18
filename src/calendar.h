@@ -63,13 +63,17 @@
 #define	MAXCOUNT	125
 
 
+struct location;
+
 struct cal_options {
+	struct location *location;
 	const char *calendarFile;  /* name of calendar file */
 	int today;  /* R.D. of today to remind events */
 	int days_before;  /* number of days before today to remind events */
 	int days_after;  /* number of days after today to remind events */
 	int year1;  /* year of the beginning day */
 	int year2;  /* year of the ending day */
+	double time;  /* [0, 1) time of now in fraction of day */
 	double UTCOffset;
 	double EastLongitude;
 	bool debug;
