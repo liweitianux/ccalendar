@@ -55,6 +55,9 @@
 #define	NMONTHS		12
 #define	NSEQUENCES	6
 
+/* Maximum number of new/full moons in a year */
+#define	MAXMOONS	18
+
 /*
  * Random number of maximum number of repeats of an event.  Should be 52
  * (number of weeks per year).  If you want to show two years then it should
@@ -140,10 +143,5 @@ struct event *event_add(struct cal_day *dp, bool day_first, bool variable,
 			char *txt, char *extra);
 void	event_continue(struct event *events, char *txt);
 void	event_print_all(FILE *fp);
-
-/* pom.c */
-#define	MAXMOONS	18
-void	pom(int year, int utcoffset, int *fms, int *nms);
-void	fpom(int year, int utcoffset, double *ffms, double *fnms);
 
 #endif

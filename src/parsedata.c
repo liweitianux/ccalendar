@@ -41,6 +41,7 @@
 #include "basics.h"
 #include "chinese.h"
 #include "gregorian.h"
+#include "moon.h"
 #include "parsedata.h"
 #include "sun.h"
 #include "utils.h"
@@ -712,8 +713,8 @@ calc_yearinfo(int year)
 {
 	struct yearinfo *yinfo;
 	struct g_date date = { year - 1, 12, 31 };
-	double t;
-	int day0, day_approx;
+	double t, t_begin, t_end;
+	int i, day0, day_approx;
 
 	day0 = fixed_from_gregorian(&date);
 
@@ -723,7 +724,28 @@ calc_yearinfo(int year)
 	yinfo->ieaster = easter(year);
 	yinfo->ipaskha = paskha(year);
 	yinfo->firstcnyday = dayofyear_from_fixed(chinese_new_year(year));
-	fpom(year, Options.utc_offset, yinfo->ffullmoon, yinfo->fnewmoon);
+
+	/*
+	 * Lunar events
+	 */
+	date.year = year;
+	date.month = 1;
+	date.day = 1;
+	t_begin = fixed_from_gregorian(&date) - Options.location->zone;
+	date.year++;
+	t_end = fixed_from_gregorian(&date) - Options.location->zone;
+	/* New moon events */
+	for (t = t_begin, i = 0; (t = new_moon_atafter(t)) < t_end; i++) {
+		t += Options.location->zone;  /* to standard time */
+		yinfo->fnewmoon[i] = t - day0;
+	}
+	/* Full moon events */
+	for (t = t_begin, i = 0;
+	     (t = lunar_phase_atafter(180, t)) < t_end;
+	     i++) {
+		t += Options.location->zone;  /* to standard time */
+		yinfo->ffullmoon[i] = t - day0;
+	}
 
 	/*
 	 * Solar events
