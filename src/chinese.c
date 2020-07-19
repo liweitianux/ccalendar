@@ -420,7 +420,7 @@ show_chinese_calendar(int rd)
 	int newyear = chinese_new_year_onbefore(
 			chinese_new_year_onbefore(rd) + 370);
 	gregorian_from_fixed(newyear, &gdate);
-	printf("春节 (Chinese New Year): %4d-%02d-%02d\n",
+	printf("新年 (Chinese New Year): %4d-%02d-%02d\n",
 	       gdate.year, gdate.month, gdate.day);
 
 	/* 1st solar term (Lìchūn) is generally around February 4 */
