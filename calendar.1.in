@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd July 18, 2020
+.Dd July 19, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -101,7 +101,14 @@ arguments are given in units of degrees.
 The
 .Ar elevation
 argument is optional and is given in units of meters.
-All of the three arguments are default to 0.
+If not specified, the
+.Ar latitude
+and
+.Ar elevation
+arguments are default to 0, while the
+.Ar longitude
+argument is calculated from the adopted UTC offset
+(i.e., 15 degrees times the UTC offset in hours).
 .It Fl s Ar chinese|moon|sun
 Show information of the specified category:
 .Pp
@@ -389,10 +396,6 @@ Chinese New Year is calculated at 120 degrees east of Greenwich,
 which roughly corresponds with the east coast of China.
 For people west of China, this might result that the start of Chinese
 New Year and the day of the related new moon might differ.
-.Pp
-The phases of the moon and the longitude of the sun are calculated
-against the local position which corresponds with 30 degrees times
-the time-difference towards Greenwich.
 .Pp
 The new and full moons are happening on the day indicated: They
 might happen in the time period in the early night or in the late

@@ -72,6 +72,7 @@ int
 main(int argc, char *argv[])
 {
 	bool	doall = false;
+	bool	L_flag = false;
 	int	ret = 0;
 	int	Friday = 5;  /* days before weekend */
 	int	ch;
@@ -129,6 +130,7 @@ main(int argc, char *argv[])
 					    &loc.longitude, &loc.elevation)) {
 				errx(1, "invalid location: '%s'", optarg);
 			}
+			L_flag = true;
 			break;
 
 		case 's': /* show info of specified category */
@@ -157,6 +159,9 @@ main(int argc, char *argv[])
 
 	if (doall && Options.calendarFile != NULL)
 		errx(1, "flags -a and -f cannot be used together");
+
+	if (!L_flag)
+		loc.longitude = loc.zone * 360.0;
 
 	/* Friday displays Monday's events */
 	dow = dayofweek_from_fixed(Options.today);
