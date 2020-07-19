@@ -77,7 +77,6 @@ struct cal_options {
 	int days_after;  /* number of days after today to remind events */
 	int year1;  /* year of the beginning day */
 	int year2;  /* year of the ending day */
-	int utc_offset;  /* number of seconds east of UTC */
 	bool debug;
 };
 

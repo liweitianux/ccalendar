@@ -76,6 +76,7 @@ main(int argc, char *argv[])
 	int	ret = 0;
 	int	Friday = 5;  /* days before weekend */
 	int	ch;
+	int	utc_offset;
 	enum dayofweek dow;
 	struct passwd *pw;
 	struct location loc = { 0 };
@@ -84,8 +85,7 @@ main(int argc, char *argv[])
 	Options.location = &loc;
 	Options.time = get_time_of_now();
 	Options.today = get_fixed_of_today();
-	Options.utc_offset = get_utc_offset();
-	loc.zone = Options.utc_offset / (3600.0 * 24.0);
+	loc.zone = get_utc_offset() / (3600.0 * 24.0);
 
 	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:t:U:W:")) != -1) {
 		switch (ch) {
@@ -128,7 +128,7 @@ main(int argc, char *argv[])
 		case 'L': /* location */
 			if (!parse_location(optarg, &loc.latitude,
 					    &loc.longitude, &loc.elevation)) {
-				errx(1, "invalid location: '%s'", optarg);
+				errx(1, "invalid location: |%s|", optarg);
 			}
 			L_flag = true;
 			break;
@@ -143,9 +143,9 @@ main(int argc, char *argv[])
 			break;
 
 		case 'U': /* specify timezone */
-			if (!parse_timezone(optarg, &Options.utc_offset))
-				errx(1, "invalid timezone: '%s'", optarg);
-			loc.zone = Options.utc_offset / (3600.0 * 24.0);
+			if (!parse_timezone(optarg, &utc_offset))
+				errx(1, "invalid timezone: |%s|", optarg);
+			loc.zone = utc_offset / (3600.0 * 24.0);
 			break;
 
 		case 'h':
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
 			show_sun_info(Options.today + Options.time,
 				      Options.location);
 		} else {
-			errx(1, "unknown -s value: '%s'", show_info);
+			errx(1, "unknown -s value: |%s|", show_info);
 		}
 
 		exit(0);
