@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 	Options.utc_offset = get_utc_offset();
 	loc.zone = Options.utc_offset / (3600.0 * 24.0);
 
-	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:t:U:W:?")) != -1) {
+	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:t:U:W:")) != -1) {
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
@@ -147,7 +147,6 @@ main(int argc, char *argv[])
 			break;
 
 		case 'h':
-		case '?':
 		default:
 			usage(argv[0]);
 		}
