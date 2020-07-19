@@ -98,7 +98,7 @@ static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
 static bool	 parse_index(const char *s, int *index);
 static void	 remember(int *index, struct cal_day **cd, struct cal_day *dp,
-			  char **ed, char *extra);
+			  char **ed, const char *extra);
 static void	 show_datestyle(struct dateinfo *di);
 static char	*showflags(int flags);
 
@@ -759,7 +759,7 @@ calc_yearinfo(int year)
 
 static void
 remember(int *index, struct cal_day **cd, struct cal_day *dp,
-	 char **ed, char *extra)
+	 char **ed, const char *extra)
 {
 	static bool warned = false;
 
@@ -771,7 +771,15 @@ remember(int *index, struct cal_day **cd, struct cal_day *dp,
 	}
 
 	cd[*index] = dp;
-	ed[*index] = extra;
+	if (ed[*index] != NULL) {
+		free(ed[*index]);
+		ed[*index] = NULL;
+	}
+	/* NOTE: copy so that multiple occurrences of events (e.g., NewMoon)
+	 * would not overwrite */
+	if (extra != NULL)
+		ed[*index] = xstrdup(extra);
+
 	(*index)++;
 }
 

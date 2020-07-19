@@ -387,6 +387,11 @@ cal_parse(FILE *in, FILE *out)
 
 	free(line);
 	fclose(in);
+	for (int i = 0; i < MAXCOUNT; i++) {
+		if (extradata[i] != NULL)
+			free(extradata[i]);
+	}
+
 	return (true);
 }
 
