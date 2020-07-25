@@ -37,6 +37,10 @@ ifeq ($(OS),Linux)
 CFLAGS+=	-D_GNU_SOURCE -D__dead2='__attribute__((__noreturn__))'
 endif
 
+# Credit: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
+DEPFLAGS=	-MT $@ -MMD -MP -MF $*.d
+COMPILE.c=	$(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+
 .PHONY: all
 all: $(PROG) $(MAN) $(CALFILE)
 
@@ -52,6 +56,17 @@ $(MAN) $(CALFILE):
 $(MAN).gz: $(MAN)
 	gzip -9c $(MAN) > $@
 CLEANFILES+=	$(MAN) $(MAN).gz $(CALFILE)
+
+%.o: %.c
+%.o: %.c %.d
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+
+DEPFILES=	$(SRCS:%.c=%.d)
+CLEANFILES+=	$(DEPFILES)
+$(DEPFILES):
+
+include $(wildcard $(DEPFILES))
+
 
 .PHONY: install
 install:
