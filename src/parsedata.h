@@ -70,6 +70,7 @@
 #define	STRING_JUNSOLSTICE	"JunSolstice"
 #define	STRING_DECSOLSTICE	"DecSolstice"
 
+struct cal_day;
 
 int	parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 		      char **edp, const char *line);
