@@ -947,28 +947,23 @@ parse_index(const char *s, int *index)
 
 	if (s[0] == '+' || s[0] == '-') {
 		char *endp;
-		int idx = (int)strtol(s, &endp, 10);
+		int v = (int)strtol(s, &endp, 10);
 		if (*endp != '\0')
 			return false;  /* has trailing junk */
-		if (idx == 0 || idx <= -6 || idx >= 6) {
-			warnx("%s(): out of valid range: %d", __func__, idx);
-			return false;  /* out of valid range */
+		if (v == 0 || v <= -6 || v >= 6) {
+			warnx("%s(): invalid value: %d", __func__, v);
+			return false;
 		}
 
-		*index = idx;
+		*index = v;
 		parsed = true;
 	}
 
 	for (int i = 0; !parsed && sequences[i]; i++) {
-		if (strcasecmp(s, sequences[i]) == 0) {
+		if (strcasecmp(s, sequences[i]) == 0 ||
+		    (nsequences[i] && strcasecmp(s, nsequences[i]) == 0)) {
 			parsed = true;
 			*index = (i == 5) ? -1 : (i+1);  /* 'Last' -> '-1' */
-		}
-	}
-	for (int i = 0; !parsed && nsequences[i]; i++) {
-		if (strcasecmp(s, nsequences[i]) == 0) {
-			parsed = true;
-			*index = (i == 5) ? -1 : (i+1);
 		}
 	}
 
