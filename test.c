@@ -9,6 +9,7 @@
 #include "calendar.h"
 #include "basics.h"
 #include "chinese.h"
+#include "ecclesiastical.h"
 #include "gregorian.h"
 #include "julian.h"
 #include "moon.h"
@@ -44,9 +45,9 @@ test1(void)
 		      728714, 744313, 764652 };
 	*/
 	int rds[] = { -214193, 253427, 473837, 601716, 694799, 728714 };
-
 	int rd, rd2;
-	struct date date;
+	struct date date, date2;
+
 	double c;
 	printf("R.D.\t(Y, M, D)\tRD2\tEq?\tJcen\n");
 	for (size_t i = 0; i < nitems(rds); i++) {
@@ -69,6 +70,19 @@ test1(void)
 		printf("%7d\t%d\t(%4d, %2d, %2d)\t%7d\t%d\n",
 				rd, dow, date.year, date.month, date.day,
 				rd2, rd==rd2);
+	}
+
+	printf("\nR.D.\tEasterJ\tEasterJ(Y,M,D)\tEasterG\tEasterG(Y,M,D)\n");
+	for (size_t i = 0; i < nitems(rds); i++) {
+		rd = rds[i];
+		int year = gregorian_year_from_fixed(rd);
+		int j_easter = orthodox_easter(year);
+		int g_easter = easter(year);
+		gregorian_from_fixed(j_easter, &date);
+		gregorian_from_fixed(g_easter, &date2);
+		printf("%7d\t%7d\t(%4d, %2d, %2d)\t%7d\t(%4d, %2d, %2d)\n",
+				rd, j_easter, date.year, date.month, date.day,
+				g_easter, date2.year, date2.month, date2.day);
 	}
 
 	double t;
