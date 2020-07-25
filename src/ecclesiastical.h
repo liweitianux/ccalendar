@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -34,59 +34,10 @@
  * SUCH DAMAGE.
  */
 
-#ifndef BASICS_H_
-#define BASICS_H_
+#ifndef ECCLESIASTICAL_H_
+#define ECCLESIASTICAL_H_
 
-#include <stddef.h>
-
-struct date {
-	int	year;
-	int	month;	/* [1, 12] */
-	int	day;
-};
-
-struct location {
-	double	latitude;	/* degree */
-	double	longitude;	/* degree */
-	double	elevation;	/* meter */
-	double	zone;		/* time offset (in days) from UTC */
-};
-
-enum dayofweek {
-	SUNDAY = 0,
-	MONDAY,
-	TUESDAY,
-	WEDNESDAY,
-	THURSDAY,
-	FRIDAY,
-	SATURDAY,
-};
-
-enum dayofweek	dayofweek_from_fixed(int rd);
-int	kday_after(enum dayofweek k, int rd);
-int	kday_onbefore(enum dayofweek k, int rd);
-int	nth_kday(int n, enum dayofweek k, struct date *date);
-int	dayofyear_from_fixed(int rd);
-
-double	julian_centuries(double t);
-double	sidereal_from_moment(double t);
-
-double	ephemeris_correction(double t);
-double	universal_from_dynamical(double t);
-double	dynamical_from_universal(double t);
-
-double	equation_of_time(double t);
-double	apparent_from_local(double t, double longitude);
-double	local_from_apparent(double t, double longitude);
-
-double	obliquity(double t);
-double	declination(double t, double beta, double lambda);
-double	right_ascension(double t, double beta, double lambda);
-
-double	refraction(double elevation);
-
-int	format_time(char *buf, size_t size, double t);
-int	format_zone(char *buf, size_t size, double zone);
-int	format_location(char *buf, size_t size, const struct location *loc);
+int	easter(int g_year);
+int	orthodox_easter(int g_year);
 
 #endif

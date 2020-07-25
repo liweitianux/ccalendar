@@ -69,6 +69,16 @@ kday_onbefore(enum dayofweek k, int rd)
 }
 
 /*
+ * Calculate the fixed date of the $k-day after the fixed date $date.
+ * Ref: Sec.(1.12), Eq.(1.68)
+ */
+int
+kday_after(enum dayofweek k, int rd)
+{
+	return kday_onbefore(k, rd + 7);
+}
+
+/*
  * Calculate the $n-th occurrence of a given day of week counting from
  * either after (if $n > 0) or before (if $n < 0) the given $date.
  * Ref: Sec.(2.5), Eq.(2.33)

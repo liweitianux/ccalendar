@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -32,61 +32,57 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *
+ * Reference:
+ * Calendrical Calculations, The Ultimate Edition (4th Edition)
+ * by Edward M. Reingold and Nachum Dershowitz
+ * 2018, Cambridge University Press
  */
 
-#ifndef BASICS_H_
-#define BASICS_H_
+#include <math.h>
+#include <stdbool.h>
 
-#include <stddef.h>
+#include "basics.h"
+#include "ecclesiastical.h"
+#include "gregorian.h"
+#include "julian.h"
+#include "utils.h"
 
-struct date {
-	int	year;
-	int	month;	/* [1, 12] */
-	int	day;
-};
+/*
+ * Calculate the fixed date (RD) of Orthodox Easter in Gregorian year $g_year.
+ * Ref: Sec.(9.1), Eq.(9.1)
+ */
+int
+orthodox_easter(int g_year)
+{
+	/* Age of moon for April 5 */
+	int shifted_epact = mod(14 + 11 * mod(g_year, 19), 30);
 
-struct location {
-	double	latitude;	/* degree */
-	double	longitude;	/* degree */
-	double	elevation;	/* meter */
-	double	zone;		/* time offset (in days) from UTC */
-};
+	/* Day after full moon on/after March 21 */
+	int j_year = (g_year > 0) ? g_year : (g_year - 1);
+	struct date april19 = { j_year, 4, 19 };
+	int paschal_moon = fixed_from_julian(&april19) - shifted_epact;
 
-enum dayofweek {
-	SUNDAY = 0,
-	MONDAY,
-	TUESDAY,
-	WEDNESDAY,
-	THURSDAY,
-	FRIDAY,
-	SATURDAY,
-};
+	return kday_after(SUNDAY, paschal_moon);
+}
 
-enum dayofweek	dayofweek_from_fixed(int rd);
-int	kday_after(enum dayofweek k, int rd);
-int	kday_onbefore(enum dayofweek k, int rd);
-int	nth_kday(int n, enum dayofweek k, struct date *date);
-int	dayofyear_from_fixed(int rd);
+/*
+ * Calculate the fixed date (RD) of Orthodox Easter in Gregorian year $g_year.
+ * Ref: Sec.(9.2), Eq.(9.3)
+ */
+int
+easter(int g_year)
+{
+	int century = div_floor(g_year, 100) + 1;
+	int y_mod19 = mod(g_year, 19);
+	int n = (14 + 11 * y_mod19 - (int)floor(century * 0.75) +
+		 div_floor(5 + 8 * century, 25));
+	int shifted_epact = mod(n, 30);
+	if (shifted_epact == 0 || (shifted_epact == 1 && y_mod19 > 10))
+		shifted_epact++;
 
-double	julian_centuries(double t);
-double	sidereal_from_moment(double t);
+	struct date april19 = { g_year, 4, 19 };
+	int paschal_moon = fixed_from_gregorian(&april19) - shifted_epact;
 
-double	ephemeris_correction(double t);
-double	universal_from_dynamical(double t);
-double	dynamical_from_universal(double t);
-
-double	equation_of_time(double t);
-double	apparent_from_local(double t, double longitude);
-double	local_from_apparent(double t, double longitude);
-
-double	obliquity(double t);
-double	declination(double t, double beta, double lambda);
-double	right_ascension(double t, double beta, double lambda);
-
-double	refraction(double elevation);
-
-int	format_time(char *buf, size_t size, double t);
-int	format_zone(char *buf, size_t size, double zone);
-int	format_location(char *buf, size_t size, const struct location *loc);
-
-#endif
+	return kday_after(SUNDAY, paschal_moon);
+}
