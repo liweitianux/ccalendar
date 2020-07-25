@@ -299,6 +299,28 @@ test2()
 	printf("\n");
 }
 
+static void
+test3()
+{
+	struct date date = { 2020, 0, 0 };
+	struct date date2;
+	int rd, rd2;
+
+	printf("\n-----------------------------------------------------------\n");
+
+	printf("Input(Y,M,D)\tR.D.\tOutput(Y,M,D)\tR.D.2\tEq?\n");
+	for (int m = 0; m < 20; m++) {
+		date.month = m;
+		rd = fixed_from_gregorian(&date);
+		gregorian_from_fixed(rd, &date2);
+		rd2 = fixed_from_gregorian(&date2);
+		printf("(%4d, %2d, %2d)\t%7d\t(%4d, %2d, %2d)\t%7d\t%d\n",
+			date.year, date.month, date.day, rd,
+			date2.year, date2.month, date2.day, rd2,
+			rd==rd2);
+	}
+}
+
 
 /* Return the seconds east of UTC */
 static int
@@ -362,6 +384,7 @@ main(int argc, char *argv[])
 	if (run_test) {
 		test1();
 		test2();
+		test3();
 	}
 
 	return 0;
