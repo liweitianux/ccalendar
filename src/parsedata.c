@@ -40,6 +40,7 @@
 #include "calendar.h"
 #include "basics.h"
 #include "chinese.h"
+#include "ecclesiastical.h"
 #include "gregorian.h"
 #include "moon.h"
 #include "parsedata.h"
@@ -721,9 +722,10 @@ calc_yearinfo(int year)
 	yinfo = xcalloc(1, sizeof(*yinfo));
 	yinfo->year = year;
 	yinfo->monthdays = monthdaytab[isleap(year)];
-	yinfo->ieaster = easter(year);
-	yinfo->ipaskha = paskha(year);
-	yinfo->firstcnyday = dayofyear_from_fixed(chinese_new_year(year));
+
+	yinfo->ieaster = easter(year) - day0;
+	yinfo->ipaskha = orthodox_easter(year) - day0;
+	yinfo->firstcnyday = chinese_new_year(year) - day0;
 
 	/*
 	 * Lunar events

@@ -123,10 +123,6 @@ extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
 
 int	cal(bool doall);
 
-/* ostern.c / paskha.c */
-int	paskha(int year);
-int	easter(int year);
-
 /* dates.c */
 struct cal_day;
 struct event;
