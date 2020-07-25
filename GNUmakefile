@@ -38,7 +38,7 @@ CFLAGS+=	-D_GNU_SOURCE -D__dead2='__attribute__((__noreturn__))'
 endif
 
 .PHONY: all
-all: $(PROG) $(MAN).gz $(CALFILE)
+all: $(PROG) $(MAN) $(CALFILE)
 
 .PHONY: debug
 debug: $(PROG)
@@ -50,7 +50,8 @@ $(PROG): $(OBJS)
 $(MAN) $(CALFILE):
 	sed $(SED_EXPR) $@.in > $@
 $(MAN).gz: $(MAN)
-	gzip -9 $(MAN)
+	gzip -9c $(MAN) > $@
+CLEANFILES+=	$(MAN) $(MAN).gz $(CALFILE)
 
 .PHONY: install
 install:
@@ -64,7 +65,8 @@ install:
 
 .PHONY: clean
 clean:
-	rm -f $(PROG) $(OBJS) $(MAN) $(MAN).gz $(CALFILE)
+	rm -f $(PROG) $(OBJS) $(CLEANFILES)
+
 
 .PHONY: archpkg
 archpkg:
