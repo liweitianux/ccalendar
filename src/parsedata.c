@@ -413,50 +413,22 @@ showflags(int flags)
 /*
  * Calculate the date of an indexed day-of-week in the month, e.g.,
  * 'Thu-3', 'Wed+2'.
- * 'index' is the ordinal number of the day-of-week in the month.
+ * The 'index' is the ordinal number of the day-of-week in the month.
  */
 static int
 dayofweek_of_month(int dow, int index, int month, int year)
 {
-	struct yearinfo *yinfo;
-	int dow1;
-	int d;
-
 	assert(index != 0);
 
-	dow1 = first_dayofweek_of_month(year, month);
-	if (dow1 == -1)  /* not in the date range */
-		return -1;
+	struct date date = { year, month, 1 };
+	int day1 = fixed_from_gregorian(&date);
 
-	for (yinfo = yearinfo_list; yinfo; yinfo = yinfo->next) {
-		if (yinfo->year == year)
-			break;
+	if (index < 0) {	/* count back from the end of month */
+		date.month++;
+		date.day = 0;	/* the last day of previous month */
 	}
-	assert(yinfo != NULL);
 
-	/*
-	 * Date of zeroth or first of our weekday in month, depending on the
-	 * relationship with the first of the month.  The range is [-6, 6].
-	 */
-	d = (dow - dow1 + 1) % 7;
-	/*
-	 * Which way are we counting?  Index 0 is invalid, abs(index) > 5 is
-	 * meaningless, but that's OK.  Index 5 may or may not be meaningless,
-	 * so there's no point in complaining for complaining's sake.
-	 */
-	if (index < 0) {			/* back from end of month */
-						/* FIXME */
-		int dow2 = d;
-		while (dow2 <= yinfo->monthdays[month])
-			dow2 += 7;
-		d = index * 7 + dow2;
-	} else {
-		if (d > 0)
-			d += index * 7 - 7;
-		else
-			d += index * 7;
-	}
-	return (d);
+	return nth_kday(index, dow, &date) - day1 + 1;
 }
 
 int
@@ -558,8 +530,6 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 			for (m = 1; m <= NMONTHS; m++) {
 				d = dayofweek_of_month(di.idayofweek,
 						di.imodifierindex, m, year);
-				if (d == -1)  /* not in the date range */
-					continue;
 				dp = find_ymd(year, m, d);
 				if (dp != NULL)
 					remember(&remindex, dayp, dp, edp, NULL);
@@ -574,8 +544,6 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 		    (F_MONTH | F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
 			d = dayofweek_of_month(di.idayofweek,
 					di.imodifierindex, di.imonth, year);
-			if (d == -1)  /* not in the date range */
-				continue;
 			dp = find_ymd(year, di.imonth, d);
 			if (dp != NULL)
 				remember(&remindex, dayp, dp, edp, NULL);
