@@ -815,7 +815,7 @@ moonset(int rd, const struct location *loc)
 void
 show_moon_info(double t, const struct location *loc)
 {
-	struct g_date date;
+	struct date date;
 	char buf[128];
 
 	int rd = (int)floor(t);
@@ -897,7 +897,7 @@ show_moon_info(double t, const struct location *loc)
 	 * Moon phases in the year
 	 */
 
-	struct g_date date2 = { date.year, 1, 1 };
+	struct date date2 = { date.year, 1, 1 };
 	double t_begin = fixed_from_gregorian(&date2) - loc->zone;
 	date2.year++;
 	double t_end = fixed_from_gregorian(&date2) - loc->zone;

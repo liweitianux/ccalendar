@@ -712,7 +712,7 @@ static struct yearinfo *
 calc_yearinfo(int year)
 {
 	struct yearinfo *yinfo;
-	struct g_date date = { year - 1, 12, 31 };
+	struct date date = { year - 1, 12, 31 };
 	double t, t_begin, t_end;
 	int i, day0, day_approx;
 
@@ -1157,7 +1157,7 @@ parse_date(const char *date, int *rd_out)
 	size_t len;
 	time_t now;
 	struct tm tm;
-	struct g_date gdate;
+	struct date gdate;
 
 	now = time(NULL);
 	tzset();

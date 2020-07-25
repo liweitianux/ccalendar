@@ -93,7 +93,7 @@ first_dayofweek_of_year(int yy)
 	if (yy < Options.year1 || yy > Options.year2)
 		return -1;  /* out-of-range */
 
-	struct g_date date = { yy, 1, 1 };
+	struct date date = { yy, 1, 1 };
 	int rd = fixed_from_gregorian(&date);
 	return (int)dayofweek_from_fixed(rd);
 }
@@ -103,7 +103,7 @@ first_dayofweek_of_month(int yy, int mm)
 {
 	int firstday, lastday;
 
-	struct g_date date = { yy, mm, 1 };
+	struct date date = { yy, mm, 1 };
 	firstday = fixed_from_gregorian(&date);
 	date.month++;
 	lastday = fixed_from_gregorian(&date) - 1;
@@ -118,7 +118,7 @@ first_dayofweek_of_month(int yy, int mm)
 struct cal_day *
 find_yd(int yy, int dd)
 {
-	struct g_date gdate = { yy, 1, 1 };
+	struct date gdate = { yy, 1, 1 };
 	struct cal_day *dp;
 	int rd;
 
@@ -134,7 +134,7 @@ find_yd(int yy, int dd)
 struct cal_day *
 find_ymd(int yy, int mm, int dd)
 {
-	struct g_date gdate = { yy, mm, dd };
+	struct date gdate = { yy, mm, dd };
 	struct cal_day *dp;
 	int rd;
 
@@ -152,7 +152,7 @@ event_add(struct cal_day *dp, bool day_first, bool variable,
 	  char *txt, char *extra)
 {
 	static char dbuf[32];
-	struct g_date gdate = { 0 };
+	struct date gdate = { 0 };
 	struct tm tm = { 0 };
 	struct event *e;
 

@@ -39,16 +39,12 @@
 
 #include <stdbool.h>
 
-struct g_date {
-	int	year;
-	int	month;	/* [1, 12] */
-	int	day;
-};
+struct date;
 
-int	fixed_from_gregorian(const struct g_date *date);
-int	gregorian_date_difference(const struct g_date *date1,
-				  const struct g_date *date2);
-void	gregorian_from_fixed(int rd, struct g_date *date);
+int	fixed_from_gregorian(const struct date *date);
+int	gregorian_date_difference(const struct date *date1,
+				  const struct date *date2);
+void	gregorian_from_fixed(int rd, struct date *date);
 bool	gregorian_leap_year(int year);
 int	gregorian_new_year(int year);
 int	gregorian_year_from_fixed(int rd);

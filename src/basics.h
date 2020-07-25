@@ -39,7 +39,11 @@
 
 #include <stddef.h>
 
-#include "gregorian.h"
+struct date {
+	int	year;
+	int	month;	/* [1, 12] */
+	int	day;
+};
 
 struct location {
 	double	latitude;	/* degree */
@@ -60,7 +64,7 @@ enum dayofweek {
 
 enum dayofweek	dayofweek_from_fixed(int rd);
 int	kday_onbefore(enum dayofweek k, int rd);
-int	nth_kday(int n, enum dayofweek k, struct g_date *date);
+int	nth_kday(int n, enum dayofweek k, struct date *date);
 int	dayofyear_from_fixed(int rd);
 
 double	julian_centuries(double t);

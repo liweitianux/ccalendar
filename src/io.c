@@ -530,7 +530,7 @@ write_mailheader(int fd)
 {
 	uid_t uid = getuid();
 	struct passwd *pw = getpwuid(uid);
-	struct g_date date;
+	struct date date;
 	FILE *fp = fdopen(fd, "w");
 	char dayname[32] = { 0 };
 	enum dayofweek dow;

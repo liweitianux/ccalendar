@@ -46,8 +46,8 @@
 #include <unistd.h>
 
 #include "calendar.h"
-#include "chinese.h"
 #include "basics.h"
+#include "chinese.h"
 #include "gregorian.h"
 #include "moon.h"
 #include "parsedata.h"
@@ -248,7 +248,7 @@ get_fixed_of_today(void)
 {
 	time_t now;
 	struct tm tm;
-	struct g_date gdate;
+	struct date gdate;
 
 	now = time(NULL);
 	tzset();

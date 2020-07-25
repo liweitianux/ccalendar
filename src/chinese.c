@@ -237,7 +237,7 @@ chinese_new_year_onbefore(int rd)
 int
 chinese_new_year(int year)
 {
-	struct g_date date = { year, 7, 1 };
+	struct date date = { year, 7, 1 };
 	int july1 = fixed_from_gregorian(&date);
 	return chinese_new_year_onbefore(july1);
 }
@@ -403,7 +403,7 @@ show_chinese_calendar(int rd)
 	struct stem stem = STEMS[mod1(date.year, 10) - 1];
 	struct branch branch = BRANCHES[mod1(date.year, 12) - 1];
 
-	struct g_date gdate;
+	struct date gdate;
 	gregorian_from_fixed(rd, &gdate);
 	printf("公历 (Gregorian): %4d-%02d-%02d\n",
 	       gdate.year, gdate.month, gdate.day);

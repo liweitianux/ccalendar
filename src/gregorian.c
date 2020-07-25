@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -74,7 +74,7 @@ gregorian_leap_year(int year)
  * Ref: Sec.(2.2), Eq.(2.17)
  */
 int
-fixed_from_gregorian(const struct g_date *date)
+fixed_from_gregorian(const struct date *date)
 {
 	int rd = ((epoch - 1) + 365 * (date->year - 1) +
 		  div_floor(date->year - 1, 4) -
@@ -97,7 +97,7 @@ fixed_from_gregorian(const struct g_date *date)
 int
 gregorian_new_year(int year)
 {
-	struct g_date date = { year, 1, 1 };
+	struct date date = { year, 1, 1 };
 	return fixed_from_gregorian(&date);
 }
 
@@ -130,8 +130,8 @@ gregorian_year_from_fixed(int rd)
  * Ref: Sec.(2.2), Eq.(2.24)
  */
 int
-gregorian_date_difference(const struct g_date *date1,
-			  const struct g_date *date2)
+gregorian_date_difference(const struct date *date1,
+			  const struct date *date2)
 {
 	return fixed_from_gregorian(date2) - fixed_from_gregorian(date1);
 }
@@ -142,11 +142,11 @@ gregorian_date_difference(const struct g_date *date1,
  * Ref: Sec.(2.2), Eq.(2.23)
  */
 void
-gregorian_from_fixed(int rd, struct g_date *date)
+gregorian_from_fixed(int rd, struct date *date)
 {
 	date->year = gregorian_year_from_fixed(rd);
 
-	struct g_date march1 = { date->year, 3, 1 };
+	struct date march1 = { date->year, 3, 1 };
 	int correction;
 	if (rd < fixed_from_gregorian(&march1))
 		correction = 0;
@@ -158,6 +158,6 @@ gregorian_from_fixed(int rd, struct g_date *date)
 	int pdays = rd - gregorian_new_year(date->year);
 	date->month = div_floor(12 * (pdays + correction) + 373, 367);
 
-	struct g_date d1 = { date->year, date->month, 1 };
+	struct date d1 = { date->year, date->month, 1 };
 	date->day = rd - fixed_from_gregorian(&d1) + 1;
 }

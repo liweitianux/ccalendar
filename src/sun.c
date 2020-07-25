@@ -365,7 +365,7 @@ static const struct solar_event {
 void
 show_sun_info(double t, const struct location *loc)
 {
-	struct g_date date;
+	struct date date;
 	char buf[128];
 
 	int rd = (int)floor(t);
