@@ -59,6 +59,8 @@ struct cal_day {
 };
 static struct cal_day *cal_days = NULL;
 
+static inline bool date_in_range(int rd);
+
 
 void
 generatedates(int rd1, int rd2)
@@ -123,6 +125,9 @@ find_yd(int yy, int dd)
 	int rd;
 
 	rd = fixed_from_gregorian(&gdate) + dd - 1;
+	if (!date_in_range(rd))
+		return NULL;
+
 	for (dp = cal_days; dp != NULL; dp = dp->next) {
 		if (dp->rd == rd)
 			return dp;
@@ -139,6 +144,9 @@ find_ymd(int yy, int mm, int dd)
 	int rd;
 
 	rd = fixed_from_gregorian(&gdate);
+	if (!date_in_range(rd))
+		return NULL;
+
 	for (dp = cal_days; dp != NULL; dp = dp->next) {
 		if (dp->rd == rd)
 			return dp;
@@ -146,6 +154,14 @@ find_ymd(int yy, int mm, int dd)
 
 	return NULL;
 }
+
+static inline bool
+date_in_range(int rd)
+{
+	return (rd >= (Options.today - Options.days_before) ||
+		rd <= (Options.today + Options.days_after));
+}
+
 
 struct event *
 event_add(struct cal_day *dp, bool day_first, bool variable,
