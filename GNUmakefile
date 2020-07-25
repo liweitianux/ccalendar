@@ -2,8 +2,9 @@ PROG=		calendar
 MAN=		calendar.1
 SRCS=		$(wildcard src/*.c)
 OBJS=		$(SRCS:.c=.o)
-CALFILE=	etc/default
-DISTFILES=	GNUmakefile LICENSE README.md calendars etc src $(MAN).in
+CALFILE=	calendar.default
+DISTFILES=	GNUmakefile LICENSE README.md calendars src \
+		$(CALFILE).in $(MAN).in
 
 PREFIX?=	/usr/local
 ETC_DIR?=	$(PREFIX)/etc
@@ -55,7 +56,7 @@ $(MAN).gz: $(MAN)
 install:
 	install -s -Dm 0755 $(PROG) $(PREFIX)/bin/$(PROG)
 	install -Dm 0644 $(MAN).gz $(MAN_DIR)/man1/$(MAN).gz
-	install -Dm 0644 $(CALFILE) $(CALENDAR_ETCDIR)/$(notdir $(CALFILE))
+	install -Dm 0644 $(CALFILE) $(CALENDAR_ETCDIR)/default
 	[ -d "$(CALENDAR_DIR)" ] || mkdir -p $(CALENDAR_DIR)
 	cp -R calendars/* $(CALENDAR_DIR)/
 	find $(CALENDAR_DIR)/ -type d | xargs chmod 0755
