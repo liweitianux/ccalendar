@@ -144,20 +144,22 @@ gregorian_date_difference(const struct date *date1,
 void
 gregorian_from_fixed(int rd, struct date *date)
 {
+	int correction, pdays;
+
 	date->year = gregorian_year_from_fixed(rd);
 
-	struct date march1 = { date->year, 3, 1 };
-	int correction;
-	if (rd < fixed_from_gregorian(&march1))
+	struct date d = { date->year, 3, 1 };
+	if (rd < fixed_from_gregorian(&d))
 		correction = 0;
 	else if (gregorian_leap_year(date->year))
 		correction = 1;
 	else
 		correction = 2;
 
-	int pdays = rd - gregorian_new_year(date->year);
+	d.month = 1;
+	pdays = rd - fixed_from_gregorian(&d);
 	date->month = div_floor(12 * (pdays + correction) + 373, 367);
 
-	struct date d1 = { date->year, date->month, 1 };
-	date->day = rd - fixed_from_gregorian(&d1) + 1;
+	d.month = date->month;
+	date->day = rd - fixed_from_gregorian(&d) + 1;
 }
