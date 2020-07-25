@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "calendar.h"
 #include "basics.h"
 #include "chinese.h"
 #include "gregorian.h"
@@ -19,10 +20,13 @@
  * globals
  * for compatible with calendar.c ... files
  */
-bool		debug = false;
-double		UTCOffset = 0.0;
-double		EastLongitude = 0.0;
-struct tm	tm_now = { 0 };  /* time/date of calendar events to remind */
+struct cal_options Options = {
+	.calendarFile = NULL,
+	.days_before = 0,
+	.days_after = 0,
+	.time = 0.5,  /* noon */
+	.debug = false,
+};
 
 
 static void
@@ -41,7 +45,7 @@ test1(void)
 	int rds[] = { -214193, 253427, 473837, 601716, 694799, 728714 };
 
 	int rd, rd2;
-	struct g_date date;
+	struct date date;
 	double c;
 	printf("R.D.\t(Y, M, D)\tRD2\tEq?\tJcen\n");
 	for (size_t i = 0; i < nitems(rds); i++) {
@@ -139,7 +143,7 @@ test1(void)
 	printf("ra = %.12lf; dec = %.12lf\n", ra, dec);
 	printf("sidereal_time = %.12lf\n", st);
 
-	struct g_date zh_epoch_date = { -2636, 2, 15 };
+	struct date zh_epoch_date = { -2636, 2, 15 };
 	int zh_epoch = fixed_from_gregorian(&zh_epoch_date);
 	printf("\nchinese_epoch: RD (%d) <-> Gregorian (%d, %d, %d)\n",
 			zh_epoch, zh_epoch_date.year,
@@ -162,7 +166,7 @@ test1(void)
 	printf("\n-----------------------------------------------------------\n");
 	time(&tt);
 	localtime_r(&tt, &tm);
-	date = (struct g_date){ tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday };
+	date = (struct date){ tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday };
 	rd = fixed_from_gregorian(&date);
 	chinese_from_fixed(rd, &zh_date);
 	printf("R.D.: %d\n", rd);
@@ -189,7 +193,7 @@ test1(void)
 	show_moon_info(rd+t_day, &shanghai);
 
 	printf("\n-----------------------------------------------------------\n");
-	date = (struct g_date){ 2033, 12, 25 };
+	date = (struct date){ 2033, 12, 25 };
 	rd = fixed_from_gregorian(&date);
 	show_chinese_calendar(rd);
 	printf("\n...........................................................\n");
@@ -203,7 +207,7 @@ test2()
 {
 	int year1 = 2000, year2 = 2007;
 	int rd;
-	struct g_date date;
+	struct date date;
 
 	printf("\n-----------------------------------------------------------\n");
 
@@ -270,7 +274,7 @@ test2()
 
 
 /* Return the seconds east of UTC */
-static long
+static int
 get_utcoffset(void)
 {
 	time_t t;
@@ -292,7 +296,7 @@ int
 main(int argc, char *argv[])
 {
 	int ch;
-	long utcoffset = get_utcoffset();
+	int utcoffset = get_utcoffset();
 	bool run_test = false;
 	double latitude = 0.0;
 	double longitude = 0.0;
@@ -324,7 +328,7 @@ main(int argc, char *argv[])
 	if (argc)
 		usage(progname);
 
-	printf("UTC offset: %ld [seconds]\n", utcoffset);
+	printf("UTC offset: %d [seconds]\n", utcoffset);
 	printf("Location: (latitude=%lf°, longitude=%lf°, elevation=%lfm)\n",
 			latitude, longitude, elevation);
 
