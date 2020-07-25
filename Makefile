@@ -1,1 +1,2 @@
-.error "Please use GNU make (gmake)"
+all debug install clean:
+	gmake -f GNUmakefile ${.TARGET} ${MAKEFLAGS}
