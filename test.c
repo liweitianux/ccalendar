@@ -10,6 +10,7 @@
 #include "basics.h"
 #include "chinese.h"
 #include "gregorian.h"
+#include "julian.h"
 #include "moon.h"
 #include "parsedata.h"
 #include "sun.h"
@@ -56,6 +57,18 @@ test1(void)
 		printf("%7d\t(%4d, %2d, %2d)\t%7d\t%d\t%10.6lf\n",
 				rd, date.year, date.month, date.day, rd2,
 				rd==rd2, c);
+	}
+
+	int dow;
+	printf("\nR.D.\tDoW\tJulian(Y,M,D)\tRD2\tEq?\n");
+	for (size_t i = 0; i < nitems(rds); i++) {
+		rd = rds[i];
+		dow = dayofweek_from_fixed(rd);
+		julian_from_fixed(rd, &date);
+		rd2 = fixed_from_julian(&date);
+		printf("%7d\t%d\t(%4d, %2d, %2d)\t%7d\t%d\n",
+				rd, dow, date.year, date.month, date.day,
+				rd2, rd==rd2);
 	}
 
 	double t;

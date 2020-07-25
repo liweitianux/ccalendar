@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SRCS="basics.c chinese.c gregorian.c moon.c sun.c utils.c"
+SRCS="basics.c chinese.c gregorian.c julian.c moon.c sun.c utils.c"
 SRCS="${SRCS} locale.c dates.c parsedata.c io.c ostern.c paskha.c"
 CFLAGS="-std=c99 -pedantic -O2 -pipe"
 CFLAGS="${CFLAGS} -Wall -Wextra -Wlogical-op -Wshadow -Wformat=2
