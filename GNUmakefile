@@ -28,7 +28,7 @@ CFLAGS+=	-std=c99 -pedantic \
 		-DCALENDAR_ETCDIR='"$(CALENDAR_ETCDIR)"' \
 		-DCALENDAR_DIR='"$(CALENDAR_DIR)"'
 
-LIBS=		-lm
+LDFLAGS+=	-lm
 
 ARCH?=		$(shell uname -m)
 OS?=		$(shell uname -s)
@@ -36,30 +36,36 @@ ifeq ($(OS),Linux)
 CFLAGS+=	-D_GNU_SOURCE -D__dead2='__attribute__((__noreturn__))'
 endif
 
-all: $(PROG) $(MAN) $(CALFILE)
+.PHONY: all
+all: $(PROG) $(MAN).gz $(CALFILE)
 
+.PHONY: debug
 debug: $(PROG)
 debug: CFLAGS+=-DDEBUG
 
 $(PROG): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
 $(MAN) $(CALFILE):
 	sed $(SED_EXPR) $@.in > $@
+$(MAN).gz: $(MAN)
+	gzip -9 $(MAN)
 
+.PHONY: install
 install:
 	install -s -Dm 0755 $(PROG) $(PREFIX)/bin/$(PROG)
-	install -Dm 0644 $(MAN) $(MAN_DIR)/man1/$(MAN)
-	gzip -9 $(MAN_DIR)/man1/$(MAN)
+	install -Dm 0644 $(MAN).gz $(MAN_DIR)/man1/$(MAN).gz
 	install -Dm 0644 $(CALFILE) $(CALENDAR_ETCDIR)/$(notdir $(CALFILE))
 	[ -d "$(CALENDAR_DIR)" ] || mkdir -p $(CALENDAR_DIR)
 	cp -R calendars/* $(CALENDAR_DIR)/
 	find $(CALENDAR_DIR)/ -type d | xargs chmod 0755
 	find $(CALENDAR_DIR)/ -type f | xargs chmod 0644
 
+.PHONY: clean
 clean:
 	rm -f $(PROG) $(OBJS) $(MAN) $(MAN).gz $(CALFILE)
 
+.PHONY: archpkg
 archpkg:
 	mkdir -p $(ARCHBUILD_DIR)/src
 	cp linux/PKGBUILD $(ARCHBUILD_DIR)/
@@ -70,6 +76,7 @@ archpkg:
 		rm -rf $(ARCHBUILD_DIR) ; \
 		echo "Install with: 'sudo pacman -U $${pkg}'"
 
+.PHONY: rpm
 rpm:
 	mkdir -p $(RPMBUILD_DIR)/BUILD
 	cp -Rp $(DISTFILES) $(RPMBUILD_DIR)/BUILD/
@@ -80,5 +87,3 @@ rpm:
 		cp -v $(RPMBUILD_DIR)/RPMS/$(ARCH)/$${pkg} . ; \
 		rm -rf $(RPMBUILD_DIR) ; \
 		echo "Install with: 'sudo rpm -iv $${pkg}'"
-
-.PHONY: all debug install clean archpkg rpm
