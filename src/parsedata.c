@@ -961,25 +961,19 @@ parse_index(const char *s, int *index)
 
 	for (int i = 0; !parsed && sequences[i]; i++) {
 		if (strcasecmp(s, sequences[i]) == 0) {
-			if (i == 5) {  /* sequence is 'last' */
-				*index = -1;
-				parsed = true;
-			}
-			*index = i + 1;
 			parsed = true;
+			*index = (i == 5) ? -1 : (i+1);  /* 'Last' -> '-1' */
 		}
 	}
 	for (int i = 0; !parsed && nsequences[i]; i++) {
 		if (strcasecmp(s, nsequences[i]) == 0) {
-			if (i == 5) {  /* sequence is 'last' */
-				*index = -1;
-				parsed = true;
-			}
-			*index = i + 1;
 			parsed = true;
+			*index = (i == 5) ? -1 : (i+1);
 		}
 	}
 
+	logdebug("%s(): |%s| -> %d (%s)\n",
+		 __func__, s, *index, (parsed ? "ok" : "fail"));
 	return parsed;
 }
 
