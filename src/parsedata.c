@@ -91,7 +91,6 @@ static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
 static int	 dayofweek_of_month(int dow, int offset, int month, int year);
 static bool	 determinestyle(const char *date, struct dateinfo *di);
-static char	*floattotime(double f);
 static const char *getdayofweekname(int i);
 static const char *getmonthname(int i);
 static bool	 isonlydigits(const char *s, bool nostar);
@@ -467,7 +466,7 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 	struct dateinfo di = { 0 };
 	struct cal_day *dp;
 	struct yearinfo *yinfo;
-	char *ed;
+	char buf[64];
 	int remindex, d, m, dow;
 
 	di.flags = F_NONE;
@@ -633,8 +632,9 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 					(int)floor(yinfo->ffullmoon[i]) +
 					di.imodifieroffset);
 				if (dp != NULL) {
-					ed = floattotime(yinfo->ffullmoon[i]);
-					remember(&remindex, dayp, dp, edp, ed);
+					format_time(buf, sizeof(buf),
+						    yinfo->ffullmoon[i]);
+					remember(&remindex, dayp, dp, edp, buf);
 				}
 			}
 			continue;
@@ -648,8 +648,9 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 					(int)floor(yinfo->fnewmoon[i]) +
 					di.imodifieroffset);
 				if (dp != NULL) {
-					ed = floattotime(yinfo->fnewmoon[i]);
-					remember(&remindex, dayp, dp, edp, ed);
+					format_time(buf, sizeof(buf),
+						    yinfo->fnewmoon[i]);
+					remember(&remindex, dayp, dp, edp, buf);
 				}
 			}
 			continue;
@@ -661,8 +662,9 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 			dp = find_yd(year,
 				(int)yinfo->equinoxdays[0] + di.imodifieroffset);
 			if (dp != NULL) {
-				ed = floattotime(yinfo->equinoxdays[0]);
-				remember(&remindex, dayp, dp, edp, ed);
+				format_time(buf, sizeof(buf),
+					    yinfo->equinoxdays[0]);
+				remember(&remindex, dayp, dp, edp, buf);
 			}
 			continue;
 		}
@@ -671,8 +673,9 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 			dp = find_yd(year,
 				(int)yinfo->equinoxdays[1] + di.imodifieroffset);
 			if (dp != NULL) {
-				ed = floattotime(yinfo->equinoxdays[1]);
-				remember(&remindex, dayp, dp, edp, ed);
+				format_time(buf, sizeof(buf),
+					    yinfo->equinoxdays[1]);
+				remember(&remindex, dayp, dp, edp, buf);
 			}
 			continue;
 		}
@@ -683,8 +686,9 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 			dp = find_yd(year,
 				(int)yinfo->solsticedays[0] + di.imodifieroffset);
 			if (dp != NULL) {
-				ed = floattotime(yinfo->solsticedays[0]);
-				remember(&remindex, dayp, dp, edp, ed);
+				format_time(buf, sizeof(buf),
+					    yinfo->solsticedays[0]);
+				remember(&remindex, dayp, dp, edp, buf);
 			}
 			continue;
 		}
@@ -693,8 +697,9 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 			dp = find_yd(year,
 				(int)yinfo->solsticedays[1] + di.imodifieroffset);
 			if (dp != NULL) {
-				ed = floattotime(yinfo->solsticedays[1]);
-				remember(&remindex, dayp, dp, edp, ed);
+				format_time(buf, sizeof(buf),
+					    yinfo->solsticedays[1]);
+				remember(&remindex, dayp, dp, edp, buf);
 			}
 			continue;
 		}
@@ -976,25 +981,6 @@ parse_index(const char *s, int *index)
 	}
 
 	return parsed;
-}
-
-static char *
-floattotime(double f)
-{
-	static char buf[100];
-	int hh, mm, ss, i;
-
-	f -= floor(f);
-	i = (int)round(f * SECSPERDAY);
-
-	hh = i / SECSPERHOUR;
-	i %= SECSPERHOUR;
-	mm = i / SECSPERMINUTE;
-	i %= SECSPERMINUTE;
-	ss = i;
-
-	sprintf(buf, "%02d:%02d:%02d", hh, mm, ss);
-	return (buf);
 }
 
 
