@@ -42,7 +42,7 @@ DEPFLAGS=	-MT $@ -MMD -MP -MF $*.d
 COMPILE.c=	$(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 
 .PHONY: all
-all: $(PROG) $(MAN) $(CALFILE)
+all: $(PROG) $(MAN).gz $(CALFILE)
 
 .PHONY: debug
 debug: $(PROG)
