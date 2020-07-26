@@ -220,6 +220,7 @@ event_print_all(FILE *fp)
 				e->extra != NULL ? e->extra : "",
 				e->extra != NULL ? ")" : ""
 			);
+			fflush(fp);
 		}
 	}
 }
