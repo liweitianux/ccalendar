@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 					err(1, "setuid(%d)", (int)pw->pw_uid);
 
 				ret = cal();
-				exit(ret);
+				_exit(ret);
 			}
 		}
 	} else {
