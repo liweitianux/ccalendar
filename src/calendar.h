@@ -71,12 +71,13 @@ struct location;
 struct cal_options {
 	struct location *location;
 	const char *calendarFile;  /* name of calendar file */
-	double time;  /* [0, 1) time of now in fraction of day */
+	double time;  /* [0, 1) time of now in unit of days */
 	int today;  /* R.D. of today to remind events */
 	int days_before;  /* number of days before today to remind events */
 	int days_after;  /* number of days after today to remind events */
 	int year1;  /* year of the beginning day */
 	int year2;  /* year of the ending day */
+	bool allmode;  /* whether to process calendars for all users */
 	bool debug;
 };
 
@@ -121,7 +122,7 @@ void	setnsequences(const char *seq);
 extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
 extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
 
-int	cal(bool doall);
+int	cal(void);
 
 /* dates.c */
 struct cal_day;

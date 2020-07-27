@@ -59,6 +59,7 @@ struct cal_options Options = {
 	.days_before = 0,
 	.days_after = 0,
 	.time = 0.5,  /* noon */
+	.allmode = false,
 	.debug = false,
 };
 
@@ -71,7 +72,6 @@ static int	get_utc_offset(void);
 int
 main(int argc, char *argv[])
 {
-	bool	doall = false;
 	bool	L_flag = false;
 	int	ret = 0;
 	int	Friday = 5;  /* days before weekend */
@@ -93,7 +93,7 @@ main(int argc, char *argv[])
 		case 'a':
 			if (getuid() != 0)
 				errx(1, "must be root to run with '-a'");
-			doall = true;
+			Options.allmode = true;
 			break;
 
 		case 'W': /* don't need to specially deal with Fridays */
@@ -157,7 +157,7 @@ main(int argc, char *argv[])
 	if (argc > optind)
 		usage(argv[0]);
 
-	if (doall && Options.calendarFile != NULL)
+	if (Options.allmode && Options.calendarFile != NULL)
 		errx(1, "flags -a and -f cannot be used together");
 
 	if (!L_flag)
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
 		exit(0);
 	}
 
-	if (doall) {
+	if (Options.allmode) {
 		while ((pw = getpwent()) != NULL) {
 			if (chdir(pw->pw_dir) == -1)
 				continue;
@@ -218,12 +218,12 @@ main(int argc, char *argv[])
 				if (setuid(pw->pw_uid) == -1)
 					err(1, "setuid(%d)", (int)pw->pw_uid);
 
-				ret = cal(doall);
+				ret = cal();
 				exit(ret);
 			}
 		}
 	} else {
-		ret = cal(doall);
+		ret = cal();
 	}
 
 	return (ret);

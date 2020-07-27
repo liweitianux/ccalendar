@@ -69,7 +69,6 @@ static const char *calendarDirs[] = {
 /* don't send mail if this file exists in ~/.calendar */
 static const char *calendarNoMail = "nomail";
 
-static bool allmode = false; /* whether to run for all users */
 static struct node *definitions = NULL;
 
 /* National names for special days */
@@ -396,17 +395,15 @@ cal_parse(FILE *in, FILE *out)
 }
 
 int
-cal(bool doall)
+cal(void)
 {
 	FILE *fpin;
 	FILE *fpout;
 
-	allmode = doall;
-
 	if ((fpin = opencalin()) == NULL)
 		return 1;
 
-	if (allmode) {
+	if (Options.allmode) {
 		/*
 		 * Use a temporary output file, so we can skip sending mail
 		 * if there is no output.
@@ -450,7 +447,7 @@ opencalin(void)
 
 	calfile = Options.calendarFile ? Options.calendarFile : calendarFile;
 
-	if (allmode) {
+	if (Options.allmode) {
 		/* already in $HOME */
 		snprintf(fpath, sizeof(fpath), "%s/%s",
 			 calendarDirs[0], calendarNoMail);
@@ -484,7 +481,7 @@ closecal(FILE *fp)
 	char buf[1024];
 	ssize_t nread;
 
-	assert(allmode == true);
+	assert(Options.allmode == true);
 
 	if (fseek(fp, 0L, SEEK_END) != 0 || ftell(fp) == 0)
 		return;
