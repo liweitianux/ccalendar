@@ -33,6 +33,7 @@
  */
 
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 
 #include <assert.h>
@@ -481,10 +482,12 @@ closecal(FILE *fp)
 	int pdes[2];
 	char buf[1024];
 	ssize_t nread;
+	struct stat st;
 
 	assert(Options.allmode == true);
 
-	if (fseek(fp, 0L, SEEK_END) != 0 || ftell(fp) == 0)
+	rewind(fp);
+	if (fstat(fileno(fp), &st) == -1 || st.st_size == 0)
 		return;
 	if (pipe(pdes) < 0) {
 		warnx("Cannot open pipe");
@@ -512,7 +515,6 @@ closecal(FILE *fp)
 	close(pdes[0]);
 
 	write_mailheader(pdes[1]);
-	rewind(fp);
 	while ((nread = read(fileno(fp), buf, sizeof(buf))) > 0)
 		write(pdes[1], buf, (size_t)nread);
 	close(pdes[1]);
