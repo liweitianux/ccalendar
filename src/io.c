@@ -479,7 +479,7 @@ opencalin(void)
 static void
 closecal(FILE *fp)
 {
-	int pdes[2];
+	int fd, pdes[2];
 	char buf[1024];
 	ssize_t nread;
 	struct stat st;
@@ -487,10 +487,13 @@ closecal(FILE *fp)
 	assert(Options.allmode == true);
 
 	rewind(fp);
-	if (fstat(fileno(fp), &st) == -1 || st.st_size == 0)
+	fd = fileno(fp);
+	if (fstat(fd, &st) == -1 || st.st_size == 0) {
+		logdebug("%s(): no events; skip sending mail\n", __func__);
 		return;
+	}
 	if (pipe(pdes) < 0) {
-		warnx("Cannot open pipe");
+		warnx("pipe");
 		return;
 	}
 
@@ -515,8 +518,8 @@ closecal(FILE *fp)
 	close(pdes[0]);
 
 	write_mailheader(pdes[1]);
-	while ((nread = read(fileno(fp), buf, sizeof(buf))) > 0)
-		write(pdes[1], buf, (size_t)nread);
+	while ((nread = read(fd, buf, sizeof(buf))) > 0)
+		(void)write(pdes[1], buf, (size_t)nread);
 	close(pdes[1]);
 
 done:
