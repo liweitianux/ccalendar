@@ -445,23 +445,24 @@ opencalin(void)
 	const char *calfile;
 	char fpath[MAXPATHLEN];
 
-	calfile = Options.calendarFile ? Options.calendarFile : calendarFile;
-
 	if (Options.allmode) {
-		/* already in $HOME */
-		snprintf(fpath, sizeof(fpath), "%s/%s",
-			 calendarDirs[0], calendarNoMail);
-		if (access(fpath, F_OK) == 0)
+		/* already in $HOME, cd to '~/.calendar' */
+		if (chdir(calendarDirs[0]) == -1)
 			return (NULL);
-	} else {
-		fpin = fopen(calfile, "r");
-		cd_home();
+		if (access(calendarNoMail, F_OK) == 0)
+			return (NULL);
+
+		/* only try '~/.calendar/calendar' */
+		return fopen(calendarFile, "r");
 	}
 
+	calfile = Options.calendarFile ? Options.calendarFile : calendarFile;
+	fpin = fopen(calfile, "r");
 	if (fpin == NULL) {
 		if (Options.calendarFile)
 			errx(1, "No calendar file: '%s'", calfile);
 
+		cd_home();
 		snprintf(fpath, sizeof(fpath), "%s/%s",
 			 calendarDirs[0], calendarFile);
 		if ((fpin = fopen(fpath, "r")) == NULL &&

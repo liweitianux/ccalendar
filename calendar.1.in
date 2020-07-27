@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd July 25, 2020
+.Dd July 27, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -63,9 +63,9 @@ Print lines from today and the next
 .Ar num
 days (forward, future).
 .It Fl a
-Process the
-.Dq calendar
-files of all users and mail the results to them.
+Process the calendar files
+.Pa ( ~/.calendar/calendar )
+of all users and mail the results to them.
 This requires super-user privileges.
 .It Fl B Ar num
 Print lines from today and the previous
@@ -291,6 +291,9 @@ do not send mail if this file exists.
 system-wide default calendar file, which is used if the
 .Pa ~/.calendar/calendar
 doesn't exist.
+This fallback calendar file is ignored in the
+.Fl a
+mode.
 .El
 .Pp
 The following default calendar files are provided in
