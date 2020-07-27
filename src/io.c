@@ -84,12 +84,12 @@ char *njunsolstice = NULL;
 char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
-static bool	 cal_parse(FILE *in, FILE *out);
+static bool	 cal_parse(FILE *in);
 static void	 cd_home(void);
 static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
 static char	*skip_comment(char *line, int *comment);
-static bool	 tokenize(char *line, FILE *out, bool *skip);
+static bool	 tokenize(char *line, bool *skip);
 static void	 write_mailheader(int fd);
 
 
@@ -156,7 +156,7 @@ cal_fopen(const char *file)
  * NOTE: input 'line' should have trailing comment and whitespace trimed
  */
 static bool
-tokenize(char *line, FILE *out, bool *skip)
+tokenize(char *line, bool *skip)
 {
 	char *walk;
 
@@ -204,7 +204,7 @@ tokenize(char *line, FILE *out, bool *skip)
 
 		walk++;
 		walk[strlen(walk) - 1] = '\0';
-		if (!cal_parse(cal_fopen(walk), out))
+		if (!cal_parse(cal_fopen(walk)))
 			return false;
 
 		return true;
@@ -250,7 +250,7 @@ locale_day_first(void)
 }
 
 static bool
-cal_parse(FILE *in, FILE *out)
+cal_parse(FILE *in)
 {
 	ssize_t		linelen;
 	size_t		linecap = 0;
@@ -279,7 +279,7 @@ cal_parse(FILE *in, FILE *out)
 			continue;
 
 		if (*buf == '#') {
-			if (!tokenize(buf, out, &skip)) {
+			if (!tokenize(buf, &skip)) {
 				free(line);
 				return (false);
 			}
@@ -415,7 +415,7 @@ cal(void)
 			return 1;
 		}
 
-		if (!cal_parse(fpin, fpout)) {
+		if (!cal_parse(fpin)) {
 			warnx("Failed to parse calendar files");
 			fclose(fpin);
 			fclose(fpout);
@@ -426,7 +426,7 @@ cal(void)
 		closecal(fpout);
 
 	} else {
-		if (!cal_parse(fpin, stdout)) {
+		if (!cal_parse(fpin)) {
 			warnx("Failed to parse calendar files");
 			return 1;
 		}
