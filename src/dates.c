@@ -61,12 +61,12 @@ static struct cal_day *cal_days = NULL;
 
 
 void
-generatedates(int rd1, int rd2)
+generatedates(void)
 {
 	struct cal_day *dp;
 	struct cal_day **dpp = &cal_days;
 
-	for (int rd = rd1; rd <= rd2; rd++) {
+	for (int rd = Options.day_begin; rd <= Options.day_end; rd++) {
 		dp = xcalloc(1, sizeof(*dp));
 		dp->rd = rd;
 		*dpp = dp;

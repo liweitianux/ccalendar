@@ -128,7 +128,7 @@ int	cal(void);
 struct cal_day;
 struct event;
 
-void	generatedates(int rd1, int rd2);
+void	generatedates(void);
 void	dumpdates(void);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);
