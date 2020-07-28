@@ -204,9 +204,17 @@ tokenize(char *line, bool *skip)
 
 		walk++;
 		walk[strlen(walk) - 1] = '\0';
-		if (!cal_parse(cal_fopen(walk)))
-			return false;
 
+		FILE *fpin = cal_fopen(walk);
+		if (fpin == NULL)
+			return false;
+		if (!cal_parse(fpin)) {
+			warnx("Failed to parse calendar files");
+			fclose(fpin);
+			return false;
+		}
+
+		fclose(fpin);
 		return true;
 
 	} else if (string_startswith(line, "#define ") ||
@@ -267,8 +275,7 @@ cal_parse(FILE *in)
 	struct event	*events[MAXCOUNT] = { NULL };
 	char		*extradata[MAXCOUNT] = { NULL };
 
-	if (in == NULL)
-		return (false);
+	assert(in != NULL);
 
 	d_first = locale_day_first();
 
@@ -386,7 +393,6 @@ cal_parse(FILE *in)
 	}
 
 	free(line);
-	fclose(in);
 	for (int i = 0; i < MAXCOUNT; i++) {
 		if (extradata[i] != NULL)
 			free(extradata[i]);
@@ -433,6 +439,7 @@ cal(void)
 		event_print_all(stdout);
 	}
 
+	fclose(fpin);
 	list_freeall(definitions, free, NULL);
 	definitions = NULL;
 
