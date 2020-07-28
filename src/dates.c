@@ -158,7 +158,7 @@ find_ymd(int yy, int mm, int dd)
 static inline bool
 date_in_range(int rd)
 {
-	return (rd >= (Options.today - Options.days_before) ||
+	return (rd >= (Options.today - Options.days_before) &&
 		rd <= (Options.today + Options.days_after));
 }
 
