@@ -59,8 +59,6 @@ struct cal_day {
 };
 static struct cal_day *cal_days = NULL;
 
-static inline bool date_in_range(int rd);
-
 
 void
 generatedates(int rd1, int rd2)
@@ -110,8 +108,7 @@ first_dayofweek_of_month(int yy, int mm)
 	date.month++;
 	lastday = fixed_from_gregorian(&date) - 1;
 
-	if (firstday > (Options.today + Options.days_after) ||
-	    lastday < (Options.today - Options.days_before))
+	if (firstday > Options.day_end || lastday < Options.day_begin)
 		return -1;  /* out-of-range */
 
 	return (int)dayofweek_from_fixed(firstday);
@@ -125,7 +122,7 @@ find_yd(int yy, int dd)
 	int rd;
 
 	rd = fixed_from_gregorian(&gdate) + dd - 1;
-	if (!date_in_range(rd))
+	if (rd < Options.day_begin || rd > Options.day_end)
 		return NULL;
 
 	for (dp = cal_days; dp != NULL; dp = dp->next) {
@@ -144,7 +141,7 @@ find_ymd(int yy, int mm, int dd)
 	int rd;
 
 	rd = fixed_from_gregorian(&gdate);
-	if (!date_in_range(rd))
+	if (rd < Options.day_begin || rd > Options.day_end)
 		return NULL;
 
 	for (dp = cal_days; dp != NULL; dp = dp->next) {
@@ -153,13 +150,6 @@ find_ymd(int yy, int mm, int dd)
 	}
 
 	return NULL;
-}
-
-static inline bool
-date_in_range(int rd)
-{
-	return (rd >= (Options.today - Options.days_before) &&
-		rd <= (Options.today + Options.days_after));
 }
 
 

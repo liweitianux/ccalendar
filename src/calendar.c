@@ -56,8 +56,6 @@
 
 struct cal_options Options = {
 	.calendarFile = NULL,
-	.days_before = 0,
-	.days_after = 0,
 	.time = 0.5,  /* noon */
 	.allmode = false,
 	.debug = false,
@@ -74,6 +72,8 @@ main(int argc, char *argv[])
 {
 	bool	L_flag = false;
 	int	ret = 0;
+	int	days_before = 0;
+	int	days_after = 0;
 	int	Friday = 5;  /* days before weekend */
 	int	ch;
 	int	utc_offset;
@@ -100,14 +100,14 @@ main(int argc, char *argv[])
 			Friday = -1;
 			/* FALLTHROUGH */
 		case 'A': /* days after current date */
-			Options.days_after = atoi(optarg);
-			if (Options.days_after < 0)
+			days_after = atoi(optarg);
+			if (days_after < 0)
 				errx(1, "number of days must be positive");
 			break;
 
 		case 'B': /* days before current date */
-			Options.days_before = atoi(optarg);
-			if (Options.days_before < 0)
+			days_before = atoi(optarg);
+			if (days_before < 0)
 				errx(1, "number of days must be positive");
 			break;
 
@@ -165,15 +165,14 @@ main(int argc, char *argv[])
 
 	/* Friday displays Monday's events */
 	dow = dayofweek_from_fixed(Options.today);
-	if (Options.days_after == 0 && Friday != -1)
-		Options.days_after = ((int)dow == Friday) ? 3 : 1;
+	if (days_after == 0 && Friday != -1)
+		days_after = ((int)dow == Friday) ? 3 : 1;
 
-	Options.year1 = gregorian_year_from_fixed(
-			Options.today - Options.days_before);
-	Options.year2 = gregorian_year_from_fixed(
-			Options.today + Options.days_after);
-	generatedates(Options.today - Options.days_before,
-		      Options.today + Options.days_after);
+	Options.day_begin = Options.today - days_before;
+	Options.day_end = Options.today + days_after;
+	Options.year1 = gregorian_year_from_fixed(Options.day_begin);
+	Options.year2 = gregorian_year_from_fixed(Options.day_end);
+	generatedates(Options.day_begin, Options.day_end);
 
 	setlocale(LC_ALL, "");
 	setnnames();
