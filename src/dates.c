@@ -54,7 +54,6 @@ struct event {
 
 struct cal_day {
 	int		 rd;
-	struct cal_day	*next;
 	struct event	*events;
 };
 static struct cal_day *cal_days = NULL;
@@ -63,24 +62,21 @@ static struct cal_day *cal_days = NULL;
 void
 generatedates(void)
 {
-	struct cal_day *dp;
-	struct cal_day **dpp = &cal_days;
-
-	for (int rd = Options.day_begin; rd <= Options.day_end; rd++) {
-		dp = xcalloc(1, sizeof(*dp));
-		dp->rd = rd;
-		*dpp = dp;
-		dpp = &dp->next;
-	}
+	int daycount = Options.day_end - Options.day_begin + 1;
+	cal_days = xcalloc((size_t)daycount, sizeof(struct cal_day));
+	for (int i = 0; i < daycount; i++)
+		cal_days[i].rd = Options.day_begin + i;
 }
 
 void
 dumpdates(void)
 {
 	struct cal_day *dp;
-	int i, dow;
+	int dow, daycount;
 
-	for (i = 0, dp = cal_days; dp != NULL; i++, dp = dp->next) {
+	daycount = Options.day_end - Options.day_begin + 1;
+	for (int i = 0; i < daycount; i++) {
+		dp = &cal_days[i];
 		dow = (int)dayofweek_from_fixed(dp->rd);
 		fprintf(stderr, "%s(): [%d] rd:%d, dow:%d\n",
 			__func__, i, dp->rd, dow);
@@ -118,38 +114,22 @@ struct cal_day *
 find_yd(int yy, int dd)
 {
 	struct date gdate = { yy, 1, 1 };
-	struct cal_day *dp;
-	int rd;
-
-	rd = fixed_from_gregorian(&gdate) + dd - 1;
+	int rd = fixed_from_gregorian(&gdate) + dd - 1;
 	if (rd < Options.day_begin || rd > Options.day_end)
 		return NULL;
 
-	for (dp = cal_days; dp != NULL; dp = dp->next) {
-		if (dp->rd == rd)
-			return dp;
-	}
-
-	return NULL;
+	return &cal_days[rd - Options.day_begin];
 }
 
 struct cal_day *
 find_ymd(int yy, int mm, int dd)
 {
 	struct date gdate = { yy, mm, dd };
-	struct cal_day *dp;
-	int rd;
-
-	rd = fixed_from_gregorian(&gdate);
+	int rd = fixed_from_gregorian(&gdate);
 	if (rd < Options.day_begin || rd > Options.day_end)
 		return NULL;
 
-	for (dp = cal_days; dp != NULL; dp = dp->next) {
-		if (dp->rd == rd)
-			return dp;
-	}
-
-	return NULL;
+	return &cal_days[rd - Options.day_begin];
 }
 
 
@@ -201,8 +181,10 @@ event_print_all(FILE *fp)
 {
 	struct event *e;
 	struct cal_day *dp;
+	int daycount = Options.day_end - Options.day_begin + 1;
 
-	for (dp = cal_days; dp != NULL; dp = dp->next) {
+	for (int i = 0; i < daycount; i++) {
+		dp = &cal_days[i];
 		for (e = dp->events; e != NULL; e = e->next) {
 			fprintf(fp, "%s%c%s%s%s%s\n", e->date,
 				e->variable ? '*' : ' ', e->text,
