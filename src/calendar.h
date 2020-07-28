@@ -37,20 +37,6 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#define	SECSPERDAY	(24 * 60 * 60)
-#define	SECSPERHOUR	(60 * 60)
-#define	SECSPERMINUTE	(60)
-#define	MINSPERHOUR	(60)
-#define	HOURSPERDAY	(24)
-#define	FSECSPERDAY	(24.0 * 60.0 * 60.0)
-#define	FSECSPERHOUR	(60.0 * 60.0)
-#define	FSECSPERMINUTE	(60.0)
-#define	FMINSPERHOUR	(60.0)
-#define	FHOURSPERDAY	(24.0)
-
-#define	DAYSPERYEAR	365
-#define	DAYSPERLEAPYEAR	366
-
 #define	NDAYS		7
 #define	NMONTHS		12
 #define	NSEQUENCES	6
