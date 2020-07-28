@@ -60,16 +60,6 @@
 #define	F_DECSOLSTICE		0x20000
 #define	F_YEAR			0x40000
 
-#define	STRING_EASTER		"Easter"
-#define	STRING_PASKHA		"Paskha"
-#define	STRING_CNY		"ChineseNewYear"
-#define	STRING_NEWMOON		"NewMoon"
-#define	STRING_FULLMOON		"FullMoon"
-#define	STRING_MAREQUINOX	"MarEquinox"
-#define	STRING_SEPEQUINOX	"SepEquinox"
-#define	STRING_JUNSOLSTICE	"JunSolstice"
-#define	STRING_DECSOLSTICE	"DecSolstice"
-
 struct cal_day;
 
 int	parsedaymonth(const char *date, int *flags, struct cal_day **dayp,

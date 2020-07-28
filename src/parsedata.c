@@ -170,23 +170,23 @@ determinestyle(const char *date, struct dateinfo *di)
 
 	if ((p = strchr(date2, ' ')) == NULL &&
 	    (p = strchr(date2, '/')) == NULL) {
-		CHECKSPECIAL(date2, STRING_CNY, F_CNY);
+		CHECKSPECIAL(date2, "ChineseNewYear", F_CNY);
 		CHECKSPECIAL(date2, ncny, F_CNY);
-		CHECKSPECIAL(date2, STRING_NEWMOON, F_NEWMOON);
+		CHECKSPECIAL(date2, "NewMoon", F_NEWMOON);
 		CHECKSPECIAL(date2, nnewmoon, F_NEWMOON);
-		CHECKSPECIAL(date2, STRING_FULLMOON, F_FULLMOON);
+		CHECKSPECIAL(date2, "FullMoon", F_FULLMOON);
 		CHECKSPECIAL(date2, nfullmoon, F_FULLMOON);
-		CHECKSPECIAL(date2, STRING_PASKHA, F_PASKHA);
+		CHECKSPECIAL(date2, "Paskha", F_PASKHA);
 		CHECKSPECIAL(date2, npaskha, F_PASKHA);
-		CHECKSPECIAL(date2, STRING_EASTER, F_EASTER);
+		CHECKSPECIAL(date2, "Easter", F_EASTER);
 		CHECKSPECIAL(date2, neaster, F_EASTER);
-		CHECKSPECIAL(date2, STRING_MAREQUINOX, F_MAREQUINOX);
+		CHECKSPECIAL(date2, "MarEquinox", F_MAREQUINOX);
 		CHECKSPECIAL(date2, nmarequinox, F_SEPEQUINOX);
-		CHECKSPECIAL(date2, STRING_SEPEQUINOX, F_SEPEQUINOX);
+		CHECKSPECIAL(date2, "SepEquinox", F_SEPEQUINOX);
 		CHECKSPECIAL(date2, nsepequinox, F_SEPEQUINOX);
-		CHECKSPECIAL(date2, STRING_JUNSOLSTICE, F_JUNSOLSTICE);
+		CHECKSPECIAL(date2, "JunSolstice", F_JUNSOLSTICE);
 		CHECKSPECIAL(date2, njunsolstice, F_JUNSOLSTICE);
-		CHECKSPECIAL(date2, STRING_DECSOLSTICE, F_DECSOLSTICE);
+		CHECKSPECIAL(date2, "DecSolstice", F_DECSOLSTICE);
 		CHECKSPECIAL(date2, ndecsolstice, F_DECSOLSTICE);
 
 		if (checkdayofweek(date2, &len, &offset, &dow)) {
