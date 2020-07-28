@@ -410,6 +410,12 @@ cal(void)
 	if ((fpin = opencalin()) == NULL)
 		return 1;
 
+	if (!cal_parse(fpin)) {
+		warnx("Failed to parse calendar files");
+		fclose(fpin);
+		return 1;
+	}
+
 	if (Options.allmode) {
 		/*
 		 * Use a temporary output file, so we can skip sending mail
@@ -420,22 +426,9 @@ cal(void)
 			fclose(fpin);
 			return 1;
 		}
-
-		if (!cal_parse(fpin)) {
-			warnx("Failed to parse calendar files");
-			fclose(fpin);
-			fclose(fpout);
-			return 1;
-		}
-
 		event_print_all(fpout);
 		closecal(fpout);
-
 	} else {
-		if (!cal_parse(fpin)) {
-			warnx("Failed to parse calendar files");
-			return 1;
-		}
 		event_print_all(stdout);
 	}
 
