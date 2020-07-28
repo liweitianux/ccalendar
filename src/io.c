@@ -33,7 +33,6 @@
  */
 
 #include <sys/param.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 
 #include <assert.h>
@@ -90,7 +89,7 @@ static void	 closecal(FILE *fp);
 static FILE	*opencalin(void);
 static char	*skip_comment(char *line, int *comment);
 static bool	 tokenize(char *line, bool *skip);
-static void	 write_mailheader(int fd);
+static void	 write_mailheader(FILE *fp);
 
 
 /*
@@ -479,16 +478,12 @@ opencalin(void)
 static void
 closecal(FILE *fp)
 {
-	int fd, pdes[2];
-	char buf[1024];
-	ssize_t nread;
-	struct stat st;
+	int ch, pdes[2];
+	FILE *fpipe;
 
 	assert(Options.allmode == true);
 
-	rewind(fp);
-	fd = fileno(fp);
-	if (fstat(fd, &st) == -1 || st.st_size == 0) {
+	if (fseek(fp, 0L, SEEK_END) == -1 || ftell(fp) == 0) {
 		logdebug("%s(): no events; skip sending mail\n", __func__);
 		return;
 	}
@@ -517,10 +512,17 @@ closecal(FILE *fp)
 	/* parent -- write to pipe input */
 	close(pdes[0]);
 
-	write_mailheader(pdes[1]);
-	while ((nread = read(fd, buf, sizeof(buf))) > 0)
-		(void)write(pdes[1], buf, (size_t)nread);
-	close(pdes[1]);
+	fpipe = fdopen(pdes[1], "w");
+	if (fpipe == NULL) {
+		close(pdes[1]);
+		goto done;
+	}
+
+	write_mailheader(fpipe);
+	rewind(fp);
+	while ((ch = fgetc(fp)) != EOF)
+		fputc(ch, fpipe);
+	fclose(fpipe);  /* will also close the underlying fd */
 
 done:
 	fclose(fp);
@@ -529,12 +531,11 @@ done:
 }
 
 static void
-write_mailheader(int fd)
+write_mailheader(FILE *fp)
 {
 	uid_t uid = getuid();
 	struct passwd *pw = getpwuid(uid);
 	struct date date;
-	FILE *fp = fdopen(fd, "w");
 	char dayname[32] = { 0 };
 	enum dayofweek dow;
 
@@ -551,7 +552,6 @@ write_mailheader(int fd)
 		"Auto-Submitted: auto-generated\n\n",
 		pw->pw_name, pw->pw_name, dayname);
 	fflush(fp);
-	/* No need to close fp */
 }
 
 static void
