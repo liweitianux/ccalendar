@@ -56,7 +56,6 @@ struct location;
 
 struct cal_options {
 	struct location *location;
-	const char *calendarFile;  /* name of calendar file */
 	double time;  /* [0, 1) time of now in unit of days */
 	int today;  /* R.D. of today to remind events */
 	int day_begin;  /* beginning of date range to remind events */
@@ -68,6 +67,7 @@ struct cal_options {
 };
 
 extern struct cal_options Options;
+extern const char *calendarDirs[];  /* paths to search for calendar files */
 
 
 static inline bool
@@ -108,7 +108,7 @@ void	setnsequences(const char *seq);
 extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
 extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
 
-int	cal(void);
+int	cal(FILE *fp);
 
 /* dates.c */
 struct cal_day;

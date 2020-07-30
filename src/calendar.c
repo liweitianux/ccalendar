@@ -32,6 +32,7 @@
  * $FreeBSD: head/usr.bin/calendar/calendar.c 326025 2017-11-20 19:49:47Z pfg $
  */
 
+#include <sys/param.h>
 #include <sys/types.h>
 
 #include <err.h>
@@ -55,16 +56,31 @@
 
 
 struct cal_options Options = {
-	.calendarFile = NULL,
 	.time = 0.5,  /* noon */
 	.allmode = false,
 	.debug = false,
 };
 
-static void	usage(const char *progname) __dead2;
-static double	get_time_of_now(void);
+/* paths to search for calendar files for inclusion */
+const char *calendarDirs[] = {
+	".calendar",  /* relative to $HOME */
+	CALENDAR_ETCDIR,
+	CALENDAR_DIR,
+	NULL,
+};
+
+/* default calendar file to use if exists in current dir or ~/.calendar */
+static const char *calendarFile = "calendar";
+/* systemd-wide calendar file to use if user doesn't have one */
+static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
+/* don't send mail if this file exists in ~/.calendar */
+static const char *calendarNoMail = "nomail";
+
+static void	cd_home(void);
 static int	get_fixed_of_today(void);
+static double	get_time_of_now(void);
 static int	get_utc_offset(void);
+static void	usage(const char *progname) __dead2;
 
 
 int
@@ -75,12 +91,14 @@ main(int argc, char *argv[])
 	int	days_before = 0;
 	int	days_after = 0;
 	int	Friday = 5;  /* days before weekend */
-	int	ch;
-	int	utc_offset;
+	int	ch, utc_offset;
 	enum dayofweek dow;
 	struct passwd *pw;
 	struct location loc = { 0 };
 	const char *show_info = NULL;
+	const char *calfile = NULL;
+	char path[MAXPATHLEN];
+	FILE *fp = NULL;
 
 	Options.location = &loc;
 	Options.time = get_time_of_now();
@@ -120,9 +138,9 @@ main(int argc, char *argv[])
 			break;
 
 		case 'f': /* other calendar file */
-			Options.calendarFile = optarg;
+			calfile = optarg;
 			if (strcmp(optarg, "-") == 0)
-				Options.calendarFile = "/dev/stdin";
+				calfile = "/dev/stdin";
 			break;
 
 		case 'L': /* location */
@@ -157,7 +175,7 @@ main(int argc, char *argv[])
 	if (argc > optind)
 		usage(argv[0]);
 
-	if (Options.allmode && Options.calendarFile != NULL)
+	if (Options.allmode && calfile != NULL)
 		errx(1, "flags -a and -f cannot be used together");
 
 	if (!L_flag)
@@ -203,7 +221,16 @@ main(int argc, char *argv[])
 
 	if (Options.allmode) {
 		while ((pw = getpwent()) != NULL) {
-			if (chdir(pw->pw_dir) == -1)
+			/*
+			 * Only try '~/.calendar/calendar'
+			 */
+			snprintf(path, sizeof(path), "%s/%s",
+				 pw->pw_dir, calendarDirs[0]);
+			if (chdir(path) == -1)
+				continue;
+			if (access(calendarNoMail, F_OK) == 0)
+				continue;
+			if ((fp = fopen(calendarFile, "r")) == NULL)
 				continue;
 
 			pid_t pid = fork();
@@ -217,12 +244,35 @@ main(int argc, char *argv[])
 				if (setuid(pw->pw_uid) == -1)
 					err(1, "setuid(%d)", (int)pw->pw_uid);
 
-				ret = cal();
+				ret = cal(fp);
+				fclose(fp);
 				_exit(ret);
 			}
 		}
 	} else {
-		ret = cal();
+		if (calfile && (fp = fopen(calfile, "r")) == NULL)
+			errx(1, "Cannot open calendar file: '%s'", calfile);
+
+		/* try 'calendar' in current directory */
+		if (fp == NULL)
+			fp = fopen(calendarFile, "r");
+		/* try '~/.calendar/calendar' */
+		if (fp == NULL) {
+			cd_home();
+			fp = fopen(calendarFile, "r");
+		}
+		/* fallback to '/etc/calendar/default' */
+		if (fp == NULL) {
+			warnx("No user's calendar file; "
+			      "fallback to system default: '%s'",
+			      calendarFileSys);
+			fp = fopen(calendarFileSys, "r");
+			if (fp == NULL)
+				errx(1, "Cannot find calendar file");
+		}
+
+		ret = cal(fp);
+		fclose(fp);
 	}
 
 	return (ret);
@@ -271,6 +321,21 @@ get_utc_offset(void)
 	localtime_r(&now, &tm);
 
 	return tm.tm_gmtoff;
+}
+
+static void
+cd_home(void)
+{
+	char *home;
+	char path[MAXPATHLEN];
+
+	home = getenv("HOME");
+	if (home == NULL || *home == '\0')
+		errx(1, "Cannot get '$HOME'");
+
+	snprintf(path, sizeof(path), "%s/%s", home, calendarDirs[0]);
+	if (chdir(path) != 0)
+		errx(1, "Cannot enter home directory: '%s'", home);
 }
 
 static void __dead2

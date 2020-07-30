@@ -56,19 +56,6 @@
 
 enum { C_NONE, C_LINE, C_BLOCK };
 
-/* default calendar file to use if exists in current dir or ~/.calendar */
-static const char *calendarFile = "calendar";
-/* systemd-wide calendar file to use if user doesn't have one */
-static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
-/* paths to search for calendar files for inclusion */
-static const char *calendarDirs[] = {
-	".calendar",  /* relative to $HOME */
-	CALENDAR_ETCDIR,
-	CALENDAR_DIR,
-};
-/* don't send mail if this file exists in ~/.calendar */
-static const char *calendarNoMail = "nomail";
-
 static struct node *definitions = NULL;
 
 /* National names for special days */
@@ -84,9 +71,7 @@ char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in);
-static void	 cd_home(void);
 static void	 closecal(FILE *fp);
-static FILE	*opencalin(void);
 static char	*skip_comment(char *line, int *comment);
 static bool	 tokenize(char *line, bool *skip);
 static void	 write_mailheader(FILE *fp);
@@ -138,9 +123,8 @@ cal_fopen(const char *file)
 {
 	FILE *fp = NULL;
 	char fpath[MAXPATHLEN];
-	size_t i;
 
-	for (i = 0; i < nitems(calendarDirs); i++) {
+	for (size_t i = 0; calendarDirs[i] != NULL; i++) {
 		snprintf(fpath, sizeof(fpath), "%s/%s",
 			 calendarDirs[i], file);
 		if ((fp = fopen(fpath, "r")) != NULL)
@@ -401,28 +385,22 @@ cal_parse(FILE *in)
 }
 
 int
-cal(void)
+cal(FILE *fpin)
 {
-	FILE *fpin;
-	FILE *fpout;
-
-	if ((fpin = opencalin()) == NULL)
-		return 1;
-
 	if (!cal_parse(fpin)) {
 		warnx("Failed to parse calendar files");
-		fclose(fpin);
 		return 1;
 	}
 
 	if (Options.allmode) {
+		FILE *fpout;
+
 		/*
 		 * Use a temporary output file, so we can skip sending mail
 		 * if there is no output.
 		 */
 		if ((fpout = tmpfile()) == NULL) {
 			warn("tmpfile");
-			fclose(fpin);
 			return 1;
 		}
 		event_print_all(fpout);
@@ -431,48 +409,10 @@ cal(void)
 		event_print_all(stdout);
 	}
 
-	fclose(fpin);
 	list_freeall(definitions, free, NULL);
 	definitions = NULL;
 
 	return 0;
-}
-
-static FILE *
-opencalin(void)
-{
-	FILE *fpin = NULL;
-	const char *calfile;
-	char fpath[MAXPATHLEN];
-
-	if (Options.allmode) {
-		/* already in $HOME, cd to '~/.calendar' */
-		if (chdir(calendarDirs[0]) == -1)
-			return (NULL);
-		if (access(calendarNoMail, F_OK) == 0)
-			return (NULL);
-
-		/* only try '~/.calendar/calendar' */
-		return fopen(calendarFile, "r");
-	}
-
-	calfile = Options.calendarFile ? Options.calendarFile : calendarFile;
-	fpin = fopen(calfile, "r");
-	if (fpin == NULL) {
-		if (Options.calendarFile)
-			errx(1, "No calendar file: '%s'", calfile);
-
-		cd_home();
-		snprintf(fpath, sizeof(fpath), "%s/%s",
-			 calendarDirs[0], calendarFile);
-		if ((fpin = fopen(fpath, "r")) == NULL &&
-		    (fpin = fopen(calendarFileSys, "r")) == NULL) {
-			errx(1, "No calendar file: '%s' or '~/%s'",
-					calendarFile, fpath);
-		}
-	}
-
-	return (fpin);
 }
 
 static void
@@ -552,16 +492,4 @@ write_mailheader(FILE *fp)
 		"Auto-Submitted: auto-generated\n\n",
 		pw->pw_name, pw->pw_name, dayname);
 	fflush(fp);
-}
-
-static void
-cd_home(void)
-{
-	char *home;
-
-	home = getenv("HOME");
-	if (home == NULL || *home == '\0')
-		errx(1, "Cannot get home directory");
-	if (chdir(home) != 0)
-		errx(1, "Cannot enter home directory: \"%s\"", home);
 }
