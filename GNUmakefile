@@ -23,7 +23,8 @@ CFLAGS?=	-O2 -pipe \
 		-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
 		-Wwrite-strings -Wcast-qual -Wcast-align \
 		-Wduplicated-cond -Wduplicated-branches \
-		-Wrestrict -Wnull-dereference -Wsign-conversion
+		-Wrestrict -Wnull-dereference -Wsign-conversion \
+		-Winline
 
 CFLAGS+=	-std=c99 -pedantic \
 		-DCALENDAR_ETCDIR='"$(CALENDAR_ETCDIR)"' \
