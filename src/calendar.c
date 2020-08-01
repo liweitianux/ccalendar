@@ -34,11 +34,13 @@
 
 #include <sys/param.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include <err.h>
 #include <grp.h>  /* required on Linux for initgroups() */
 #include <locale.h>
 #include <pwd.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,11 +79,16 @@ static const char *calendarFile = "calendar";
 static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
 /* don't send mail if this file exists in ~/.calendar */
 static const char *calendarNoMail = "nomail";
+/* maximum time in seconds that 'calendar -a' can spend for each user */
+static const int user_timeout = 10;
+/* maximum time in seconds that 'calendar -a' can spend in total */
+static const int total_timeout = 3600;
 
 static bool	cd_home(const char *home);
 static int	get_fixed_of_today(void);
 static double	get_time_of_now(void);
 static int	get_utc_offset(void);
+static void	handle_sigchld(int signo __unused);
 static void	usage(const char *progname) __dead2;
 
 
@@ -221,6 +228,17 @@ main(int argc, char *argv[])
 	}
 
 	if (Options.allmode) {
+		pid_t kid, deadkid, gkid;
+		time_t t;
+		bool reaped;
+		int kidstat, runningkids;
+		unsigned int sleeptime;
+
+		if (signal(SIGCHLD, handle_sigchld) == SIG_ERR)
+			err(1, "signal");
+		runningkids = 0;
+		t = time(NULL);
+
 		while ((pw = getpwent()) != NULL) {
 			/*
 			 * Enter '~/.calendar' and only try 'calendar'
@@ -232,22 +250,88 @@ main(int argc, char *argv[])
 			if ((fp = fopen(calendarFile, "r")) == NULL)
 				continue;
 
-			pid_t pid = fork();
-			if (pid < 0)
-				err(1, "fork");
-			if (pid == 0) {
+			sleeptime = user_timeout;
+			kid = fork();
+			if (kid < 0) {
+				warn("fork");
+				continue;
+			}
+			if (kid == 0) {
+				gkid = getpid();
+				if (setpgid(gkid, gkid) == -1)
+					err(1, "setpgid");
 				if (setgid(pw->pw_gid) == -1)
-					err(1, "setgid(%d)", (int)pw->pw_gid);
+					err(1, "setgid(%u)", pw->pw_gid);
 				if (initgroups(pw->pw_name, pw->pw_gid) == -1)
 					err(1, "initgroups(%s)", pw->pw_name);
 				if (setuid(pw->pw_uid) == -1)
-					err(1, "setuid(%d)", (int)pw->pw_uid);
+					err(1, "setuid(%u)", pw->pw_uid);
 
 				ret = cal(fp);
 				fclose(fp);
 				_exit(ret);
 			}
+			/*
+			 * Parent: wait a reasonable time, then kill child
+			 * if necessary.
+			 */
+			runningkids++;
+			reaped = false;
+			do {
+				sleeptime = sleep(sleeptime);
+				/*
+				 * Note that there is the possibility, if the
+				 * sleep stops early due to some other signal,
+				 * of the child terminating and not getting
+				 * detected during the next sleep.  In that
+				 * unlikely worst case, we just sleep too long
+				 * for that user.
+				 */
+				for (;;) {
+					deadkid = waitpid(-1, &kidstat, WNOHANG);
+					if (deadkid <= 0)
+						break;
+					runningkids--;
+					if (deadkid == kid) {
+						reaped = true;
+						sleeptime = 0;
+					}
+				}
+			} while (sleeptime);
+
+			if (!reaped) {
+				/*
+				 * It doesn't really matter if the kill fails;
+				 * there is only one more zombie now.
+				 */
+				gkid = getpgid(kid);
+				if (gkid != getpgrp())
+					killpg(gkid, SIGTERM);
+				else
+					kill(kid, SIGTERM);
+				warnx("user %s (uid %u) did not finish in time "
+				      "(%d seconds)",
+				      pw->pw_name, pw->pw_uid, user_timeout);
+			}
+
+			if (time(NULL) - t > total_timeout) {
+				errx(2, "'calendar -a' timed out (%d seconds); "
+					"stop at user %s (uid %u)",
+					total_timeout, pw->pw_name, pw->pw_uid);
+			}
 		}
+
+		for (;;) {
+			deadkid = waitpid(-1, &kidstat, WNOHANG);
+			if (deadkid <= 0)
+				break;
+			runningkids--;
+		}
+		if (runningkids) {
+			warnx("%d child processes still running when "
+			      "'calendar -a' finished", runningkids);
+		}
+
 	} else {
 		if (calfile && (fp = fopen(calfile, "r")) == NULL)
 			errx(1, "Cannot open calendar file: '%s'", calfile);
@@ -279,6 +363,12 @@ main(int argc, char *argv[])
 	return (ret);
 }
 
+
+static void
+handle_sigchld(int signo __unused)
+{
+	/* empty; just let the main() to reap the child */
+}
 
 static double
 get_time_of_now(void)
