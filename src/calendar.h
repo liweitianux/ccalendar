@@ -58,6 +58,12 @@
  */
 #define	MAXCOUNT	125
 
+static inline bool
+isleap(int y)
+{
+	return (((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0;
+}
+
 
 struct location;
 
@@ -76,24 +82,7 @@ struct cal_options {
 extern struct cal_options Options;
 extern const char *calendarDirs[];  /* paths to search for calendar files */
 
-
-static inline bool
-isleap(int y)
-{
-	return (((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0;
-}
-
-static inline void
-logdebug(const char *format, ...)
-{
-	if (!Options.debug)
-		return;
-
-	va_list args;
-	va_start(args, format);
-	vfprintf(stderr, format, args);
-	va_end(args);
-}
+void	logdebug(const char *format, ...);
 
 
 /* locale.c */

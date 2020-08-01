@@ -436,6 +436,18 @@ cd_home(const char *home)
 	return true;
 }
 
+void
+logdebug(const char *format, ...)
+{
+	if (!Options.debug)
+		return;
+
+	va_list args;
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+}
+
 static void __dead2
 usage(const char *progname)
 {
