@@ -63,12 +63,14 @@ struct cal_options Options = {
 
 /* paths to search for calendar files for inclusion */
 const char *calendarDirs[] = {
-	".calendar",  /* relative to $HOME */
+	".",  /* i.e., '~/.calendar' */
 	CALENDAR_ETCDIR,
 	CALENDAR_DIR,
 	NULL,
 };
 
+/* user's calendar home directory (relative to $HOME) */
+static const char *calendarHome = ".calendar";
 /* default calendar file to use if exists in current dir or ~/.calendar */
 static const char *calendarFile = "calendar";
 /* systemd-wide calendar file to use if user doesn't have one */
@@ -222,10 +224,10 @@ main(int argc, char *argv[])
 	if (Options.allmode) {
 		while ((pw = getpwent()) != NULL) {
 			/*
-			 * Only try '~/.calendar/calendar'
+			 * Enter '~/.calendar' and only try 'calendar'
 			 */
 			snprintf(path, sizeof(path), "%s/%s",
-				 pw->pw_dir, calendarDirs[0]);
+				 pw->pw_dir, calendarHome);
 			if (chdir(path) == -1)
 				continue;
 			if (access(calendarNoMail, F_OK) == 0)
@@ -256,11 +258,11 @@ main(int argc, char *argv[])
 		/* try 'calendar' in current directory */
 		if (fp == NULL)
 			fp = fopen(calendarFile, "r");
+
+		cd_home();
 		/* try '~/.calendar/calendar' */
-		if (fp == NULL) {
-			cd_home();
+		if (fp == NULL)
 			fp = fopen(calendarFile, "r");
-		}
 		/* fallback to '/etc/calendar/default' */
 		if (fp == NULL) {
 			warnx("No user's calendar file; "
@@ -333,7 +335,7 @@ cd_home(void)
 	if (home == NULL || *home == '\0')
 		errx(1, "Cannot get '$HOME'");
 
-	snprintf(path, sizeof(path), "%s/%s", home, calendarDirs[0]);
+	snprintf(path, sizeof(path), "%s/%s", home, calendarHome);
 	if (chdir(path) != 0)
 		errx(1, "Cannot enter home directory: '%s'", home);
 }
