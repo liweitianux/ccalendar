@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd July 27, 2020
+.Dd August 1, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -396,15 +396,9 @@ A
 command appeared in
 .At v7 .
 .Sh NOTES
-Chinese New Year is calculated at 120 degrees east of Greenwich,
-which roughly corresponds with the east coast of China.
-For people west of China, this might result that the start of Chinese
-New Year and the day of the related new moon might differ.
-.Pp
-The new and full moons are happening on the day indicated:
-They might happen in the time period in the early morning or
-in the late evening.
-It does not indicate that they are starting in the night on that day.
+The new and full moons are happening on the day indicated.
+They can happen in the time period from the early morning to
+the late evening.
 .Pp
 The adopted methods to calculate solar and lunar events is are
 simplified astronomical algorithms, so the accuracy of events is
