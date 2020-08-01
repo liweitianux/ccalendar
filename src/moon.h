@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -52,6 +52,7 @@ double	lunar_phase(double t);
 double	lunar_phase_atafter(double phi, double t);
 double	new_moon_atafter(double t);
 double	new_moon_before(double t);
+double	nth_new_moon(int n);
 
 double	moonrise(int rd, const struct location *loc);
 double	moonset(int rd, const struct location *loc);

@@ -607,7 +607,7 @@ lunar_parallax(double t, double latitude, double longitude)
  * at location ($latitude, $longitude) and at moment $t.
  * Ref: Sec.(14.6), Eq.(14.67)
  */
-double
+static double
 lunar_altitude_topocentric(double t, double latitude, double longitude)
 {
 	return (lunar_altitude(t, latitude, longitude) -
