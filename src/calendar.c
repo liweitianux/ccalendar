@@ -78,7 +78,7 @@ static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
 /* don't send mail if this file exists in ~/.calendar */
 static const char *calendarNoMail = "nomail";
 
-static void	cd_home(void);
+static bool	cd_home(const char *home);
 static int	get_fixed_of_today(void);
 static double	get_time_of_now(void);
 static int	get_utc_offset(void);
@@ -99,7 +99,6 @@ main(int argc, char *argv[])
 	struct location loc = { 0 };
 	const char *show_info = NULL;
 	const char *calfile = NULL;
-	char path[MAXPATHLEN];
 	FILE *fp = NULL;
 
 	Options.location = &loc;
@@ -226,9 +225,7 @@ main(int argc, char *argv[])
 			/*
 			 * Enter '~/.calendar' and only try 'calendar'
 			 */
-			snprintf(path, sizeof(path), "%s/%s",
-				 pw->pw_dir, calendarHome);
-			if (chdir(path) == -1)
+			if (!cd_home(pw->pw_dir))
 				continue;
 			if (access(calendarNoMail, F_OK) == 0)
 				continue;
@@ -259,7 +256,9 @@ main(int argc, char *argv[])
 		if (fp == NULL)
 			fp = fopen(calendarFile, "r");
 
-		cd_home();
+		/* enter '~/.calendar' */
+		if (!cd_home(NULL))
+			errx(1, "Cannot enter home directory");
 		/* try '~/.calendar/calendar' */
 		if (fp == NULL)
 			fp = fopen(calendarFile, "r");
@@ -325,19 +324,26 @@ get_utc_offset(void)
 	return tm.tm_gmtoff;
 }
 
-static void
-cd_home(void)
+static bool
+cd_home(const char *home)
 {
-	char *home;
 	char path[MAXPATHLEN];
 
-	home = getenv("HOME");
-	if (home == NULL || *home == '\0')
-		errx(1, "Cannot get '$HOME'");
+	if (home == NULL) {
+		home = getenv("HOME");
+		if (home == NULL || *home == '\0') {
+			warnx("Cannot get '$HOME'");
+			return false;
+		}
+	}
 
 	snprintf(path, sizeof(path), "%s/%s", home, calendarHome);
-	if (chdir(path) != 0)
-		errx(1, "Cannot enter home directory: '%s'", home);
+	if (chdir(path) == -1) {
+		logdebug("Cannot enter home directory: '%s'", home);
+		return false;
+	}
+
+	return true;
 }
 
 static void __dead2
