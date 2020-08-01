@@ -71,9 +71,9 @@ char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in);
-static void	 closecal(FILE *fp);
+static bool	 process_token(char *line, bool *skip);
+static void	 send_mail(FILE *fp);
 static char	*skip_comment(char *line, int *comment);
-static bool	 tokenize(char *line, bool *skip);
 static void	 write_mailheader(FILE *fp);
 
 
@@ -139,7 +139,7 @@ cal_fopen(const char *file)
  * NOTE: input 'line' should have trailing comment and whitespace trimed
  */
 static bool
-tokenize(char *line, bool *skip)
+process_token(char *line, bool *skip)
 {
 	char *walk;
 
@@ -269,7 +269,7 @@ cal_parse(FILE *in)
 			continue;
 
 		if (*buf == '#') {
-			if (!tokenize(buf, &skip)) {
+			if (!process_token(buf, &skip)) {
 				free(line);
 				return (false);
 			}
@@ -404,7 +404,7 @@ cal(FILE *fpin)
 			return 1;
 		}
 		event_print_all(fpout);
-		closecal(fpout);
+		send_mail(fpout);
 	} else {
 		event_print_all(stdout);
 	}
@@ -416,7 +416,7 @@ cal(FILE *fpin)
 }
 
 static void
-closecal(FILE *fp)
+send_mail(FILE *fp)
 {
 	int ch, pdes[2];
 	FILE *fpipe;
