@@ -106,16 +106,20 @@ static char	*showflags(int flags);
 /*
  * Expected styles:
  *
- * Date			::=	Month . ' ' . DayOfMonth |
- *				Month . ' ' . DayOfWeek . ModifierIndex |
+ * Date			::=	Year . '/' . Month . '/' . DayOfMonth |
+ *				Month . ' ' . DayOfMonth |
  *				Month . '/' . DayOfMonth |
+ *				Month . ' ' . DayOfWeek . ModifierIndex |
  *				Month . '/' . DayOfWeek . ModifierIndex |
  *				DayOfMonth . ' ' . Month |
  *				DayOfMonth . '/' . Month |
- *				DayOfWeek . ModifierIndex . ' ' . Month |
- *				DayOfWeek . ModifierIndex . '/' . Month |
- *				DayOfWeek . ModifierIndex |
+ *				DayOfWeek . ModifierIndex . ' ' . MonthName |
+ *				DayOfWeek . ModifierIndex . '/' . MonthName |
+ *				DayOfWeek . ModifierIndex
  *				SpecialDay . ModifierOffset
+ *
+ * Year			::=	'0' ... '9' | '00' ... '09' | '10' ... '99' |
+ *				'100' ... '999' | '1000' ... '9999'
  *
  * Month		::=	MonthName | MonthNumber | '*'
  * MonthNumber		::=	'0' ... '9' | '00' ... '09' | '10' ... '12'
@@ -124,19 +128,25 @@ static char	*showflags(int flags);
  * MonthNameShort	::=	'Jan' ... 'Dec' | 'Jan.' ... 'Dec.'
  *
  * DayOfWeek		::=	DayOfWeekShort | DayOfWeekLong
- * DayOfWeekShort	::=	'Mon' .. 'Sun'
- * DayOfWeekLong	::=	'Monday' .. 'Sunday'
+ * DayOfWeekShort	::=	'Mon' ... 'Sun'
+ * DayOfWeekLong	::=	'Monday' ... 'Sunday'
  * DayOfMonth		::=	'0' ... '9' | '00' ... '09' | '10' ... '29' |
  *				'30' ... '31' | '*'
+ *
+ * ModifierIndex	::=	'' | IndexName |
+ *				'+' . IndexNumber | '-' . IndexNumber
+ * IndexName		::=	'First' | 'Second' | 'Third' | 'Fourth' |
+ *				'Fifth' | 'Last'
+ * IndexNumber		::=	'1' ... '5'
  *
  * ModifierOffset	::=	'' | '+' . ModifierNumber | '-' . ModifierNumber
  * ModifierNumber	::=	'0' ... '9' | '00' ... '99' | '000' ... '299' |
  *				'300' ... '359' | '360' ... '365'
- * ModifierIndex	::=	'First' | 'Second' | 'Third' | 'Fourth' |
- *				'Fifth' | 'Last'
  *
- * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear'
- *
+ * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear' |
+ *				'NewMoon' | 'FullMoon' |
+ *				'MarEquinox' | 'SepEquinox' |
+ *				'JunSolstice' | 'DecSolstice'
  */
 static bool
 determinestyle(const char *date, struct dateinfo *di)
