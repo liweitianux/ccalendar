@@ -126,13 +126,13 @@ main(int argc, char *argv[])
 			Friday = -1;
 			/* FALLTHROUGH */
 		case 'A': /* days after current date */
-			days_after = atoi(optarg);
+			days_after = (int)strtol(optarg, NULL, 10);
 			if (days_after < 0)
 				errx(1, "number of days must be positive");
 			break;
 
 		case 'B': /* days before current date */
-			days_before = atoi(optarg);
+			days_before = (int)strtol(optarg, NULL, 10);
 			if (days_before < 0)
 				errx(1, "number of days must be positive");
 			break;
@@ -142,7 +142,7 @@ main(int argc, char *argv[])
 			break;
 
 		case 'F': /* Change the time: When does weekend start? */
-			Friday = atoi(optarg);
+			Friday = (int)strtol(optarg, NULL, 10);
 			break;
 
 		case 'f': /* other calendar file */
