@@ -37,6 +37,13 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
+#ifndef __unused
+#define __unused	__attribute__((__unused__))
+#endif
+#ifndef __daed2
+#define __dead2		__attribute__((__noreturn__))
+#endif
+
 #define	NDAYS		7
 #define	NMONTHS		12
 #define	NSEQUENCES	6

@@ -34,7 +34,7 @@ LDFLAGS+=	-lm
 ARCH?=		$(shell uname -m)
 OS?=		$(shell uname -s)
 ifeq ($(OS),Linux)
-CFLAGS+=	-D_GNU_SOURCE -D__dead2='__attribute__((__noreturn__))'
+CFLAGS+=	-D_GNU_SOURCE
 endif
 
 # Credit: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
