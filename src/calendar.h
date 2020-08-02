@@ -34,7 +34,6 @@
 #ifndef CALENDAR_H_
 #define CALENDAR_H_
 
-#include <stdarg.h>
 #include <stdbool.h>
 
 #ifndef __unused
