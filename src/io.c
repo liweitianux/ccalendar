@@ -298,8 +298,7 @@ cal_parse(FILE *in)
 #define	REPLACE(string, nvar) \
 		if (strncasecmp(buf, (string), strlen(string)) == 0 &&	\
 		    buf[strlen(string)]) {				\
-			if (nvar != NULL)				\
-				free(nvar);				\
+			free(nvar);					\
 			nvar = xstrdup(buf + strlen(string));		\
 			continue;					\
 		}
@@ -377,10 +376,8 @@ cal_parse(FILE *in)
 	}
 
 	free(line);
-	for (int i = 0; i < MAXCOUNT; i++) {
-		if (extradata[i] != NULL)
-			free(extradata[i]);
-	}
+	for (int i = 0; i < MAXCOUNT; i++)
+		free(extradata[i]);
 
 	return (true);
 }

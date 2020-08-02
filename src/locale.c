@@ -82,13 +82,11 @@ set_nnames(void)
 	for (int i = 0; i < NDAYS; i++) {
 		tm.tm_wday = i;
 		strftime(buf, sizeof(buf), "%a", &tm);
-		if (ndays[i] != NULL)
-			free(ndays[i]);
+		free(ndays[i]);
 		ndays[i] = xstrdup(buf);
 
 		strftime(buf, sizeof(buf), "%A", &tm);
-		if (fndays[i] != NULL)
-			free(fndays[i]);
+		free(fndays[i]);
 		fndays[i] = xstrdup(buf);
 	}
 
@@ -96,14 +94,12 @@ set_nnames(void)
 	for (int i = 0; i < NMONTHS; i++) {
 		tm.tm_mon = i;
 		strftime(buf, sizeof(buf), "%b", &tm);
-		if (nmonths[i] != NULL)
-			free(nmonths[i]);
+		free(nmonths[i]);
 		/* The month may have a leading blank (e.g., on *BSD) */
 		nmonths[i] = xstrdup(triml(buf));
 
 		strftime(buf, sizeof(buf), "%B", &tm);
-		if (fnmonths[i] != NULL)
-			free(fnmonths[i]);
+		free(fnmonths[i]);
 		fnmonths[i] = xstrdup(triml(buf));
 	}
 }
@@ -123,10 +119,8 @@ set_nsequences(const char *seq)
 		while (*p != ' ' && *p != '\0')
 			p++;
 
-		if (nsequences[i] != NULL)
-			free(nsequences[i]);
-
 		len = (size_t)(p - seq);
+		free(nsequences[i]);
 		nsequences[i] = xcalloc(1, len + 1);
 		strncpy(nsequences[i], seq, len);
 
