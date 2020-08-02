@@ -77,7 +77,7 @@ const char *calendarDirs[] = {
 static const char *calendarHome = ".calendar";
 /* default calendar file to use if exists in current dir or ~/.calendar */
 static const char *calendarFile = "calendar";
-/* systemd-wide calendar file to use if user doesn't have one */
+/* system-wide calendar file to use if user doesn't have one */
 static const char *calendarFileSys = CALENDAR_ETCDIR "/default";
 /* don't send mail if this file exists in ~/.calendar */
 static const char *calendarNoMail = "nomail";

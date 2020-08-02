@@ -159,8 +159,7 @@ determinestyle(const char *date, struct dateinfo *di)
 	int offset;
 	bool ret = false;
 
-	if (Options.debug)
-		fprintf(stderr, "-------\ndate: |%s|\n", date);
+	logdebug("-------\ndate: |%s|\n", date);
 
 #define CHECKSPECIAL(s1, s2, type)						\
 	if (string_startswith(s1, s2)) {					\
@@ -685,9 +684,8 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 
 		warnx("%s(): unprocessed date: |%s| in line |%s|",
 				__func__, date, line);
-		if (Options.debug) {
+		if (Options.debug)
 			show_datestyle(&di);
-		}
 	}
 
 	return remindex;
