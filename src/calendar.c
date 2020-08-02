@@ -390,10 +390,7 @@ get_fixed_of_today(void)
 	now = time(NULL);
 	tzset();
 	localtime_r(&now, &tm);
-
-	gdate.year = tm.tm_year + 1900;
-	gdate.month = tm.tm_mon + 1;
-	gdate.day = tm.tm_mday;
+	date_set(&gdate, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
 
 	return fixed_from_gregorian(&gdate);
 }

@@ -41,9 +41,17 @@
 
 struct date {
 	int	year;
-	int	month;	/* [1, 12] */
+	int	month;
 	int	day;
 };
+
+static inline void
+date_set(struct date *date, int y, int m, int d)
+{
+	date->year = y;
+	date->month = m;
+	date->day = d;
+}
 
 struct location {
 	double	latitude;	/* degree */
