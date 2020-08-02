@@ -110,8 +110,7 @@ int	cal(FILE *fp);
 struct cal_day;
 struct event;
 
-void	generatedates(void);
-void	dumpdates(void);
+void	generate_dates(void);
 int	first_dayofweek_of_year(int y);
 int	first_dayofweek_of_month(int y, int m);
 struct cal_day *find_yd(int yy, int dd);

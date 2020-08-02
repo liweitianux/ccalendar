@@ -60,26 +60,26 @@ static struct cal_day *cal_days = NULL;
 
 
 void
-generatedates(void)
-{
-	int daycount = Options.day_end - Options.day_begin + 1;
-	cal_days = xcalloc((size_t)daycount, sizeof(struct cal_day));
-	for (int i = 0; i < daycount; i++)
-		cal_days[i].rd = Options.day_begin + i;
-}
-
-void
-dumpdates(void)
+generate_dates(void)
 {
 	struct cal_day *dp;
-	int dow, daycount;
+	struct date date;
+	int daycount, dow;
 
 	daycount = Options.day_end - Options.day_begin + 1;
+	cal_days = xcalloc((size_t)daycount, sizeof(struct cal_day));
 	for (int i = 0; i < daycount; i++) {
 		dp = &cal_days[i];
-		dow = (int)dayofweek_from_fixed(dp->rd);
-		fprintf(stderr, "%s(): [%d] rd:%d, dow:%d\n",
-			__func__, i, dp->rd, dow);
+		dp->rd = Options.day_begin + i;
+
+		if (Options.debug) {
+			gregorian_from_fixed(dp->rd, &date);
+			dow = (int)dayofweek_from_fixed(dp->rd);
+			fprintf(stderr,
+				"%s: [%d] rd:%d, date:%04d-%02d-%02d, dow:%d\n",
+				__func__, i, dp->rd, date.year, date.month,
+				date.day, dow);
+		}
 	}
 }
 

@@ -198,7 +198,7 @@ main(int argc, char *argv[])
 	Options.day_end = Options.today + days_after;
 	Options.year1 = gregorian_year_from_fixed(Options.day_begin);
 	Options.year2 = gregorian_year_from_fixed(Options.day_end);
-	generatedates();
+	generate_dates();
 
 	setlocale(LC_ALL, "");
 	setnnames();
@@ -207,9 +207,6 @@ main(int argc, char *argv[])
 		err(1, "setenv");
 	tzset();
 	/* We're in UTC from now on */
-
-	if (Options.debug)
-		dumpdates();
 
 	if (show_info != NULL) {
 		if (strcmp(show_info, "chinese") == 0) {
