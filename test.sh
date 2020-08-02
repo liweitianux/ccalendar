@@ -1,7 +1,7 @@
 #!/bin/sh
 
 SRCS="basics.c chinese.c ecclesiastical.c gregorian.c julian.c moon.c sun.c utils.c"
-SRCS="${SRCS} locale.c dates.c parsedata.c io.c"
+SRCS="${SRCS} dates.c nnames.c parsedata.c io.c"
 CFLAGS="-std=c99 -pedantic -O2 -pipe"
 CFLAGS="${CFLAGS} -Wall -Wextra -Wlogical-op -Wshadow -Wformat=2
 	-Wwrite-strings -Wcast-qual -Wcast-align
@@ -13,7 +13,7 @@ CFLAGS="${CFLAGS} -DCALENDAR_ETCDIR=\"/usr/local/etc/calendar\""
 LDFLAGS="-lm"
 
 if [ "$(uname -s)" = "Linux" ]; then
-	CFLAGS="${CFLAGS} -D_GNU_SOURCE -D__dead2="
+	CFLAGS="${CFLAGS} -D_GNU_SOURCE"
 fi
 
 ( cd src; gcc ${CFLAGS} -o ../test ../test.c ${SRCS} ${LDFLAGS} )

@@ -22,13 +22,9 @@
  * globals
  * for compatible with calendar.c ... files
  */
-struct cal_options Options = {
-	.calendarFile = NULL,
-	.days_before = 0,
-	.days_after = 0,
-	.time = 0.5,  /* noon */
-	.debug = false,
-};
+struct cal_options Options;
+const char *calendarDirs[] = { NULL };
+void logdebug(const char *format, ...) { }
 
 
 static void
