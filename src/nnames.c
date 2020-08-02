@@ -41,7 +41,7 @@
 #include <time.h>
 
 #include "calendar.h"
-#include "locale.h"
+#include "nnames.h"
 #include "utils.h"
 
 

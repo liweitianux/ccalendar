@@ -53,8 +53,8 @@
 #include "basics.h"
 #include "chinese.h"
 #include "gregorian.h"
-#include "locale.h"
 #include "moon.h"
+#include "nnames.h"
 #include "parsedata.h"
 #include "sun.h"
 

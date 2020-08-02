@@ -51,7 +51,7 @@
 #include "calendar.h"
 #include "basics.h"
 #include "gregorian.h"
-#include "locale.h"
+#include "nnames.h"
 #include "parsedata.h"
 #include "utils.h"
 

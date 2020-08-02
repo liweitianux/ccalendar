@@ -33,8 +33,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef LOCALE_H_
-#define LOCALE_H_
+#ifndef NNAMES_H_
+#define NNAMES_H_
 
 #define NDOWS		7
 #define NMONTHS		12
