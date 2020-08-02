@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,20 +36,24 @@
 #ifndef LOCALE_H_
 #define LOCALE_H_
 
-#define NDAYS		7
+#define NDOWS		7
 #define NMONTHS		12
 #define NSEQUENCES	6
 
-extern const char *fdays[];		/* full day names */
-extern const char *days[];		/* short day names */
-extern const char *fmonths[];		/* full month names */
-extern const char *months[];		/* short month names */
-extern const char *sequences[];		/* sequence names */
-extern char *fndays[];			/* full national day names */
-extern char *ndays[];			/* short national day names */
-extern char *fnmonths[];		/* full national month names */
-extern char *nmonths[];			/* short national month names */
-extern char *nsequences[];		/* national sequence names */
+struct nname {
+	const char	*name;		/* short name */
+	size_t		len;		/* length of short name */
+	const char	*f_name;	/* full name */
+	size_t		f_len;		/* length of full name */
+	char		*n_name;	/* short national name */
+	size_t		n_len;		/* length of short national name */
+	char		*fn_name;	/* full national name */
+	size_t		fn_len;		/* length of full national name */
+};
+
+extern struct nname dow_names[];	/* names of every day of week */
+extern struct nname month_names[];	/* names of every month */
+extern struct nname sequence_names[];	/* names of every sequence */
 
 void	set_nnames(void);
 void	set_nsequences(const char *seq);

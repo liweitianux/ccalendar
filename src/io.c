@@ -480,7 +480,8 @@ write_mailheader(FILE *fp)
 	gregorian_from_fixed(Options.today, &date);
 	dow = dayofweek_from_fixed(Options.today);
 	sprintf(dayname, "%s, %d %s %d",
-		fdays[dow], date.day, fmonths[date.month-1], date.year);
+		dow_names[dow].f_name, date.day,
+		month_names[date.month-1].f_name, date.year);
 
 	fprintf(fp,
 		"From: %s (Reminder Service)\n"

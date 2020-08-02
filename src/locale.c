@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,8 +31,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD: head/usr.bin/calendar/locale.c 326025 2017-11-20 19:49:47Z pfg $
  */
 
 #include <ctype.h>
@@ -42,34 +44,53 @@
 #include "locale.h"
 #include "utils.h"
 
-const char *fdays[NDAYS+1] = {
-	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-	"Saturday", NULL,
+
+#define NNAME_INIT0 \
+	{ NULL, 0, NULL, 0, NULL, 0, NULL, 0 }
+#define NNAME_INIT1(name) \
+	{ name, sizeof(name)-1, NULL, 0, NULL, 0, NULL, 0 }
+#define NNAME_INIT2(name, f_name) \
+	{ name, sizeof(name)-1, f_name, sizeof(f_name)-1, NULL, 0, NULL, 0 }
+
+/* names of every day of week */
+struct nname dow_names[NDOWS+1] = {
+	NNAME_INIT2("Sun", "Sunday"),
+	NNAME_INIT2("Mon", "Monday"),
+	NNAME_INIT2("Tue", "Tuesday"),
+	NNAME_INIT2("Wed", "Wednesday"),
+	NNAME_INIT2("Thu", "Thursday"),
+	NNAME_INIT2("Fri", "Friday"),
+	NNAME_INIT2("Sat", "Saturday"),
+	NNAME_INIT0,
 };
 
-const char *days[NDAYS+1] = {
-	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", NULL,
+/* names of every month */
+struct nname month_names[NMONTHS+1] = {
+	NNAME_INIT2("Jan", "January"),
+	NNAME_INIT2("Feb", "February"),
+	NNAME_INIT2("Mar", "March"),
+	NNAME_INIT2("Apr", "April"),
+	NNAME_INIT2("May", "May"),
+	NNAME_INIT2("Jun", "June"),
+	NNAME_INIT2("Jul", "July"),
+	NNAME_INIT2("Aug", "August"),
+	NNAME_INIT2("Sep", "September"),
+	NNAME_INIT2("Oct", "October"),
+	NNAME_INIT2("Nov", "November"),
+	NNAME_INIT2("Dec", "December"),
+	NNAME_INIT0,
 };
 
-const char *fmonths[NMONTHS+1] = {
-	"January", "February", "March", "April", "May", "June", "July",
-	"August", "September", "October", "November", "December", NULL,
+/* names of every sequence */
+struct nname sequence_names[NSEQUENCES+1] = {
+	NNAME_INIT1("First"),
+	NNAME_INIT1("Second"),
+	NNAME_INIT1("Third"),
+	NNAME_INIT1("Fourth"),
+	NNAME_INIT1("Fifth"),
+	NNAME_INIT1("Last"),
+	NNAME_INIT0,
 };
-
-const char *months[NMONTHS+1] = {
-	"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-	"Jul", "Aug", "Sep", "Oct", "Nov", "Dec", NULL,
-};
-
-const char *sequences[NSEQUENCES+1] = {
-	"First", "Second", "Third", "Fourth", "Fifth", "Last", NULL,
-};
-
-char *fndays[NDAYS+1] = { NULL }; /* full national day names */
-char *ndays[NDAYS+1] = { NULL }; /* short national day names */
-char *fnmonths[NMONTHS+1] = { NULL }; /* full national month names */
-char *nmonths[NMONTHS+1] = { NULL }; /* short national month names */
-char *nsequences[NSEQUENCES+1] = { NULL }; /* national sequence names */
 
 
 void
@@ -77,36 +98,46 @@ set_nnames(void)
 {
 	char buf[64];
 	struct tm tm;
+	struct nname *nname;
 
 	memset(&tm, 0, sizeof(tm));
-	for (int i = 0; i < NDAYS; i++) {
+	for (int i = 0; i < NDOWS; i++) {
+		nname = &dow_names[i];
 		tm.tm_wday = i;
+
 		strftime(buf, sizeof(buf), "%a", &tm);
-		free(ndays[i]);
-		ndays[i] = xstrdup(buf);
+		free(nname->n_name);
+		nname->n_name = xstrdup(buf);
+		nname->n_len = strlen(nname->n_name);
 
 		strftime(buf, sizeof(buf), "%A", &tm);
-		free(fndays[i]);
-		fndays[i] = xstrdup(buf);
+		free(nname->fn_name);
+		nname->fn_name = xstrdup(buf);
+		nname->fn_len = strlen(nname->fn_name);
 	}
 
 	memset(&tm, 0, sizeof(tm));
 	for (int i = 0; i < NMONTHS; i++) {
+		nname = &month_names[i];
 		tm.tm_mon = i;
+
 		strftime(buf, sizeof(buf), "%b", &tm);
-		free(nmonths[i]);
+		free(nname->n_name);
 		/* The month may have a leading blank (e.g., on *BSD) */
-		nmonths[i] = xstrdup(triml(buf));
+		nname->n_name = xstrdup(triml(buf));
+		nname->n_len = strlen(nname->n_name);
 
 		strftime(buf, sizeof(buf), "%B", &tm);
-		free(fnmonths[i]);
-		fnmonths[i] = xstrdup(triml(buf));
+		free(nname->fn_name);
+		nname->fn_name = xstrdup(triml(buf));
+		nname->fn_len = strlen(nname->fn_name);
 	}
 }
 
 void
 set_nsequences(const char *seq)
 {
+	struct nname *nname;
 	const char *p = seq;
 	size_t len;
 
@@ -120,9 +151,11 @@ set_nsequences(const char *seq)
 			p++;
 
 		len = (size_t)(p - seq);
-		free(nsequences[i]);
-		nsequences[i] = xcalloc(1, len + 1);
-		strncpy(nsequences[i], seq, len);
+		nname = &sequence_names[i];
+		free(nname->n_name);
+		nname->n_name = xcalloc(1, len + 1);
+		strncpy(nname->n_name, seq, len);
+		nname->n_len = strlen(nname->n_name);
 
 		seq = ++p;
 	}

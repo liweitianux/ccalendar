@@ -797,113 +797,103 @@ getmonthname(int i)
 	if (i <= 0 || i > NMONTHS)
 		errx(1, "Invalid month number: %d", i);
 
-	return (nmonths[i-1] ? nmonths[i-1] : months[i-1]);
+	return (month_names[i-1].n_name ?
+		month_names[i-1].n_name :
+		month_names[i-1].name);
 }
 
 static bool
 checkmonth(const char *s, size_t *len, int *offset, const char **month)
 {
-	const char *p;
-	size_t l;
+	struct nname *nname;
 
-	for (int i = 0; fnmonths[i]; i++) {
-		p = fnmonths[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*month = p;
+	for (int i = 0; month_names[i].name != NULL; i++) {
+		nname = &month_names[i];
+
+		if (nname->fn_name &&
+		    strncasecmp(s, nname->fn_name, nname->fn_len) == 0) {
+			*month = nname->fn_name;
+			*len = nname->fn_len;
+			*offset = i + 1;
+			return (true);
+		}
+
+		if (nname->n_name &&
+		    strncasecmp(s, nname->n_name, nname->n_len) == 0) {
+			*month = nname->n_name;
+			*len = nname->n_len;
+			*offset = i + 1;
+			return (true);
+		}
+
+		if (nname->f_name &&
+		    strncasecmp(s, nname->f_name, nname->f_len) == 0) {
+			*month = nname->f_name;
+			*len = nname->f_len;
+			*offset = i + 1;
+			return (true);
+		}
+
+		if (strncasecmp(s, nname->name, nname->len) == 0) {
+			*month = nname->name;
+			*len = nname->len;
 			*offset = i + 1;
 			return (true);
 		}
 	}
-	for (int i = 0; nmonths[i]; i++) {
-		p = nmonths[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*month = p;
-			*offset = i + 1;
-			return (true);
-		}
-	}
-	for (int i = 0; fmonths[i]; i++) {
-		p = fmonths[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*month = p;
-			*offset = i + 1;
-			return (true);
-		}
-	}
-	for (int i = 0; months[i]; i++) {
-		p = months[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*month = p;
-			*offset = i + 1;
-			return (true);
-		}
-	}
+
 	return (false);
 }
 
 static const char *
 getdayofweekname(int i)
 {
-	if (i < 0 || i >= NDAYS)
+	if (i < 0 || i >= NDOWS)
 		errx(1, "Invalid day-of-week number: %d", i);
 
-	return (ndays[i] ? ndays[i] : days[i]);
+	return (dow_names[i].n_name ? dow_names[i].n_name : dow_names[i].name);
 }
 
 static bool
 checkdayofweek(const char *s, size_t *len, int *offset, const char **dow)
 {
-	const char *p;
-	size_t l;
+	struct nname *nname;
 
-	for (int i = 0; fndays[i]; i++) {
-		p = fndays[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*dow = p;
+	for (int i = 0; dow_names[i].name != NULL; i++) {
+		nname = &dow_names[i];
+
+		if (nname->fn_name &&
+		    strncasecmp(s, nname->fn_name, nname->fn_len) == 0) {
+			*dow = nname->fn_name;
+			*len = nname->fn_len;
+			*offset = i;
+			return (true);
+		}
+
+		if (nname->n_name &&
+		    strncasecmp(s, nname->n_name, nname->n_len) == 0) {
+			*dow = nname->n_name;
+			*len = nname->n_len;
+			*offset = i;
+			return (true);
+		}
+
+		if (nname->f_name &&
+		    strncasecmp(s, nname->f_name, nname->f_len) == 0) {
+			*dow = nname->f_name;
+			*len = nname->f_len;
+			*offset = i;
+			return (true);
+		}
+
+		if (strncasecmp(s, nname->name, nname->len) == 0) {
+			*dow = nname->name;
+			*len = nname->len;
 			*offset = i;
 			return (true);
 		}
 	}
-	for (int i = 0; ndays[i]; i++) {
-		p = ndays[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*dow = p;
-			*offset = i;
-			return (true);
-		}
-	}
-	for (int i = 0; fdays[i]; i++) {
-		p = fdays[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*dow = p;
-			*offset = i;
-			return (true);
-		}
-	}
-	for (int i = 0; days[i]; i++) {
-		p = days[i];
-		l = strlen(p);
-		if (strncasecmp(s, p, l) == 0) {
-			*len = l;
-			*dow = p;
-			*offset = i;
-			return (true);
-		}
-	}
+
 	return (false);
 }
 
@@ -938,9 +928,10 @@ parse_index(const char *s, int *index)
 		parsed = true;
 	}
 
-	for (int i = 0; !parsed && sequences[i]; i++) {
-		if (strcasecmp(s, sequences[i]) == 0 ||
-		    (nsequences[i] && strcasecmp(s, nsequences[i]) == 0)) {
+	for (int i = 0; !parsed && sequence_names[i].name; i++) {
+		if (strcasecmp(s, sequence_names[i].name) == 0 ||
+		    (sequence_names[i].n_name &&
+		     strcasecmp(s, sequence_names[i].n_name) == 0)) {
 			parsed = true;
 			*index = (i == 5) ? -1 : (i+1);  /* 'Last' -> '-1' */
 		}
