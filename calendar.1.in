@@ -397,6 +397,13 @@ A
 .Nm
 command appeared in
 .At v7 .
+.Pp
+The
+.Nm
+program was significantly enhanced in
+.Fx 9.0
+by
+.An Edwin Groothuis Aq Mt edwin@FreeBSD.org .
 .Sh NOTES
 The new and full moons are happening on the day indicated.
 They can happen in the time period from the early morning to
