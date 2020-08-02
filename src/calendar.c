@@ -52,6 +52,7 @@
 #include "basics.h"
 #include "chinese.h"
 #include "gregorian.h"
+#include "locale.h"
 #include "moon.h"
 #include "parsedata.h"
 #include "sun.h"
@@ -201,7 +202,7 @@ main(int argc, char *argv[])
 	generate_dates();
 
 	setlocale(LC_ALL, "");
-	setnnames();
+	set_nnames();
 
 	if (setenv("TZ", "UTC", 1) != 0)
 		err(1, "setenv");

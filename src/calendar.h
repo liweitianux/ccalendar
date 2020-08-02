@@ -44,10 +44,6 @@
 #define __dead2		__attribute__((__noreturn__))
 #endif
 
-#define	NDAYS		7
-#define	NMONTHS		12
-#define	NSEQUENCES	6
-
 /*
  * Random number of maximum number of repeats of an event.  Should be 52
  * (number of weeks per year).  If you want to show two years then it should
@@ -81,21 +77,6 @@ extern const char *calendarDirs[];  /* paths to search for calendar files */
 
 void	logdebug(const char *format, ...);
 
-
-/* locale.c */
-extern const char *fdays[];		/* full day names */
-extern const char *days[];		/* short day names */
-extern const char *fmonths[];		/* full month names */
-extern const char *months[];		/* short month names */
-extern const char *sequences[];		/* sequence names */
-extern char *fndays[];			/* full national day names */
-extern char *ndays[];			/* short national day names */
-extern char *fnmonths[];		/* full national month names */
-extern char *nmonths[];			/* short national month names */
-extern char *nsequences[];		/* national sequence names */
-
-void	setnnames(void);
-void	setnsequences(const char *seq);
 
 /* io.c */
 extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;

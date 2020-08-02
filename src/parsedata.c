@@ -42,6 +42,7 @@
 #include "chinese.h"
 #include "ecclesiastical.h"
 #include "gregorian.h"
+#include "locale.h"
 #include "moon.h"
 #include "parsedata.h"
 #include "sun.h"

@@ -51,6 +51,7 @@
 #include "calendar.h"
 #include "basics.h"
 #include "gregorian.h"
+#include "locale.h"
 #include "parsedata.h"
 #include "utils.h"
 
@@ -286,7 +287,7 @@ cal_parse(FILE *in)
 			if (setlocale(LC_ALL, lang) == NULL)
 				warnx("Failed to set LC_ALL='%s'", lang);
 			d_first = locale_day_first();
-			setnnames();
+			set_nnames();
 			locale_changed = true;
 			logdebug("%s(): set LC_ALL='%s' (day_first=%s)\n",
 				 __func__, lang, d_first ? "true" : "false");
@@ -315,7 +316,7 @@ cal_parse(FILE *in)
 #undef	REPLACE
 
 		if (string_startswith(buf, "SEQUENCE=")) {
-			setnsequences(buf + strlen("SEQUENCE="));
+			set_nsequences(buf + strlen("SEQUENCE="));
 			continue;
 		}
 
@@ -372,7 +373,7 @@ cal_parse(FILE *in)
 	 */
 	if (locale_changed) {
 		setlocale(LC_ALL, "");
-		setnnames();
+		set_nnames();
 	}
 
 	free(line);

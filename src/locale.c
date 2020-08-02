@@ -39,6 +39,7 @@
 #include <time.h>
 
 #include "calendar.h"
+#include "locale.h"
 #include "utils.h"
 
 const char *fdays[NDAYS+1] = {
@@ -72,7 +73,7 @@ char *nsequences[NSEQUENCES+1] = { NULL }; /* national sequence names */
 
 
 void
-setnnames(void)
+set_nnames(void)
 {
 	char buf[64];
 	struct tm tm;
@@ -97,7 +98,7 @@ setnnames(void)
 		strftime(buf, sizeof(buf), "%b", &tm);
 		if (nmonths[i] != NULL)
 			free(nmonths[i]);
-		/* The month may have a leading blank (e.g., on *BSDs) */
+		/* The month may have a leading blank (e.g., on *BSD) */
 		nmonths[i] = xstrdup(triml(buf));
 
 		strftime(buf, sizeof(buf), "%B", &tm);
@@ -108,7 +109,7 @@ setnnames(void)
 }
 
 void
-setnsequences(const char *seq)
+set_nsequences(const char *seq)
 {
 	const char *p = seq;
 	size_t len;
