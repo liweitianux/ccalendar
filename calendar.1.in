@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 1, 2020
+.Dd August 2, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -144,7 +144,9 @@ If not specified, the timezone of localtime is used.
 Print lines from today and the next
 .Ar num
 days (forward, future).
-Ignore weekends when calculating the number of days.
+Similar to the
+.Fl A
+option but ignore weekends when calculating the number of days.
 .El
 .Sh FILE FORMAT
 To handle calendars in your national code table you can specify
@@ -296,12 +298,12 @@ This fallback calendar file is ignored in the
 mode.
 .El
 .Pp
-The following default calendar files are provided in
+The following calendar files are provided in
 .Pa @@CALENDAR_DIR@@ :
 .Pp
 .Bl -tag -width calendar.southafrica -compact
 .It Pa calendar.all
-File which includes all the default files.
+File which includes all the calendar files.
 .It Pa calendar.australia
 Calendar of events in Australia.
 .It Pa calendar.birthday
@@ -368,7 +370,7 @@ U.S.\& holidays.
 This calendar should be updated yearly by the local system administrator
 so that roving holidays are set correctly for the current year.
 .It Pa calendar.world
-Includes all calendar files except for national files.
+Includes all calendar files except for national ones.
 .El
 .Sh COMPATIBILITY
 The
