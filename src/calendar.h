@@ -48,9 +48,6 @@
 #define	NMONTHS		12
 #define	NSEQUENCES	6
 
-/* Maximum number of new/full moons in a year */
-#define	MAXMOONS	18
-
 /*
  * Random number of maximum number of repeats of an event.  Should be 52
  * (number of weeks per year).  If you want to show two years then it should
