@@ -76,7 +76,7 @@ generate_dates(void)
 			gregorian_from_fixed(dp->rd, &date);
 			dow = (int)dayofweek_from_fixed(dp->rd);
 			fprintf(stderr,
-				"%s: [%d] rd:%d, date:%04d-%02d-%02d, dow:%d\n",
+				"%s: [%d] rd:%d, date:%d-%02d-%02d, dow:%d\n",
 				__func__, i, dp->rd, date.year, date.month,
 				date.day, dow);
 		}

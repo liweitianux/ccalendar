@@ -822,7 +822,7 @@ show_moon_info(double t, const struct location *loc)
 	double t_u = t - loc->zone;  /* universal time */
 
 	gregorian_from_fixed(rd, &date);
-	printf("Gregorian date: %4d-%02d-%02d\n",
+	printf("Gregorian date: %d-%02d-%02d\n",
 	       date.year, date.month, date.day);
 
 	format_time(buf, sizeof(buf), t);
@@ -911,7 +911,7 @@ show_moon_info(double t, const struct location *loc)
 		t_newmoon += loc->zone;  /* to standard time */
 		gregorian_from_fixed((int)floor(t_newmoon), &date2);
 		format_time(buf, sizeof(buf), t_newmoon);
-		printf("%4d-%02d-%02d %s",
+		printf("%d-%02d-%02d %s",
 		       date2.year, date2.month, date2.day, buf);
 
 		/*
@@ -924,7 +924,7 @@ show_moon_info(double t, const struct location *loc)
 			t_event += loc->zone;
 			gregorian_from_fixed((int)floor(t_event), &date2);
 			format_time(buf, sizeof(buf), t_event);
-			printf("   %4d-%02d-%02d %s",
+			printf("   %d-%02d-%02d %s",
 			       date2.year, date2.month, date2.day, buf);
 		}
 		printf("\n");

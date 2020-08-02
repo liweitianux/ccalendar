@@ -481,7 +481,7 @@ write_mailheader(FILE *fp)
 
 	gregorian_from_fixed(Options.today, &date);
 	dow = dayofweek_from_fixed(Options.today);
-	sprintf(dayname, "%s, %02d %s %04d",
+	sprintf(dayname, "%s, %d %s %d",
 		fdays[dow], date.day, fmonths[date.month-1], date.year);
 
 	fprintf(fp,

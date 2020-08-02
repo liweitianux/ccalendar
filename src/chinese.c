@@ -405,7 +405,7 @@ show_chinese_calendar(int rd)
 
 	struct date gdate;
 	gregorian_from_fixed(rd, &gdate);
-	printf("公历 (Gregorian): %4d-%02d-%02d\n",
+	printf("公历 (Gregorian): %d-%02d-%02d\n",
 	       gdate.year, gdate.month, gdate.day);
 
 	printf("农历: %s%s年 [%s], %s%s月%s\n",
@@ -420,7 +420,7 @@ show_chinese_calendar(int rd)
 	int newyear = chinese_new_year_onbefore(
 			chinese_new_year_onbefore(rd) + 370);
 	gregorian_from_fixed(newyear, &gdate);
-	printf("新年 (Chinese New Year): %4d-%02d-%02d\n",
+	printf("新年 (Chinese New Year): %d-%02d-%02d\n",
 	       gdate.year, gdate.month, gdate.day);
 
 	/* 1st solar term (Lìchūn) is generally around February 4 */
@@ -445,7 +445,7 @@ show_chinese_calendar(int rd)
 		gregorian_from_fixed((int)floor(t_term), &gdate);
 		format_time(buf_time, sizeof(buf_time), t_term);
 
-		printf("%s (%-13s): %3d°, %4d-%02d-%02d %s %s\n",
+		printf("%s (%-13s): %3d°, %d-%02d-%02d %s %s\n",
 		       term->zhname, term->name, lambda,
 		       gdate.year, gdate.month, gdate.day,
 		       buf_time, buf_zone);

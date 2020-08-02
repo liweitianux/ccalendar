@@ -370,7 +370,7 @@ show_sun_info(double t, const struct location *loc)
 
 	int rd = (int)floor(t);
 	gregorian_from_fixed(rd, &date);
-	printf("Gregorian date: %4d-%02d-%02d\n",
+	printf("Gregorian date: %d-%02d-%02d\n",
 	       date.year, date.month, date.day);
 
 	format_time(buf, sizeof(buf), t);
@@ -421,7 +421,7 @@ show_sun_info(double t, const struct location *loc)
 		t = solar_longitude_atafter(lambda, day_approx) + loc->zone;
 		gregorian_from_fixed((int)floor(t), &date);
 		format_time(buf, sizeof(buf), t);
-		printf("%-17s: %3d°, %4d-%02d-%02d %s\n",
+		printf("%-17s: %3d°, %d-%02d-%02d %s\n",
 		       event->name, lambda,
 		       date.year, date.month, date.day, buf);
 	}
