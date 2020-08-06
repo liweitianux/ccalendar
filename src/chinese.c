@@ -418,7 +418,7 @@ show_chinese_calendar(int rd)
 
 	/* the following Chinese New Year */
 	int newyear = chinese_new_year_onbefore(
-			chinese_new_year_onbefore(rd) + 370);
+			chinese_new_year_onbefore(rd) + 30*13);
 	gregorian_from_fixed(newyear, &gdate);
 	printf("新年 (Chinese New Year): %d-%02d-%02d\n",
 	       gdate.year, gdate.month, gdate.day);
