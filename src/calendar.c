@@ -425,23 +425,11 @@ cd_home(const char *home)
 
 	snprintf(path, sizeof(path), "%s/%s", home, calendarHome);
 	if (chdir(path) == -1) {
-		logdebug("Cannot enter home directory: '%s'", home);
+		DPRINTF("Cannot enter home directory: '%s'", home);
 		return false;
 	}
 
 	return true;
-}
-
-void
-logdebug(const char *format, ...)
-{
-	if (!Options.debug)
-		return;
-
-	va_list args;
-	va_start(args, format);
-	vfprintf(stderr, format, args);
-	va_end(args);
 }
 
 static void __dead2

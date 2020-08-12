@@ -236,7 +236,7 @@ static bool
 locale_day_first(void)
 {
 	char *d_fmt = nl_langinfo(D_FMT);
-	logdebug("%s(): d_fmt=|%s|\n", __func__, d_fmt);
+	DPRINTF("%s(): d_fmt=|%s|\n", __func__, d_fmt);
 	/* NOTE: BSDs use '%e' in D_FMT while Linux uses '%d' */
 	return (strpbrk(d_fmt, "ed") < strchr(d_fmt, 'm'));
 }
@@ -289,8 +289,8 @@ cal_parse(FILE *in)
 			d_first = locale_day_first();
 			set_nnames();
 			locale_changed = true;
-			logdebug("%s(): set LC_ALL='%s' (day_first=%s)\n",
-				 __func__, lang, d_first ? "true" : "false");
+			DPRINTF("%s(): set LC_ALL='%s' (day_first=%s)\n",
+				__func__, lang, d_first ? "true" : "false");
 
 			continue;
 		}
@@ -334,7 +334,7 @@ cal_parse(FILE *in)
 
 		/* No tab in the line, then not a valid line, e.g., comment */
 		if ((pp = strchr(buf, '\t')) == NULL) {
-			logdebug("%s() ignored invalid: |%s|\n", __func__, buf);
+			DPRINTF("%s() ignored invalid: |%s|\n", __func__, buf);
 			continue;
 		}
 
@@ -349,7 +349,7 @@ cal_parse(FILE *in)
 
 		count = parsedaymonth(dbuf, &flags, cdays, extradata, buf);
 		if (count == 0) {
-			logdebug("%s() ignored: |%s|\n", __func__, buf);
+			DPRINTF("%s() ignored: |%s|\n", __func__, buf);
 			continue;
 		}
 
@@ -358,7 +358,7 @@ cal_parse(FILE *in)
 			pp++;
 
 		for (int i = 0; i < count; i++) {
-			logdebug("%s() got: |%s|\n", __func__, pp);
+			DPRINTF("%s() got: |%s|\n", __func__, pp);
 			events[i] = event_add(cdays[i], d_first,
 					      ((flags & F_VARIABLE) != 0),
 					      pp, extradata[i]);
@@ -422,7 +422,7 @@ send_mail(FILE *fp)
 	assert(Options.allmode == true);
 
 	if (fseek(fp, 0L, SEEK_END) == -1 || ftell(fp) == 0) {
-		logdebug("%s(): no events; skip sending mail\n", __func__);
+		DPRINTF("%s(): no events; skip sending mail\n", __func__);
 		return;
 	}
 	if (pipe(pdes) < 0) {

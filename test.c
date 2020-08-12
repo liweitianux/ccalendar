@@ -24,7 +24,6 @@
  */
 struct cal_options Options;
 const char *calendarDirs[] = { NULL };
-void logdebug(const char *format, ...) { }
 
 
 static void

@@ -48,7 +48,11 @@
  * (number of weeks per year).  If you want to show two years then it should
  * be 104.  If you are seeing more than this you are using this program wrong.
  */
-#define	MAXCOUNT	125
+#define MAXCOUNT	125
+
+#define DPRINTF(...) \
+	if (Options.debug) fprintf(stderr, __VA_ARGS__)
+
 
 static inline bool
 isleap(int y)
@@ -73,8 +77,6 @@ struct cal_options {
 
 extern struct cal_options Options;
 extern const char *calendarDirs[];  /* paths to search for calendar files */
-
-void	logdebug(const char *format, ...);
 
 
 /* io.c */

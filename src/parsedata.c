@@ -159,7 +159,7 @@ determinestyle(const char *date, struct dateinfo *di)
 	int offset;
 	bool ret = false;
 
-	logdebug("-------\ndate: |%s|\n", date);
+	DPRINTF("-------\ndate: |%s|\n", date);
 
 #define CHECKSPECIAL(s1, s2, type)						\
 	if (string_startswith(s1, s2)) {					\
@@ -935,8 +935,8 @@ parse_index(const char *s, int *index)
 		}
 	}
 
-	logdebug("%s(): |%s| -> %d (%s)\n",
-		 __func__, s, *index, (parsed ? "ok" : "fail"));
+	DPRINTF("%s(): |%s| -> %d (%s)\n",
+		__func__, s, *index, (parsed ? "ok" : "fail"));
 	return parsed;
 }
 
@@ -1132,7 +1132,7 @@ parse_date(const char *date, int *rd_out)
 
 	*rd_out = fixed_from_gregorian(&gdate);
 
-	logdebug("%s(): |%s| -> %04d-%02d-%02d\n",
-		 __func__, date, gdate.year, gdate.month, gdate.day);
+	DPRINTF("%s(): |%s| -> %04d-%02d-%02d\n",
+		__func__, date, gdate.year, gdate.month, gdate.day);
 	return true;
 }
