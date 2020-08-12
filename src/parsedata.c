@@ -703,7 +703,7 @@ calc_yearinfo(int year)
 
 	yinfo = xcalloc(1, sizeof(*yinfo));
 	yinfo->year = year;
-	yinfo->monthdays = monthdaytab[isleap(year)];
+	yinfo->monthdays = monthdaytab[gregorian_leap_year(year)];
 
 	yinfo->ieaster = easter(year) - day0;
 	yinfo->ipaskha = orthodox_easter(year) - day0;

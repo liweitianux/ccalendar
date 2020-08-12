@@ -54,13 +54,6 @@
 	if (Options.debug) fprintf(stderr, __VA_ARGS__)
 
 
-static inline bool
-isleap(int y)
-{
-	return (((y) % 4) == 0 && ((y) % 100) != 0) || ((y) % 400) == 0;
-}
-
-
 struct location;
 
 struct cal_options {
