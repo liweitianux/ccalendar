@@ -442,8 +442,7 @@ dayofweek_of_month(int dow, int index, int month, int year)
 }
 
 int
-parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
-	      char **edp, const char *line)
+parsedaymonth(const char *date, int *flags, struct cal_day **dayp, char **edp)
 {
 	struct dateinfo di = { 0 };
 	struct cal_day *dp;
@@ -453,11 +452,8 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 
 	di.flags = F_NONE;
 
-	if (determinestyle(date, &di) == false) {
-		warnx("Cannot determine style for date: |%s| in line |%s|",
-				date, line);
-		return (0);
-	}
+	if (!determinestyle(date, &di))
+		return -1;
 
 	*flags = di.flags;
 	remindex = 0;
@@ -682,8 +678,7 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
 			continue;
 		}
 
-		warnx("%s(): unprocessed date: |%s| in line |%s|",
-				__func__, date, line);
+		warnx("%s(): unprocessed date: |%s|", __func__, date);
 		if (Options.debug)
 			show_datestyle(&di);
 	}

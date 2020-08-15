@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -270,125 +274,103 @@ locale_day_first(void)
 static bool
 cal_parse(FILE *in)
 {
-	ssize_t		linelen;
-	size_t		linecap = 0;
-	char		*line = NULL;
-	char		*buf, *pp;
-	char		dbuf[80];
-	bool		d_first;
-	bool		skip = false;
-	bool		locale_changed = false;
-	int		flags;
-	int		count = 0;
-	int		comment = C_NONE;
+	bool		d_first, skip, locale_changed;
+	int		flags, count;
+	struct cal_file cfile = { 0 };
+	struct cal_entry entry = { 0 };
 	struct cal_day	*cdays[CAL_MAX_REPEAT] = { NULL };
-	struct event	*events[CAL_MAX_REPEAT] = { NULL };
 	char		*extradata[CAL_MAX_REPEAT] = { NULL };
 
 	assert(in != NULL);
-
+	cfile.fp = in;
 	d_first = locale_day_first();
+	skip = false;
+	locale_changed = false;
 
-	while ((linelen = getline(&line, &linecap, in)) > 0) {
-		buf = skip_comment(line, &comment);
-		buf = trimr(buf);  /* Need to keep the leading tabs */
-		if (*buf == '\0')
-			continue;
-
-		if (*buf == '#') {
-			if (!process_token(buf, &skip)) {
-				free(line);
-				return (false);
+	while (cal_readentry(&cfile, &entry, skip)) {
+		if (entry.type == T_TOKEN) {
+			DPRINTF("%s: T_TOKEN: |%s|\n",
+				__func__, entry.token);
+			if (!process_token(entry.token, &skip)) {
+				free(entry.token);
+				return false;
 			}
+
+			free(entry.token);
 			continue;
 		}
 
-		if (skip)
-			continue;
+		if (entry.type == T_VARIABLE) {
+			DPRINTF("%s: T_VARIABLE: |%s|=|%s|\n",
+				__func__, entry.variable, entry.value);
 
-		/* Parse special definitions: LANG, Easter, Paskha etc */
-		if (string_startswith(buf, "LANG=")) {
-			const char *lang = buf + strlen("LANG=");
+			if (strcasecmp(entry.variable, "LANG") == 0) {
+				if (setlocale(LC_ALL, entry.value) == NULL) {
+					warnx("Failed to set LC_ALL='%s'",
+					      entry.value);
+				}
+				d_first = locale_day_first();
+				set_nnames();
+				locale_changed = true;
+				DPRINTF("%s(): set LC_ALL='%s' (day_first=%s)\n",
+					__func__, entry.value,
+					d_first ? "true" : "false");
+			}
 
-			if (setlocale(LC_ALL, lang) == NULL)
-				warnx("Failed to set LC_ALL='%s'", lang);
-			d_first = locale_day_first();
-			set_nnames();
-			locale_changed = true;
-			DPRINTF("%s(): set LC_ALL='%s' (day_first=%s)\n",
-				__func__, lang, d_first ? "true" : "false");
-
-			continue;
-		}
+			if (strcasecmp(entry.variable, "SEQUENCE") == 0)
+				set_nsequences(entry.value);
 
 #define	REPLACE(string, nvar) \
-		if (strncasecmp(buf, (string), strlen(string)) == 0 &&	\
-		    buf[strlen(string)]) {				\
-			free(nvar);					\
-			nvar = xstrdup(buf + strlen(string));		\
-			continue;					\
-		}
+			if (strcasecmp(entry.variable, (string)) == 0) {	\
+				free(nvar);					\
+				nvar = xstrdup(entry.value);			\
+			}
 
-		REPLACE("Easter=", neaster);
-		REPLACE("Paskha=", npaskha);
-		REPLACE("ChineseNewYear=", ncny);
-		REPLACE("NewMoon=", nnewmoon);
-		REPLACE("FullMoon=", nfullmoon);
-		REPLACE("MarEquinox=", nmarequinox);
-		REPLACE("SepEquinox=", nsepequinox);
-		REPLACE("JunSolstice=", njunsolstice);
-		REPLACE("DecSolstice=", ndecsolstice);
+			REPLACE("Easter", neaster);
+			REPLACE("Paskha", npaskha);
+			REPLACE("ChineseNewYear", ncny);
+			REPLACE("NewMoon", nnewmoon);
+			REPLACE("FullMoon", nfullmoon);
+			REPLACE("MarEquinox", nmarequinox);
+			REPLACE("SepEquinox", nsepequinox);
+			REPLACE("JunSolstice", njunsolstice);
+			REPLACE("DecSolstice", ndecsolstice);
 #undef	REPLACE
 
-		if (string_startswith(buf, "SEQUENCE=")) {
-			set_nsequences(buf + strlen("SEQUENCE="));
+			free(entry.variable);
+			free(entry.value);
 			continue;
 		}
 
-		/*
-		 * If the line starts with a tab, the data has to be
-		 * added to the previous line
-		 */
-		if (buf[0] == '\t') {
-			for (int i = 0; i < count; i++)
-				event_continue(events[i], buf);
+		if (entry.type == T_DATE) {
+			DPRINTF("%s: T_DATE: |%s|\n", __func__, entry.date);
+			for (int i = 0; i < CAL_MAX_LINES && entry.contents[i]; i++)
+				DPRINTF("\t[%d] |%s|\n", i, entry.contents[i]);
+
+			count = parsedaymonth(entry.date, &flags, cdays,
+					      extradata);
+			if (count < 0) {
+				warnx("Cannot parse date |%s| with content |%s|",
+				      entry.date, entry.contents[0]);
+				continue;
+			} else if (count == 0) {
+				DPRINTF("Ignore out-of-range date |%s| "
+					"with content |%s|",
+					entry.date, entry.contents[0]);
+				continue;
+			}
+
+			for (int i = 0; i < count; i++) {
+				event_add(cdays[i], d_first,
+				          ((flags & F_VARIABLE) != 0),
+				          entry.contents, extradata[i]);
+			}
+
+			free(entry.date);
 			continue;
 		}
 
-		/* Get rid of leading spaces (non-standard) */
-		buf = triml(buf);
-
-		/* No tab in the line, then not a valid line, e.g., comment */
-		if ((pp = strchr(buf, '\t')) == NULL) {
-			DPRINTF("%s() ignored invalid: |%s|\n", __func__, buf);
-			continue;
-		}
-
-		/* Trim spaces in front of the tab */
-		while (isspace((unsigned char)pp[-1]))
-			pp--;
-
-		char ch = *pp;
-		*pp = '\0';
-		snprintf(dbuf, sizeof(dbuf), "%s", buf);
-		*pp = ch;
-
-		count = parsedaymonth(dbuf, &flags, cdays, extradata, buf);
-		if (count == 0) {
-			DPRINTF("%s() ignored: |%s|\n", __func__, buf);
-			continue;
-		}
-
-		/* Find the last tab */
-		while (pp[1] == '\t')
-			pp++;
-
-		for (int i = 0; i < count; i++) {
-			DPRINTF("%s() got: |%s|\n", __func__, pp);
-			events[i] = event_add(cdays[i], d_first,
-					      ((flags & F_VARIABLE) != 0),
-					      pp, extradata[i]);
-		}
+		errx(1, "Invalid calendar entry type: %d", entry.type);
 	}
 
 	/*
@@ -401,9 +383,10 @@ cal_parse(FILE *in)
 		set_nnames();
 	}
 
-	free(line);
+	free(cfile.line);
+	free(cfile.nextline);
 
-	return (true);
+	return true;
 }
 
 static bool

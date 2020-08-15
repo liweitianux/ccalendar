@@ -95,8 +95,7 @@ struct cal_day *find_yd(int yy, int dd);
 struct cal_day *find_ymd(int yy, int mm, int dd);
 
 struct event *event_add(struct cal_day *dp, bool day_first, bool variable,
-			char *txt, char *extra);
-void	event_continue(struct event *events, char *txt);
+			char *contents[], char *extra);
 void	event_print_all(FILE *fp);
 
 #endif

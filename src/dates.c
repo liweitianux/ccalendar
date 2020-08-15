@@ -47,7 +47,7 @@
 struct event {
 	bool		 variable;  /* Whether a variable event ? */
 	char		*date;  /* human readable */
-	char		*text;
+	char		*contents[CAL_MAX_LINES];  /* lines of contents */
 	char		*extra;
 	struct event	*next;
 };
@@ -135,7 +135,7 @@ find_ymd(int yy, int mm, int dd)
 
 struct event *
 event_add(struct cal_day *dp, bool day_first, bool variable,
-	  char *txt, char *extra)
+	  char *contents[], char *extra)
 {
 	static char dbuf[32];
 	struct date gdate = { 0 };
@@ -151,7 +151,8 @@ event_add(struct cal_day *dp, bool day_first, bool variable,
 	e = xcalloc(1, sizeof(*e));
 	e->variable = variable;
 	e->date = xstrdup(dbuf);
-	e->text = xstrdup(txt);
+	for (int i = 0; i < CAL_MAX_LINES; i++)
+		e->contents[i] = contents[i];
 	if (extra != NULL && extra[0] != '\0')
 		e->extra = extra;
 
@@ -162,35 +163,28 @@ event_add(struct cal_day *dp, bool day_first, bool variable,
 }
 
 void
-event_continue(struct event *e, char *txt)
-{
-	char *text;
-	size_t len;
-
-	/* Includes a '\n' and a NUL */
-	len = strlen(e->text) + strlen(txt) + 2;
-	text = xcalloc(1, len);
-	snprintf(text, len, "%s\n%s", e->text, txt);
-	free(e->text);
-	e->text = text;
-}
-
-void
 event_print_all(FILE *fp)
 {
 	struct event *e;
 	struct cal_day *dp;
 	int daycount = Options.day_end - Options.day_begin + 1;
+	int last;
 
 	for (int i = 0; i < daycount; i++) {
 		dp = &cal_days[i];
 		for (e = dp->events; e != NULL; e = e->next) {
-			fprintf(fp, "%s%c%s%s%s%s\n", e->date,
-				e->variable ? '*' : ' ', e->text,
-				e->extra != NULL ? " (" : "",
-				e->extra != NULL ? e->extra : "",
-				e->extra != NULL ? ")" : ""
-			);
+			last = 0;
+			while (last < CAL_MAX_LINES && e->contents[last])
+			     last++;
+
+			fprintf(fp, "%s%c", e->date, e->variable ? '*' : ' ');
+			for (int j = 0; j < last; j++) {
+				fprintf(fp, "\t%s%s", e->contents[j],
+					(j == last - 1) ? "" : "\n");
+			}
+			if (e->extra)
+				fprintf(fp, " (%s)", e->extra);
+			fputc('\n', fp);
 			fflush(fp);
 		}
 	}
