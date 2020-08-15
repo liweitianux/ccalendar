@@ -222,6 +222,18 @@ invert_angular(double (*f)(double), double y, double a, double b)
 
 
 /*
+ * Like malloc(3) but exit if allocation fails.
+ */
+void *
+xmalloc(size_t size)
+{
+	void *ptr = malloc(size);
+	if (ptr == NULL)
+		errx(1, "mcalloc(%zu): out of memory", size);
+	return ptr;
+}
+
+/*
  * Like calloc(3) but exit if allocation fails.
  */
 void *
@@ -230,6 +242,18 @@ xcalloc(size_t number, size_t size)
 	void *ptr = calloc(number, size);
 	if (ptr == NULL)
 		errx(1, "xcalloc(%zu, %zu): out of memory", number, size);
+	return ptr;
+}
+
+/*
+ * Like realloc(3) but exit if allocation fails.
+ */
+void *
+xrealloc(void *ptr, size_t size)
+{
+	ptr = realloc(ptr, size);
+	if (ptr == NULL)
+		errx(1, "xrealloc: out of memory (size: %zu)", size);
 	return ptr;
 }
 

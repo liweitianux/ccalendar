@@ -81,7 +81,9 @@ double	angle2deg(int deg, int min, double sec);
 
 double	invert_angular(double (*f)(double), double y, double a, double b);
 
+void *	xmalloc(size_t size);
 void *	xcalloc(size_t number, size_t size);
+void *	xrealloc(void *ptr, size_t size);
 char *	xstrdup(const char *str);
 
 size_t	count_char(const char *s, int ch);
