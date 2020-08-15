@@ -44,11 +44,11 @@
 #endif
 
 /*
- * Random number of maximum number of repeats of an event.  Should be 52
- * (number of weeks per year).  If you want to show two years then it should
- * be 104.  If you are seeing more than this you are using this program wrong.
+ * Maximum number of repeats of an event.  100 should be enough, which is
+ * about the number of weeks in 2 years).  If you need more, then you may
+ * be using this program wrong...
  */
-#define MAXCOUNT	125
+#define CAL_MAX_REPEAT	100
 
 #define DPRINTF(...) \
 	if (Options.debug) fprintf(stderr, __VA_ARGS__)

@@ -255,9 +255,9 @@ cal_parse(FILE *in)
 	int		flags;
 	int		count = 0;
 	int		comment = C_NONE;
-	struct cal_day	*cdays[MAXCOUNT] = { NULL };
-	struct event	*events[MAXCOUNT] = { NULL };
-	char		*extradata[MAXCOUNT] = { NULL };
+	struct cal_day	*cdays[CAL_MAX_REPEAT] = { NULL };
+	struct event	*events[CAL_MAX_REPEAT] = { NULL };
+	char		*extradata[CAL_MAX_REPEAT] = { NULL };
 
 	assert(in != NULL);
 
@@ -376,7 +376,7 @@ cal_parse(FILE *in)
 	}
 
 	free(line);
-	for (int i = 0; i < MAXCOUNT; i++)
+	for (int i = 0; i < CAL_MAX_REPEAT; i++)
 		free(extradata[i]);
 
 	return (true);

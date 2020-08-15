@@ -769,9 +769,11 @@ remember(int *index, struct cal_day **cd, struct cal_day *dp,
 {
 	static bool warned = false;
 
-	if (*index >= MAXCOUNT - 1) {
-		if (!warned)
-			warnx("Event count exceeds %d, ignored", MAXCOUNT);
+	if (*index >= CAL_MAX_REPEAT - 1) {
+		if (!warned) {
+			warnx("Event repeats more than %d, ignored",
+			      CAL_MAX_REPEAT);
+		}
 		warned = true;
 		return;
 	}
