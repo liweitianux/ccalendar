@@ -54,7 +54,9 @@
 
 #include "calendar.h"
 #include "basics.h"
+#include "dates.h"
 #include "gregorian.h"
+#include "io.h"
 #include "nnames.h"
 #include "parsedata.h"
 #include "utils.h"

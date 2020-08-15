@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,54 +31,14 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $FreeBSD: head/usr.bin/calendar/calendar.h 326025 2017-11-20 19:49:47Z pfg $
  */
 
-#ifndef CALENDAR_H_
-#define CALENDAR_H_
+#ifndef IO_H_
+#define IO_H_
 
-#include <stdbool.h>
+extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
+extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
 
-#ifndef __unused
-#define __unused	__attribute__((__unused__))
-#endif
-#ifndef __daed2
-#define __dead2		__attribute__((__noreturn__))
-#endif
-
-/*
- * Maximum number of repeats of an event.  100 should be enough, which is
- * about the number of weeks in 2 years).  If you need more, then you may
- * be using this program wrong...
- */
-#define CAL_MAX_REPEAT	100
-
-/*
- * Maximum number of content lines of an event.  An event can have multiple
- * content lines if they start with a tab '\t'.
- */
-#define CAL_MAX_LINES	50
-
-#define DPRINTF(...) \
-	if (Options.debug) fprintf(stderr, __VA_ARGS__)
-
-
-struct location;
-
-struct cal_options {
-	struct location *location;
-	double time;  /* [0, 1) time of now in unit of days */
-	int today;  /* R.D. of today to remind events */
-	int day_begin;  /* beginning of date range to remind events */
-	int day_end;  /* end of date range to remind events */
-	int year1;  /* year of the beginning day */
-	int year2;  /* year of the ending day */
-	bool allmode;  /* whether to process calendars for all users */
-	bool debug;
-};
-
-extern struct cal_options Options;
-extern const char *calendarDirs[];  /* paths to search for calendar files */
+int	cal(FILE *fp);
 
 #endif

@@ -40,6 +40,7 @@
 
 #include "calendar.h"
 #include "basics.h"
+#include "dates.h"
 #include "gregorian.h"
 #include "utils.h"
 
