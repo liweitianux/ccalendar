@@ -55,7 +55,27 @@
 #include "parsedata.h"
 #include "utils.h"
 
+
 enum { C_NONE, C_LINE, C_BLOCK };
+enum { T_NONE, T_TOKEN, T_VARIABLE, T_DATE };
+
+struct cal_entry {
+	int   type;		/* type of the read entry */
+	char *token;		/* token to process (T_TOKEN) */
+	char *variable;		/* variable name (T_VARIABLE) */
+	char *value;		/* variable value (T_VARIABLE) */
+	char *date;		/* date of event (T_DATE) */
+	char *contents[CAL_MAX_LINES];  /* content lines of event (T_DATE) */
+};
+
+struct cal_file {
+	FILE	*fp;
+	char	*line;		/* line string read from file */
+	size_t	 line_cap;	/* capacity of the 'line' buffer */
+	char	*nextline;	/* to store the rewinded line */
+	size_t	 nextline_cap;	/* capacity of the 'nextline' buffer */
+	bool	 rewinded;	/* if 'nextline' has the rewinded line */
+};
 
 static struct node *definitions = NULL;
 
@@ -72,6 +92,12 @@ char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in);
+static bool	 cal_readentry(struct cal_file *cfile,
+			       struct cal_entry *entry, bool skip);
+static char	*cal_readline(struct cal_file *cfile);
+static void	 cal_rewindline(struct cal_file *cfile);
+static bool	 is_date_entry(char *line, char **content);
+static bool	 is_variable_entry(char *line, char **value);
 static bool	 process_token(char *line, bool *skip);
 static void	 send_mail(FILE *fp);
 static char	*skip_comment(char *line, int *comment);
@@ -382,6 +408,159 @@ cal_parse(FILE *in)
 	return (true);
 }
 
+static bool
+cal_readentry(struct cal_file *cfile, struct cal_entry *entry, bool skip)
+{
+	char *p, *value, *content;
+	int comment, ci;
+
+	memset(entry, 0, sizeof(*entry));
+	entry->type = T_NONE;
+	comment = C_NONE;
+
+	while ((p = cal_readline(cfile)) != NULL) {
+		p = skip_comment(p, &comment);
+		p = trimr(p);  /* Need to keep the leading tabs */
+		if (*p == '\0')
+			continue;
+
+		if (*p == '#') {
+			entry->type = T_TOKEN;
+			entry->token = xstrdup(p);
+			return true;
+		}
+
+		if (skip) {
+			/* skip entries but tokens (e.g., '#endif') */
+			DPRINTF("%s: skip line: |%s|\n", __func__, p);
+			continue;
+		}
+
+		if (is_variable_entry(p, &value)) {
+			value = triml(value);
+			if (*value == '\0') {
+				warnx("%s: varaible |%s| has no value",
+				      __func__, p);
+				continue;
+			}
+
+			entry->type = T_VARIABLE;
+			entry->variable = xstrdup(p);
+			entry->value = xstrdup(value);
+			return true;
+		}
+
+		if (is_date_entry(p, &content)) {
+			content = triml(content);
+			if (*content == '\0') {
+				warnx("%s: date |%s| has no content",
+				      __func__, p);
+				continue;
+			}
+
+			ci = 0;
+			entry->type = T_DATE;
+			entry->date = xstrdup(p);
+			entry->contents[ci++] = xstrdup(content);
+
+			/* Continuous contents of the event */
+			while ((p = cal_readline(cfile)) != NULL) {
+				p = trimr(skip_comment(p, &comment));
+				if (*p == '\0')
+					continue;
+
+				if (*p == '\t') {
+					content = triml(p);
+					if (ci >= CAL_MAX_LINES) {
+						warnx("%s: date |%s| has too "
+						      "many lines of contents",
+						      __func__, entry->date);
+						break;
+					}
+					entry->contents[ci++] = xstrdup(content);
+				} else {
+					cal_rewindline(cfile);
+					break;
+				}
+			}
+
+			return true;
+		}
+
+		warnx("%s: unknown line: |%s|", __func__, p);
+	}
+
+	return false;
+}
+
+static char *
+cal_readline(struct cal_file *cfile)
+{
+	if (cfile->rewinded) {
+		cfile->rewinded = false;
+		return cfile->nextline;
+	}
+
+	if (getline(&cfile->line, &cfile->line_cap, cfile->fp) <= 0)
+		return NULL;
+
+	return cfile->line;
+}
+
+static void
+cal_rewindline(struct cal_file *cfile)
+{
+	if (cfile->nextline_cap == 0)
+		cfile->nextline = xmalloc(cfile->line_cap);
+	else if (cfile->nextline_cap < cfile->line_cap)
+		cfile->nextline = xrealloc(cfile->nextline, cfile->line_cap);
+
+	memcpy(cfile->nextline, cfile->line, cfile->line_cap);
+	cfile->nextline_cap = cfile->line_cap;
+	cfile->rewinded = true;
+}
+
+static bool
+is_variable_entry(char *line, char **value)
+{
+	char *p, *eq;
+
+	if (line == NULL)
+		return false;
+	if (!(*line == '_' || isalpha((unsigned int)*line)))
+		return false;
+	if ((eq = strchr(line, '=')) == NULL)
+		return false;
+	for (p = line+1; p < eq; p++) {
+		if (!isalnum((unsigned int)*p))
+			return false;
+	}
+
+	*eq = '\0';
+	if (value != NULL)
+		*value = eq + 1;
+
+	return true;
+}
+
+static bool
+is_date_entry(char *line, char **content)
+{
+	char *p;
+
+	if (*line == '\t')
+		return false;
+	if ((p = strchr(line, '\t')) == NULL)
+		return false;
+
+	*p = '\0';
+	if (content != NULL)
+		*content = p + 1;
+
+	return true;
+}
+
+
 int
 cal(FILE *fpin)
 {
@@ -412,6 +591,7 @@ cal(FILE *fpin)
 
 	return 0;
 }
+
 
 static void
 send_mail(FILE *fp)

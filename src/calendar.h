@@ -50,6 +50,12 @@
  */
 #define CAL_MAX_REPEAT	100
 
+/*
+ * Maximum number of content lines of an event.  An event can have multiple
+ * content lines if they start with a tab '\t'.
+ */
+#define CAL_MAX_LINES	50
+
 #define DPRINTF(...) \
 	if (Options.debug) fprintf(stderr, __VA_ARGS__)
 
