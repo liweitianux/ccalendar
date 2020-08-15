@@ -19,7 +19,7 @@ TMPDIR?=	/tmp
 ARCHBUILD_DIR?=	$(TMPDIR)/$(PROG)-archbuild
 RPMBUILD_DIR?=	$(TMPDIR)/$(PROG)-rpmbuild
 
-CFLAGS?=	-O2 -pipe \
+CFLAGS?=	-g -O2 -pipe \
 		-Wall -Wextra -Wlogical-op -Wshadow -Wformat=2 \
 		-Wwrite-strings -Wcast-qual -Wcast-align \
 		-Wduplicated-cond -Wduplicated-branches \
