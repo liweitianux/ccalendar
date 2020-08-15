@@ -779,10 +779,6 @@ remember(int *index, struct cal_day **cd, struct cal_day *dp,
 	}
 
 	cd[*index] = dp;
-	if (ed[*index] != NULL) {
-		free(ed[*index]);
-		ed[*index] = NULL;
-	}
 	/* NOTE: copy so that multiple occurrences of events (e.g., NewMoon)
 	 * would not overwrite */
 	if (extra != NULL)

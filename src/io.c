@@ -402,8 +402,6 @@ cal_parse(FILE *in)
 	}
 
 	free(line);
-	for (int i = 0; i < CAL_MAX_REPEAT; i++)
-		free(extradata[i]);
 
 	return (true);
 }

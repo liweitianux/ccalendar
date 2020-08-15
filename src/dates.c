@@ -152,9 +152,8 @@ event_add(struct cal_day *dp, bool day_first, bool variable,
 	e->variable = variable;
 	e->date = xstrdup(dbuf);
 	e->text = xstrdup(txt);
-	e->extra = NULL;
 	if (extra != NULL && extra[0] != '\0')
-		e->extra = xstrdup(extra);
+		e->extra = extra;
 
 	e->next = dp->events;
 	dp->events = e;
