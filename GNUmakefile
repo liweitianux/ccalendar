@@ -105,4 +105,4 @@ rpm:
 	@pkg=`( cd $(RPMBUILD_DIR)/RPMS/$(ARCH); ls $(PROG)-*.rpm )` ; \
 		cp -v $(RPMBUILD_DIR)/RPMS/$(ARCH)/$${pkg} . ; \
 		rm -rf $(RPMBUILD_DIR) ; \
-		echo "Install with: 'sudo rpm -iv $${pkg}'"
+		echo "Install with: 'sudo yum install $${pkg}'"
