@@ -439,16 +439,6 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 			continue;
 		}
 
-		/* One day of every month */
-		if (lflags == (F_ALLMONTH | F_DAYOFWEEK)) {
-			for (m = 1; m <= NMONTHS; m++) {
-				dp = find_ymd(year, m, di.idayofmonth);
-				if (dp != NULL)
-					remember(&remindex, dayp, dp, edp, NULL);
-			}
-			continue;
-		}
-
 		/* Every day-of-week of the year, e.g., 'Thu' */
 		if (lflags == (F_DAYOFWEEK | F_VARIABLE)) {
 			dow = first_dayofweek_of_year(year);
