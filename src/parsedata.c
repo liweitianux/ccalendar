@@ -51,6 +51,9 @@
 #include "sun.h"
 #include "utils.h"
 
+/* Maximum number of new/full moons in a year */
+#define MAXMOONS	18
+
 struct dateinfo {
 	int	flags;
 	int	iyear;

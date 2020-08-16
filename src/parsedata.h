@@ -60,9 +60,6 @@
 #define	F_DECSOLSTICE		0x20000
 #define	F_YEAR			0x40000
 
-/* Maximum number of new/full moons in a year */
-#define	MAXMOONS		18
-
 struct cal_day;
 
 int	parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
