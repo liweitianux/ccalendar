@@ -59,13 +59,6 @@ struct dateinfo {
 	int	idayofweek;
 	int	imodifieroffset;
 	int	imodifierindex;
-	char	year[32];
-	char	month[32];
-	char	dayofmonth[32];
-	char	dayofweek[32];
-	char	modifieroffset[32];
-	char	modifierindex[32];
-	char	specialday[128];
 };
 
 struct yearinfo {
@@ -95,8 +88,6 @@ static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
 static int	 dayofweek_of_month(int dow, int offset, int month, int year);
 static bool	 determinestyle(const char *date, struct dateinfo *di);
-static const char *getdayofweekname(int i);
-static const char *getmonthname(int i);
 static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
@@ -104,8 +95,7 @@ static const char *parse_int_ranged(const char *s, size_t len, int min,
 static bool	 parse_index(const char *s, int *index);
 static void	 remember(int *index, struct cal_day **cd, struct cal_day *dp,
 			  char **ed, const char *extra);
-static void	 show_datestyle(struct dateinfo *di);
-static char	*showflags(int flags);
+static void	 show_dateinfo(struct dateinfo *di);
 
 /*
  * Expected styles:
@@ -180,14 +170,10 @@ determinestyle(const char *date, struct dateinfo *di)
 
 			di->flags |= (sday->flag | F_SPECIALDAY | F_VARIABLE);
 			if (strlen(date2) == len) {
-				strcpy(di->specialday, date2);
 				ret = true;
 				goto out;
 			}
-			strncpy(di->specialday, date2, len);
-			di->specialday[len] = '\0';
-			strcpy(di->modifieroffset, date2 + len);
-			di->imodifieroffset = (int)strtol(di->modifieroffset, NULL, 10);
+			di->imodifieroffset = (int)strtol(date2+len, NULL, 10);
 			di->flags |= F_MODIFIEROFFSET;
 			ret = true;
 			goto out;
@@ -197,14 +183,10 @@ determinestyle(const char *date, struct dateinfo *di)
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			di->idayofweek = offset;
 			if (strlen(date2) == len) {
-				strcpy(di->dayofweek, date2);
 				ret = true;
 				goto out;
 			}
-			strncpy(di->dayofweek, date2, len);
-			di->dayofweek[len] = '\0';
-			strcpy(di->modifierindex, date2 + len);
-			if (parse_index(di->modifierindex, &di->imodifierindex)) {
+			if (parse_index(date2+len, &di->imodifierindex)) {
 				di->flags |= F_MODIFIERINDEX;
 				ret = true;
 			}
@@ -214,7 +196,6 @@ determinestyle(const char *date, struct dateinfo *di)
 			/* Assume month number only */
 			di->flags |= F_MONTH;
 			di->imonth = (int)strtol(date2, NULL, 10);
-			strcpy(di->month, getmonthname(di->imonth));
 			ret = true;
 			goto out;
 		}
@@ -230,8 +211,7 @@ determinestyle(const char *date, struct dateinfo *di)
 	if ((p = strchr(p2, '/')) != NULL) {
 		/* Got a year in the date string. */
 		di->flags |= F_YEAR;
-		strcpy(di->year, p1);
-		di->iyear = (int)strtol(di->year, NULL, 10);
+		di->iyear = (int)strtol(p1, NULL, 10);
 		*p = '\0';
 		p1 = p2;
 		p2 = p + 1;
@@ -244,10 +224,8 @@ determinestyle(const char *date, struct dateinfo *di)
 
 		di->flags |= F_MONTH;
 		di->imonth = offset;
-		strcpy(di->month, getmonthname(offset));
 
 		if (isonlydigits(p2, true)) {
-			strcpy(di->dayofmonth, p2);
 			di->idayofmonth = (int)strtol(p2, NULL, 10);
 			di->flags |= F_DAYOFMONTH;
 			ret = true;
@@ -261,13 +239,11 @@ determinestyle(const char *date, struct dateinfo *di)
 		if (checkdayofweek(p2, &len, &offset, &dow)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			di->idayofweek = offset;
-			strcpy(di->dayofweek, getdayofweekname(offset));
 			if (strlen(p2) == len) {
 				ret = true;
 				goto out;
 			}
-			strcpy(di->modifierindex, p2 + len);
-			if (parse_index(di->modifierindex, &di->imodifierindex)) {
+			if (parse_index(p2+len, &di->imodifierindex)) {
 				di->flags |= F_MODIFIERINDEX;
 				ret = true;
 			}
@@ -282,7 +258,6 @@ determinestyle(const char *date, struct dateinfo *di)
 	    (strcmp(p2, "*") == 0 && isonlydigits(p1, true) && (p2 = p1))) {
 		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
 		di->idayofmonth = (int)strtol(p2, NULL, 10);
-		sprintf(di->dayofmonth, "%d", di->idayofmonth);
 		ret = true;
 		goto out;
 	}
@@ -291,18 +266,13 @@ determinestyle(const char *date, struct dateinfo *di)
 	if (isonlydigits(p1, true) &&
 	    checkdayofweek(p2, &len, &offset, &dow)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
-
 		di->imonth = (int)strtol(p1, NULL, 10);
-		strcpy(di->month, getmonthname(di->imonth));
-
 		di->idayofweek = offset;
-		strcpy(di->dayofweek, getdayofweekname(offset));
 		if (strlen(p2) == len) {
 			ret = true;
 			goto out;
 		}
-		strcpy(di->modifierindex, p2 + len);
-		if (parse_index(di->modifierindex, &di->imodifierindex)) {
+		if (parse_index(p2+len, &di->imodifierindex)) {
 			di->flags |= F_MODIFIERINDEX;
 			ret = true;
 		}
@@ -327,8 +297,6 @@ determinestyle(const char *date, struct dateinfo *di)
 			swap(&m, &d);
 		di->imonth = m;
 		di->idayofmonth = d;
-		strcpy(di->month, getmonthname(m));
-		sprintf(di->dayofmonth, "%d", d);
 		ret = true;
 		goto out;
 	}
@@ -337,81 +305,48 @@ determinestyle(const char *date, struct dateinfo *di)
 
 out:
 	if (Options.debug)
-		show_datestyle(di);
+		show_dateinfo(di);
 	free(date2);
 	return ret;
 }
 
 static void
-show_datestyle(struct dateinfo *di)
+show_dateinfo(struct dateinfo *di)
 {
-	fprintf(stderr, "flags: 0x%x - %s\n", di->flags, showflags(di->flags));
-	if (di->modifieroffset[0] != '\0')
-		fprintf(stderr, "modifieroffset: |%s| (%d)\n",
-			di->modifieroffset, di->imodifieroffset);
-	if (di->modifierindex[0] != '\0')
-		fprintf(stderr, "modifierindex: |%s| (%d)\n",
-			di->modifierindex, di->imodifierindex);
-	if (di->year[0] != '\0')
-		fprintf(stderr, "year: |%s| (%d)\n", di->year, di->iyear);
-	if (di->month[0] != '\0')
-		fprintf(stderr, "month: |%s| (%d)\n", di->month, di->imonth);
-	if (di->dayofmonth[0] != '\0')
-		fprintf(stderr, "dayofmonth: |%s| (%d)\n",
-			di->dayofmonth, di->idayofmonth);
-	if (di->dayofweek[0] != '\0')
-		fprintf(stderr, "dayofweek: |%s| (%d)\n",
-			di->dayofweek, di->idayofweek);
-	if (di->specialday[0] != '\0')
-		fprintf(stderr, "specialday: |%s|\n", di->specialday);
-}
+	struct specialday *sday;
 
-static char *
-showflags(int flags)
-{
-	static char s[128];
-	s[0] = '\0';
+	fprintf(stderr, "flags: 0x%x -", di->flags);
 
-	if ((flags & F_YEAR) != 0)
-		strcat(s, "year ");
-	if ((flags & F_MONTH) != 0)
-		strcat(s, "month ");
-	if ((flags & F_DAYOFWEEK) != 0)
-		strcat(s, "dayofweek ");
-	if ((flags & F_DAYOFMONTH) != 0)
-		strcat(s, "dayofmonth ");
-	if ((flags & F_MODIFIERINDEX) != 0)
-		strcat(s, "modifierindex ");
-	if ((flags & F_MODIFIEROFFSET) != 0)
-		strcat(s, "modifieroffset ");
-	if ((flags & F_SPECIALDAY) != 0)
-		strcat(s, "specialday ");
-	if ((flags & F_ALLMONTH) != 0)
-		strcat(s, "allmonth ");
-	if ((flags & F_ALLDAY) != 0)
-		strcat(s, "allday ");
-	if ((flags & F_VARIABLE) != 0)
-		strcat(s, "variable ");
-	if ((flags & F_CNY) != 0)
-		strcat(s, "chinesenewyear ");
-	if ((flags & F_PASKHA) != 0)
-		strcat(s, "paskha ");
-	if ((flags & F_EASTER) != 0)
-		strcat(s, "easter ");
-	if ((flags & F_FULLMOON) != 0)
-		strcat(s, "fullmoon ");
-	if ((flags & F_NEWMOON) != 0)
-		strcat(s, "newmoon ");
-	if ((flags & F_MAREQUINOX) != 0)
-		strcat(s, "marequinox ");
-	if ((flags & F_SEPEQUINOX) != 0)
-		strcat(s, "sepequinox ");
-	if ((flags & F_JUNSOLSTICE) != 0)
-		strcat(s, "junsolstice ");
-	if ((flags & F_DECSOLSTICE) != 0)
-		strcat(s, "decsolstice ");
+	if ((di->flags & F_YEAR) != 0)
+		fprintf(stderr, " year(%d)", di->iyear);
+	if ((di->flags & F_MONTH) != 0)
+		fprintf(stderr, " month(%d)", di->imonth);
+	if ((di->flags & F_DAYOFWEEK) != 0)
+		fprintf(stderr, " dayofweek(%d)", di->idayofweek);
+	if ((di->flags & F_DAYOFMONTH) != 0)
+		fprintf(stderr, " dayofmonth(%d)", di->idayofmonth);
+	if ((di->flags & F_MODIFIERINDEX) != 0)
+		fprintf(stderr, " modifierindex(%d)", di->imodifierindex);
+	if ((di->flags & F_MODIFIEROFFSET) != 0)
+		fprintf(stderr, " modifieroffset(%d)", di->imodifieroffset);
 
-	return s;
+	if ((di->flags & F_SPECIALDAY) != 0) {
+		fprintf(stderr, " specialday");
+		for (size_t i = 0; specialdays[i].name; i++) {
+			sday = &specialdays[i];
+			if ((di->flags & sday->flag) != 0)
+				fprintf(stderr, "(%s)", sday->name);
+		}
+	}
+
+	if ((di->flags & F_ALLMONTH) != 0)
+		fprintf(stderr, " allmonth");
+	if ((di->flags & F_ALLDAY) != 0)
+		fprintf(stderr, " allday");
+	if ((di->flags & F_VARIABLE) != 0)
+		fprintf(stderr, " variable");
+	fprintf(stderr, "\n");
+	fflush(stderr);
 }
 
 /*
@@ -674,7 +609,7 @@ parsedaymonth(const char *date, int *flags, struct cal_day **dayp, char **edp)
 
 		warnx("%s(): unprocessed date: |%s|", __func__, date);
 		if (Options.debug)
-			show_datestyle(&di);
+			show_dateinfo(&di);
 	}
 
 	return remindex;
@@ -776,17 +711,6 @@ remember(int *index, struct cal_day **cd, struct cal_day *dp,
 	(*index)++;
 }
 
-static const char *
-getmonthname(int i)
-{
-	if (i <= 0 || i > NMONTHS)
-		errx(1, "Invalid month number: %d", i);
-
-	return (month_names[i-1].n_name ?
-		month_names[i-1].n_name :
-		month_names[i-1].name);
-}
-
 static bool
 checkmonth(const char *s, size_t *len, int *offset, const char **month)
 {
@@ -828,15 +752,6 @@ checkmonth(const char *s, size_t *len, int *offset, const char **month)
 	}
 
 	return (false);
-}
-
-static const char *
-getdayofweekname(int i)
-{
-	if (i < 0 || i >= NDOWS)
-		errx(1, "Invalid day-of-week number: %d", i);
-
-	return (dow_names[i].n_name ? dow_names[i].n_name : dow_names[i].name);
 }
 
 static bool
