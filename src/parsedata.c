@@ -101,14 +101,15 @@ static void	 show_dateinfo(struct dateinfo *di);
  * Expected styles:
  *
  * Date			::=	Year . '/' . Month . '/' . DayOfMonth |
- *				Month . ' ' . DayOfMonth |
+ *				Year . ' ' . Month . ' ' . DayOfMonth |
  *				Month . '/' . DayOfMonth |
- *				Month . ' ' . DayOfWeek . ModifierIndex |
+ *				Month . ' ' . DayOfMonth |
  *				Month . '/' . DayOfWeek . ModifierIndex |
- *				DayOfMonth . ' ' . Month |
+ *				Month . ' ' . DayOfWeek . ModifierIndex |
  *				DayOfMonth . '/' . Month |
- *				DayOfWeek . ModifierIndex . ' ' . MonthName |
+ *				DayOfMonth . ' ' . Month |
  *				DayOfWeek . ModifierIndex . '/' . MonthName |
+ *				DayOfWeek . ModifierIndex . ' ' . MonthName |
  *				DayOfWeek . ModifierIndex
  *				SpecialDay . ModifierOffset
  *
@@ -147,13 +148,15 @@ determinestyle(const char *date, struct dateinfo *di)
 {
 	struct specialday *sday;
 	const char *dow, *pmonth;
-	char *date2 = xstrdup(date);
+	char *date2;
 	char *p, *p1, *p2;
 	size_t len;
+	bool ret;
 	int offset;
-	bool ret = false;
 
 	DPRINTF("-------\ndate: |%s|\n", date);
+	date2 = xstrdup(date);
+	ret = false;
 
 	if ((p = strchr(date2, ' ')) == NULL &&
 	    (p = strchr(date2, '/')) == NULL) {
@@ -208,7 +211,8 @@ determinestyle(const char *date, struct dateinfo *di)
 	p2 = p + 1;
 	/* Now p1 and p2 point to the first and second fields, respectively */
 
-	if ((p = strchr(p2, '/')) != NULL) {
+	if ((p = strchr(p2, ' ')) != NULL ||
+	    (p = strchr(p2, '/')) != NULL) {
 		/* Got a year in the date string. */
 		di->flags |= F_YEAR;
 		di->iyear = (int)strtol(p1, NULL, 10);
