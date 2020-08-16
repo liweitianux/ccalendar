@@ -62,8 +62,8 @@
 
 struct cal_day;
 
-int	parsedaymonth(const char *date, int *flags, struct cal_day **dayp,
-		      char **edp);
+int	parse_cal_date(const char *date, int *flags, struct cal_day **dayp,
+		       char **edp);
 
 bool	parse_timezone(const char *s, int *result);
 bool	parse_location(const char *s, double *latitude, double *longitude,

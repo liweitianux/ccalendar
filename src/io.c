@@ -333,8 +333,8 @@ cal_parse(FILE *in)
 			for (int i = 0; i < CAL_MAX_LINES && entry.contents[i]; i++)
 				DPRINTF("\t[%d] |%s|\n", i, entry.contents[i]);
 
-			count = parsedaymonth(entry.date, &flags, cdays,
-					      extradata);
+			count = parse_cal_date(entry.date, &flags, cdays,
+					       extradata);
 			if (count < 0) {
 				warnx("Cannot parse date |%s| with content |%s|",
 				      entry.date, entry.contents[0]);

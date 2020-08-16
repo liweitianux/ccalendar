@@ -378,7 +378,7 @@ dayofweek_of_month(int dow, int index, int month, int year)
 }
 
 int
-parsedaymonth(const char *date, int *flags, struct cal_day **dayp, char **edp)
+parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 {
 	struct dateinfo di = { 0 };
 	struct cal_day *dp;
