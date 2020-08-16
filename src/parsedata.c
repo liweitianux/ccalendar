@@ -41,6 +41,7 @@
 #include "basics.h"
 #include "chinese.h"
 #include "dates.h"
+#include "days.h"
 #include "ecclesiastical.h"
 #include "gregorian.h"
 #include "io.h"
@@ -154,52 +155,43 @@ static char	*showflags(int flags);
 static bool
 determinestyle(const char *date, struct dateinfo *di)
 {
+	struct specialday *sday;
+	const char *dow, *pmonth;
 	char *date2 = xstrdup(date);
 	char *p, *p1, *p2;
-	const char *dow, *pmonth;
 	size_t len;
 	int offset;
 	bool ret = false;
 
 	DPRINTF("-------\ndate: |%s|\n", date);
 
-#define CHECKSPECIAL(s1, s2, type)						\
-	if (string_startswith(s1, s2)) {					\
-		di->flags |= (type | F_SPECIALDAY | F_VARIABLE);		\
-		if (strlen(s1) == strlen(s2)) {					\
-			strcpy(di->specialday, s1);				\
-			ret = true;						\
-			goto out;						\
-		}								\
-		strncpy(di->specialday, s1, strlen(s2));			\
-		di->specialday[strlen(s2)] = '\0';				\
-		strcpy(di->modifieroffset, s1 + strlen(s2));			\
-		di->imodifieroffset = (int)strtol(di->modifieroffset, NULL, 10); \
-		di->flags |= F_MODIFIEROFFSET;					\
-		ret = true;							\
-		goto out;							\
-	}
-
 	if ((p = strchr(date2, ' ')) == NULL &&
 	    (p = strchr(date2, '/')) == NULL) {
-		CHECKSPECIAL(date2, "ChineseNewYear", F_CNY);
-		CHECKSPECIAL(date2, ncny, F_CNY);
-		CHECKSPECIAL(date2, "NewMoon", F_NEWMOON);
-		CHECKSPECIAL(date2, nnewmoon, F_NEWMOON);
-		CHECKSPECIAL(date2, "FullMoon", F_FULLMOON);
-		CHECKSPECIAL(date2, nfullmoon, F_FULLMOON);
-		CHECKSPECIAL(date2, "Paskha", F_PASKHA);
-		CHECKSPECIAL(date2, npaskha, F_PASKHA);
-		CHECKSPECIAL(date2, "Easter", F_EASTER);
-		CHECKSPECIAL(date2, neaster, F_EASTER);
-		CHECKSPECIAL(date2, "MarEquinox", F_MAREQUINOX);
-		CHECKSPECIAL(date2, nmarequinox, F_SEPEQUINOX);
-		CHECKSPECIAL(date2, "SepEquinox", F_SEPEQUINOX);
-		CHECKSPECIAL(date2, nsepequinox, F_SEPEQUINOX);
-		CHECKSPECIAL(date2, "JunSolstice", F_JUNSOLSTICE);
-		CHECKSPECIAL(date2, njunsolstice, F_JUNSOLSTICE);
-		CHECKSPECIAL(date2, "DecSolstice", F_DECSOLSTICE);
-		CHECKSPECIAL(date2, ndecsolstice, F_DECSOLSTICE);
+		for (size_t i = 0; specialdays[i].name; i++) {
+			sday = &specialdays[i];
+			if (strncasecmp(date2, sday->name, sday->len) == 0) {
+				len = sday->len;
+			} else if (sday->n_len > 0 && strncasecmp(
+					date2, sday->n_name, sday->n_len) == 0) {
+				len = sday->n_len;
+			} else {
+				continue;
+			}
+
+			di->flags |= (sday->flag | F_SPECIALDAY | F_VARIABLE);
+			if (strlen(date2) == len) {
+				strcpy(di->specialday, date2);
+				ret = true;
+				goto out;
+			}
+			strncpy(di->specialday, date2, len);
+			di->specialday[len] = '\0';
+			strcpy(di->modifieroffset, date2 + len);
+			di->imodifieroffset = (int)strtol(di->modifieroffset, NULL, 10);
+			di->flags |= F_MODIFIEROFFSET;
+			ret = true;
+			goto out;
+		}
 
 		if (checkdayofweek(date2, &len, &offset, &dow)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);

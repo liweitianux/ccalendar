@@ -55,6 +55,7 @@
 #include "calendar.h"
 #include "basics.h"
 #include "dates.h"
+#include "days.h"
 #include "gregorian.h"
 #include "io.h"
 #include "nnames.h"
@@ -84,17 +85,6 @@ struct cal_file {
 };
 
 static struct node *definitions = NULL;
-
-/* National names for special days */
-char *neaster = NULL;
-char *npaskha = NULL;
-char *ncny = NULL;
-char *nfullmoon = NULL;
-char *nnewmoon = NULL;
-char *nmarequinox = NULL;
-char *nsepequinox = NULL;
-char *njunsolstice = NULL;
-char *ndecsolstice = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in);
@@ -276,12 +266,13 @@ locale_day_first(void)
 static bool
 cal_parse(FILE *in)
 {
-	bool		d_first, skip, locale_changed;
-	int		flags, count;
 	struct cal_file cfile = { 0 };
 	struct cal_entry entry = { 0 };
-	struct cal_day	*cdays[CAL_MAX_REPEAT] = { NULL };
-	char		*extradata[CAL_MAX_REPEAT] = { NULL };
+	struct cal_day *cdays[CAL_MAX_REPEAT] = { NULL };
+	struct specialday *sday;
+	char *extradata[CAL_MAX_REPEAT] = { NULL };
+	bool d_first, skip, locale_changed;
+	int flags, count;
 
 	assert(in != NULL);
 	cfile.fp = in;
@@ -322,22 +313,15 @@ cal_parse(FILE *in)
 			if (strcasecmp(entry.variable, "SEQUENCE") == 0)
 				set_nsequences(entry.value);
 
-#define	REPLACE(string, nvar) \
-			if (strcasecmp(entry.variable, (string)) == 0) {	\
-				free(nvar);					\
-				nvar = xstrdup(entry.value);			\
+			for (size_t i = 0; specialdays[i].name; i++) {
+				sday = &specialdays[i];
+				if (strcasecmp(entry.variable, sday->name) == 0) {
+					free(sday->n_name);
+					sday->n_name = xstrdup(entry.value);
+					sday->n_len = strlen(sday->n_name);
+					break;
+				}
 			}
-
-			REPLACE("Easter", neaster);
-			REPLACE("Paskha", npaskha);
-			REPLACE("ChineseNewYear", ncny);
-			REPLACE("NewMoon", nnewmoon);
-			REPLACE("FullMoon", nfullmoon);
-			REPLACE("MarEquinox", nmarequinox);
-			REPLACE("SepEquinox", nsepequinox);
-			REPLACE("JunSolstice", njunsolstice);
-			REPLACE("DecSolstice", ndecsolstice);
-#undef	REPLACE
 
 			free(entry.variable);
 			free(entry.value);
@@ -357,7 +341,7 @@ cal_parse(FILE *in)
 				continue;
 			} else if (count == 0) {
 				DPRINTF("Ignore out-of-range date |%s| "
-					"with content |%s|",
+					"with content |%s|\n",
 					entry.date, entry.contents[0]);
 				continue;
 			}

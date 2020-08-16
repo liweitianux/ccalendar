@@ -36,9 +36,6 @@
 #ifndef IO_H_
 #define IO_H_
 
-extern char *neaster, *npaskha, *ncny, *nfullmoon, *nnewmoon;
-extern char *nmarequinox, *nsepequinox, *njunsolstice, *ndecsolstice;
-
 int	cal(FILE *fp);
 
 #endif
