@@ -49,7 +49,8 @@ struct specialday {
 
 extern struct specialday specialdays[];
 
-int	find_days_ymd(int y, int m, int d, struct cal_day **dayp, char **edp);
+int	find_days_ymd(int year, int month, int day,
+		      struct cal_day **dayp, char **edp);
 int	find_days_dom(int dom, struct cal_day **dayp, char **edp);
 int	find_days_month(int month, struct cal_day **dayp, char **edp);
 int	find_days_mdow(int month, int dow, int index,

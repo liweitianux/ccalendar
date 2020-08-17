@@ -85,18 +85,18 @@ generate_dates(void)
 }
 
 int
-first_dayofweek_of_month(int y, int m)
+first_dayofweek_of_month(int year, int month)
 {
-	struct date date = { y, m, 1 };
+	struct date date = { year, month, 1 };
 	int rd = fixed_from_gregorian(&date);
 	return (int)dayofweek_from_fixed(rd);
 }
 
 struct cal_day *
-find_yd(int yy, int dd, int offset)
+find_yd(int year, int yday, int offset)
 {
-	struct date gdate = { yy, 1, 1 };
-	int rd = fixed_from_gregorian(&gdate) + dd + offset - 1;
+	struct date gdate = { year, 1, 1 };
+	int rd = fixed_from_gregorian(&gdate) + yday + offset - 1;
 	if (rd < Options.day_begin || rd > Options.day_end)
 		return NULL;
 
@@ -104,9 +104,9 @@ find_yd(int yy, int dd, int offset)
 }
 
 struct cal_day *
-find_ymd(int yy, int mm, int dd)
+find_ymd(int year, int month, int day)
 {
-	struct date gdate = { yy, mm, dd };
+	struct date gdate = { year, month, day };
 	int rd = fixed_from_gregorian(&gdate);
 	if (rd < Options.day_begin || rd > Options.day_end)
 		return NULL;

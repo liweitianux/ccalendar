@@ -73,15 +73,16 @@ struct specialday specialdays[] = {
  * If year $y < 0, then year is ignored.
  */
 int
-find_days_ymd(int y, int m, int d, struct cal_day **dayp, char **edp __unused)
+find_days_ymd(int year, int month, int day,
+	      struct cal_day **dayp, char **edp __unused)
 {
 	struct cal_day *dp;
 	int count = 0;
 
-	for (int year = Options.year1; year <= Options.year2; year++) {
-		if (y >= 0 && y != year)
+	for (int y = Options.year1; y <= Options.year2; y++) {
+		if (year >= 0 && year != y)
 			continue;
-		if ((dp = find_ymd(year, m, d)) != NULL) {
+		if ((dp = find_ymd(y, month, day)) != NULL) {
 			if (count >= CAL_MAX_REPEAT) {
 				warnx("%s: too many repeats", __func__);
 				return count;
@@ -102,9 +103,9 @@ find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
 	struct cal_day *dp;
 	int count = 0;
 
-	for (int year = Options.year1; year <= Options.year2; year++) {
-		for (int month = 1; month <= NMONTHS; month++) {
-			if ((dp = find_ymd(year, month, dom)) != NULL) {
+	for (int y = Options.year1; y <= Options.year2; y++) {
+		for (int m = 1; m <= NMONTHS; m++) {
+			if ((dp = find_ymd(y, m, dom)) != NULL) {
 				if (count >= CAL_MAX_REPEAT) {
 					warnx("%s: too many repeats",
 					      __func__);
@@ -128,10 +129,10 @@ find_days_month(int month, struct cal_day **dayp, char **edp __unused)
 	int mdays;
 	int count = 0;
 
-	for (int year = Options.year1; year <= Options.year2; year++) {
-		mdays = days_in_month(month, year);
-		for (int day = 1; day <= mdays; day++) {
-			if ((dp = find_ymd(year, month, day)) != NULL) {
+	for (int y = Options.year1; y <= Options.year2; y++) {
+		mdays = days_in_month(month, y);
+		for (int d = 1; d <= mdays; d++) {
+			if ((dp = find_ymd(y, month, d)) != NULL) {
 				if (count >= CAL_MAX_REPEAT) {
 					warnx("%s: too many repeats",
 					      __func__);
@@ -158,17 +159,17 @@ find_days_mdow(int month, int dow, int index,
 	int d, dow_m1, mdays;
 	int count = 0;
 
-	for (int year = Options.year1; year <= Options.year2; year++) {
+	for (int y = Options.year1; y <= Options.year2; y++) {
 		for (int m = 1; m <= NMONTHS; m++) {
 			if (month >= 0 && month != m)
 				continue;
 			if (index == 0) {
 				/* Every day-of-week of month */
-				mdays = days_in_month(m, year);
-				dow_m1 = first_dayofweek_of_month(year, m);
+				mdays = days_in_month(m, y);
+				dow_m1 = first_dayofweek_of_month(y, m);
 				d = mod1(dow - dow_m1 + 8, 7);
 				while (d <= mdays) {
-					dp = find_ymd(year, m, d);
+					dp = find_ymd(y, m, d);
 					if (dp != NULL) {
 						if (count >= CAL_MAX_REPEAT) {
 							warnx("%s: too many repeats",
@@ -181,8 +182,8 @@ find_days_mdow(int month, int dow, int index,
 				}
 			} else {
 				/* One indexed day-of-week of month */
-				d = dayofweek_of_month(dow, index, m, year);
-				if ((dp = find_ymd(year, m, d)) != NULL) {
+				d = dayofweek_of_month(dow, index, m, y);
+				if ((dp = find_ymd(y, m, d)) != NULL) {
 					if (count >= CAL_MAX_REPEAT) {
 						warnx("%s: too many repeats",
 						      __func__);
