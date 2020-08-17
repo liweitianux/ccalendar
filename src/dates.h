@@ -41,7 +41,7 @@ struct event;
 
 void	generate_dates(void);
 int	first_dayofweek_of_month(int y, int m);
-struct cal_day *find_yd(int yy, int dd);
+struct cal_day *find_yd(int yy, int dd, int offset);
 struct cal_day *find_ymd(int yy, int mm, int dd);
 
 struct event *event_add(struct cal_day *dp, bool day_first, bool variable,
