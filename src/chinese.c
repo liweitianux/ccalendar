@@ -400,6 +400,7 @@ show_chinese_calendar(int rd)
 {
 	struct chinese_date date;
 	chinese_from_fixed(rd, &date);
+	/* Ref: Sec.(19.3), Eq.(19.18) */
 	struct stem stem = STEMS[mod1(date.year, 10) - 1];
 	struct branch branch = BRANCHES[mod1(date.year, 12) - 1];
 

@@ -34,6 +34,7 @@
 #define DATES_H_
 
 #include <stdbool.h>
+#include <stdio.h>
 
 struct cal_day;
 struct event;
