@@ -45,6 +45,9 @@ struct specialday {
 	char		*n_name;	/* national name of the special day */
 	size_t		 n_len;		/* length of the national name */
 	int		 flag;		/* flag to set for date parsing */
+
+	/* function to find days of the special day in [rd1, rd2] */
+	int	(*find_days)(int offset, struct cal_day **dayp, char **edp);
 };
 
 extern struct specialday specialdays[];

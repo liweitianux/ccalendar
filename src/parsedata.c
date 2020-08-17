@@ -38,10 +38,8 @@
 
 #include "calendar.h"
 #include "basics.h"
-#include "chinese.h"
 #include "dates.h"
 #include "days.h"
-#include "ecclesiastical.h"
 #include "gregorian.h"
 #include "io.h"
 #include "moon.h"
@@ -75,9 +73,7 @@ struct yearinfo {
 	double	equinoxdays[2];
 	double	solsticedays[2];
 };
-static struct yearinfo *yearinfo_list = NULL;
 
-static struct yearinfo *calc_yearinfo(int year);
 static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
 static bool	 checkmonth(const char *s, size_t *len, int *offset,
@@ -349,8 +345,9 @@ show_dateinfo(struct dateinfo *di)
 int
 parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 {
+	struct specialday *sday;
 	struct dateinfo di;
-	int index;
+	int index, offset;
 
 	memset(&di, 0, sizeof(di));
 	di.flags = F_NONE;
@@ -360,6 +357,7 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 
 	*flags = di.flags;
 	index = (di.flags & F_MODIFIERINDEX) ? di.imodifierindex : 0;
+	offset = (di.flags & F_MODIFIEROFFSET) ? di.imodifieroffset : 0;
 
 	/* Specified year, month and day (e.g., '2020/Aug/16') */
 	if ((di.flags & ~F_VARIABLE) == (F_YEAR | F_MONTH | F_DAYOFMONTH))
@@ -396,40 +394,17 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 	if ((di.flags & ~F_MODIFIERINDEX) == (F_DAYOFWEEK | F_VARIABLE))
 		return find_days_mdow(-1, di.idayofweek, index, dayp, edp);
 
+	/* Special days with optional offset (e.g., 'ChineseNewYear+14') */
+	if ((di.flags & F_SPECIALDAY) != 0) {
+		for (size_t i = 0; specialdays[i].name; i++) {
+			sday = &specialdays[i];
+			if ((di.flags & sday->flag) != 0 && sday->find_days)
+				return (sday->find_days)(offset, dayp, edp);
+		}
+	}
 
 #if 0
 	for (int year = Options.year1; year <= Options.year2; year++) {
-		if ((di.flags & F_YEAR) != 0 && di.iyear != year)
-			continue;
-
-		int lflags = di.flags & ~F_YEAR;
-
-		/* Easter */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_EASTER)) {
-			dp = find_yd(year, yinfo->ieaster + di.imodifieroffset);
-			if (dp != NULL)
-				remember(&remindex, dayp, dp, edp, NULL);
-			continue;
-		}
-
-		/* Paskha */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_PASKHA)) {
-			dp = find_yd(year, yinfo->ipaskha + di.imodifieroffset);
-			if (dp != NULL)
-				remember(&remindex, dayp, dp, edp, NULL);
-			continue;
-		}
-
-		/* Chinese New Year */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_CNY)) {
-			dp = find_yd(year, yinfo->firstcnyday + di.imodifieroffset);
-			if (dp != NULL)
-				remember(&remindex, dayp, dp, edp, NULL);
-			continue;
-		}
 
 		/* FullMoon */
 		if ((lflags & ~F_MODIFIEROFFSET) ==

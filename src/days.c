@@ -40,8 +40,10 @@
 
 #include "calendar.h"
 #include "basics.h"
+#include "chinese.h"
 #include "dates.h"
 #include "days.h"
+#include "ecclesiastical.h"
 #include "gregorian.h"
 #include "nnames.h"
 #include "parsedata.h"
@@ -49,24 +51,93 @@
 
 static int	days_in_month(int month, int year);
 static int	dayofweek_of_month(int dow, int index, int month, int year);
+static int	find_days_yearly(int day_flag, int offset,
+				 struct cal_day **dayp, char **edp);
+
+static int	find_days_easter(int, struct cal_day **, char **);
+static int	find_days_paskha(int, struct cal_day **, char **);
+static int	find_days_cny(int, struct cal_day **, char **);
 
 #define SPECIALDAY_INIT0 \
-	{ NULL, 0, NULL, 0, 0 }
-#define SPECIALDAY_INIT(name, flag) \
-	{ name, sizeof(name)-1, NULL, 0, (flag) }
+	{ NULL, 0, NULL, 0, 0, NULL }
+#define SPECIALDAY_INIT(name, flag, func) \
+	{ name, sizeof(name)-1, NULL, 0, (flag), func }
 struct specialday specialdays[] = {
-	SPECIALDAY_INIT("Easter", F_EASTER),
-	SPECIALDAY_INIT("Paskha", F_PASKHA),
-	SPECIALDAY_INIT("ChineseNewYear", F_CNY),
-	SPECIALDAY_INIT("NewMoon", F_NEWMOON),
-	SPECIALDAY_INIT("FullMoon", F_FULLMOON),
-	SPECIALDAY_INIT("MarEquinox", F_MAREQUINOX),
-	SPECIALDAY_INIT("SepEquinox", F_SEPEQUINOX),
-	SPECIALDAY_INIT("JunSolstice", F_JUNSOLSTICE),
-	SPECIALDAY_INIT("DecSolstice", F_DECSOLSTICE),
+	SPECIALDAY_INIT("Easter", F_EASTER, &find_days_easter),
+	SPECIALDAY_INIT("Paskha", F_PASKHA, &find_days_paskha),
+	SPECIALDAY_INIT("ChineseNewYear", F_CNY, &find_days_cny),
+	SPECIALDAY_INIT("NewMoon", F_NEWMOON, NULL),
+	SPECIALDAY_INIT("FullMoon", F_FULLMOON, NULL),
+	SPECIALDAY_INIT("MarEquinox", F_MAREQUINOX, NULL),
+	SPECIALDAY_INIT("SepEquinox", F_SEPEQUINOX, NULL),
+	SPECIALDAY_INIT("JunSolstice", F_JUNSOLSTICE, NULL),
+	SPECIALDAY_INIT("DecSolstice", F_DECSOLSTICE, NULL),
 	SPECIALDAY_INIT0,
 };
 
+
+static int
+find_days_easter(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_EASTER, offset, dayp, edp);
+}
+
+static int
+find_days_paskha(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_PASKHA, offset, dayp, edp);
+}
+
+static int
+find_days_cny(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_CNY, offset, dayp, edp);
+}
+
+/*
+ * Find days of the yearly special day ($day_flag).
+ */
+static int
+find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
+		 char **edp __unused)
+{
+	struct cal_day *dp;
+	struct date date;
+	int day0, yday;
+	int count = 0;
+
+	for (int y = Options.year1; y <= Options.year2; y++) {
+		date_set(&date, y - 1, 12, 31);
+		day0 = fixed_from_gregorian(&date);
+
+		switch (day_flag) {
+		case F_EASTER:
+			yday = easter(y) - day0;
+			break;
+		case F_PASKHA:
+			yday = orthodox_easter(y) - day0;
+			break;
+		case F_CNY:
+			yday = chinese_new_year(y) - day0;
+			break;
+		default:
+			errx(1, "%s: unknown special day: 0x%x",
+			     __func__, day_flag);
+		}
+
+		if ((dp = find_yd(y, yday, offset)) != NULL) {
+			if (count >= CAL_MAX_REPEAT) {
+				warnx("%s: too many repeats", __func__);
+				return count;
+			}
+			dayp[count++] = dp;
+		}
+	}
+
+	return count;
+}
+
+/**************************************************************************/
 
 /*
  * Find days of the specified year ($y), month ($m) and day ($d).
