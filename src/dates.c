@@ -85,30 +85,11 @@ generate_dates(void)
 }
 
 int
-first_dayofweek_of_year(int yy)
+first_dayofweek_of_month(int y, int m)
 {
-	if (yy < Options.year1 || yy > Options.year2)
-		return -1;  /* out-of-range */
-
-	struct date date = { yy, 1, 1 };
+	struct date date = { y, m, 1 };
 	int rd = fixed_from_gregorian(&date);
 	return (int)dayofweek_from_fixed(rd);
-}
-
-int
-first_dayofweek_of_month(int yy, int mm)
-{
-	int firstday, lastday;
-
-	struct date date = { yy, mm, 1 };
-	firstday = fixed_from_gregorian(&date);
-	date.month++;
-	lastday = fixed_from_gregorian(&date) - 1;
-
-	if (firstday > Options.day_end || lastday < Options.day_begin)
-		return -1;  /* out-of-range */
-
-	return (int)dayofweek_from_fixed(firstday);
 }
 
 struct cal_day *

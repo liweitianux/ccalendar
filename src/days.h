@@ -37,6 +37,8 @@
 #ifndef DAYS_H_
 #define DAYS_H_
 
+struct cal_day;
+
 struct specialday {
 	const char	*name;		/* name of the special day */
 	size_t		 len;		/* length of the name */
@@ -46,5 +48,11 @@ struct specialday {
 };
 
 extern struct specialday specialdays[];
+
+int	find_days_ymd(int y, int m, int d, struct cal_day **dayp, char **edp);
+int	find_days_dom(int dom, struct cal_day **dayp, char **edp);
+int	find_days_month(int month, struct cal_day **dayp, char **edp);
+int	find_days_mdow(int month, int dow, int index,
+		       struct cal_day **dayp, char **edp);
 
 #endif

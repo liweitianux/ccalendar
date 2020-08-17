@@ -28,7 +28,6 @@
  * $FreeBSD: head/usr.bin/calendar/parsedata.c 326276 2017-11-27 15:37:16Z pfg $
  */
 
-#include <assert.h>
 #include <ctype.h>
 #include <err.h>
 #include <math.h>
@@ -78,26 +77,17 @@ struct yearinfo {
 };
 static struct yearinfo *yearinfo_list = NULL;
 
-/* 1-based month, individual */
-static int monthdaytab[][14] = {
-	{ 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30 },
-	{ 0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30 },
-};
-
 static struct yearinfo *calc_yearinfo(int year);
 static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
 				const char **dow);
 static bool	 checkmonth(const char *s, size_t *len, int *offset,
 			    const char **month);
-static int	 dayofweek_of_month(int dow, int offset, int month, int year);
 static bool	 determinestyle(const char *date, struct dateinfo *di);
 static bool	 isonlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
 static bool	 parse_index(const char *s, int *index);
-static void	 remember(int *index, struct cal_day **cd, struct cal_day *dp,
-			  char **ed, const char *extra);
 static void	 show_dateinfo(struct dateinfo *di);
 
 /*
@@ -356,146 +346,63 @@ show_dateinfo(struct dateinfo *di)
 	fflush(stderr);
 }
 
-/*
- * Calculate the date of an indexed day-of-week in the month, e.g.,
- * 'Thu-3', 'Wed+2'.
- * The 'index' is the ordinal number of the day-of-week in the month.
- */
-static int
-dayofweek_of_month(int dow, int index, int month, int year)
-{
-	assert(index != 0);
-
-	struct date date = { year, month, 1 };
-	int day1 = fixed_from_gregorian(&date);
-
-	if (index < 0) {	/* count back from the end of month */
-		date.month++;
-		date.day = 0;	/* the last day of previous month */
-	}
-
-	return nth_kday(index, dow, &date) - day1 + 1;
-}
-
 int
 parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 {
-	struct dateinfo di = { 0 };
-	struct cal_day *dp;
-	struct yearinfo *yinfo;
-	char buf[64];
-	int remindex, d, m, dow;
+	struct dateinfo di;
+	int index;
 
+	memset(&di, 0, sizeof(di));
 	di.flags = F_NONE;
 
 	if (!determinestyle(date, &di))
 		return -1;
 
 	*flags = di.flags;
-	remindex = 0;
+	index = (di.flags & F_MODIFIERINDEX) ? di.imodifierindex : 0;
 
+	/* Specified year, month and day (e.g., '2020/Aug/16') */
+	if ((di.flags & ~F_VARIABLE) == (F_YEAR | F_MONTH | F_DAYOFMONTH))
+		return find_days_ymd(di.iyear, di.imonth, di.idayofmonth,
+				     dayp, edp);
+
+	/* Specified month and day (e.g., 'Aug/16') */
+	if ((di.flags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH))
+		return find_days_ymd(-1, di.imonth, di.idayofmonth,
+				     dayp, edp);
+
+	/* Same day every month (e.g., '* 16') */
+	if (di.flags == (F_ALLMONTH | F_DAYOFMONTH))
+		return find_days_dom(di.idayofmonth, dayp, edp);
+
+	/* Every day of a month (e.g., 'Aug *') */
+	if (di.flags == (F_ALLDAY | F_MONTH))
+		return find_days_month(di.imonth, dayp, edp);
+
+	/*
+	 * Every day-of-week of a month (e.g., 'Aug/Sun')
+	 * One indexed day-of-week of a month (e.g., 'Aug/Sun+3')
+	 */
+	if ((di.flags & ~F_MODIFIERINDEX) ==
+	    (F_MONTH | F_DAYOFWEEK | F_VARIABLE)) {
+		return find_days_mdow(di.imonth, di.idayofweek, index,
+				      dayp, edp);
+	}
+
+	/*
+	 * Every day-of-week of the year (e.g., 'Sun')
+	 * One indexed day-of-week of every month (e.g., 'Sun+3')
+	 */
+	if ((di.flags & ~F_MODIFIERINDEX) == (F_DAYOFWEEK | F_VARIABLE))
+		return find_days_mdow(-1, di.idayofweek, index, dayp, edp);
+
+
+#if 0
 	for (int year = Options.year1; year <= Options.year2; year++) {
 		if ((di.flags & F_YEAR) != 0 && di.iyear != year)
 			continue;
 
 		int lflags = di.flags & ~F_YEAR;
-
-		/* Get important dates for this year */
-		for (yinfo = yearinfo_list; yinfo; yinfo = yinfo->next) {
-			if (yinfo->year == year)
-				break;
-		}
-		if (yinfo == NULL) {
-			yinfo = calc_yearinfo(year);
-			yinfo->next = yearinfo_list;
-			yearinfo_list = yinfo;
-		}
-
-		/* Specified month and day (fixed or variable) */
-		if ((lflags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH)) {
-			dp = find_ymd(year, di.imonth, di.idayofmonth);
-			if (dp != NULL)
-				remember(&remindex, dayp, dp, edp, NULL);
-			continue;
-		}
-
-		/* Same day every month */
-		if (lflags == (F_ALLMONTH | F_DAYOFMONTH)) {
-			for (m = 1; m <= NMONTHS; m++) {
-				dp = find_ymd(year, m, di.idayofmonth);
-				if (dp != NULL)
-					remember(&remindex, dayp, dp, edp, NULL);
-			}
-			continue;
-		}
-
-		/* Every day of a month */
-		if (lflags == (F_ALLDAY | F_MONTH)) {
-			for (d = 1; d <= yinfo->monthdays[di.imonth]; d++) {
-				dp = find_ymd(year, di.imonth, d);
-				if (dp != NULL)
-					remember(&remindex, dayp, dp, edp, NULL);
-			}
-			continue;
-		}
-
-		/* Every day-of-week of the year, e.g., 'Thu' */
-		if (lflags == (F_DAYOFWEEK | F_VARIABLE)) {
-			dow = first_dayofweek_of_year(year);
-			if (dow == -1)  /* not in the date range */
-				continue;
-			d = (di.idayofweek - dow + 8) % 7;
-			while (d <= 366) {
-				dp = find_yd(year, d);
-				if (dp != NULL)
-					remember(&remindex, dayp, dp, edp, NULL);
-				d += 7;
-			}
-			continue;
-		}
-
-		/*
-		 * One indexed day-of-week of every month of the year,
-		 * e.g., 'Thu-3'
-		 */
-		if (lflags == (F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
-			for (m = 1; m <= NMONTHS; m++) {
-				d = dayofweek_of_month(di.idayofweek,
-						di.imodifierindex, m, year);
-				dp = find_ymd(year, m, d);
-				if (dp != NULL)
-					remember(&remindex, dayp, dp, edp, NULL);
-			}
-			continue;
-		}
-
-		/*
-		 * One indexed day-of-week of a month, e.g., 'Jan/Thu-3'
-		 */
-		if (lflags ==
-		    (F_MONTH | F_DAYOFWEEK | F_MODIFIERINDEX | F_VARIABLE)) {
-			d = dayofweek_of_month(di.idayofweek,
-					di.imodifierindex, di.imonth, year);
-			dp = find_ymd(year, di.imonth, d);
-			if (dp != NULL)
-				remember(&remindex, dayp, dp, edp, NULL);
-			continue;
-		}
-
-		/* Every day-of-week of the month, e.g., 'Jan/Thu' */
-		if (lflags == (F_DAYOFWEEK | F_MONTH | F_VARIABLE)) {
-			dow = first_dayofweek_of_month(year, di.imonth);
-			if (dow == -1)  /* not in the date range */
-				continue;
-			d = (di.idayofweek - dow + 8) % 7;
-			while (d <= yinfo->monthdays[di.imonth]) {
-				dp = find_ymd(year, di.imonth, d);
-				if (dp != NULL)
-					remember(&remindex, dayp, dp, edp, NULL);
-				d += 7;
-			}
-			continue;
-		}
 
 		/* Easter */
 		if ((lflags & ~F_MODIFIEROFFSET) ==
@@ -603,15 +510,17 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 			}
 			continue;
 		}
-
-		warnx("%s(): unprocessed date: |%s|", __func__, date);
-		if (Options.debug)
-			show_dateinfo(&di);
 	}
+#endif
 
-	return remindex;
+	warnx("%s: unprocessed date: |%s|", __func__, date);
+	if (Options.debug)
+		show_dateinfo(&di);
+
+	return 0;
 }
 
+#if 0
 static struct yearinfo *
 calc_yearinfo(int year)
 {
@@ -683,30 +592,7 @@ calc_yearinfo(int year)
 
 	return yinfo;
 }
-
-static void
-remember(int *index, struct cal_day **cd, struct cal_day *dp,
-	 char **ed, const char *extra)
-{
-	static bool warned = false;
-
-	if (*index >= CAL_MAX_REPEAT - 1) {
-		if (!warned) {
-			warnx("Event repeats more than %d, ignored",
-			      CAL_MAX_REPEAT);
-		}
-		warned = true;
-		return;
-	}
-
-	cd[*index] = dp;
-	/* NOTE: copy so that multiple occurrences of events (e.g., NewMoon)
-	 * would not overwrite */
-	if (extra != NULL)
-		ed[*index] = xstrdup(extra);
-
-	(*index)++;
-}
+#endif
 
 static bool
 checkmonth(const char *s, size_t *len, int *offset, const char **month)
