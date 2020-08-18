@@ -80,6 +80,14 @@ static void	 show_dateinfo(struct dateinfo *di);
  *				Month . ' ' . DayOfMonth |
  *				Month . '/' . DayOfWeek . Index |
  *				Month . ' ' . DayOfWeek . Index |
+ *				MonthName . '/' . AllDays |
+ *				MonthName . ' ' . AllDays |
+ *				AllDays . '/' . MonthName |
+ *				AllDays . ' ' . MonthName |
+ *				AllMonths . '/' . DayOfMonth |
+ *				AllMonths . ' ' . DayOfMonth |
+ *				DayOfMonth . '/' . AllMonths |
+ *				DayOfMonth . ' ' . AllMonths |
  *				DayOfMonth . '/' . Month |
  *				DayOfMonth . ' ' . Month |
  *				DayOfWeek . Index . '/' . MonthName |
@@ -90,7 +98,7 @@ static void	 show_dateinfo(struct dateinfo *di);
  * Year			::=	'0' ... '9' | '00' ... '09' | '10' ... '99' |
  *				'100' ... '999' | '1000' ... '9999'
  *
- * Month		::=	MonthName | MonthNumber | '*'
+ * Month		::=	MonthName | MonthNumber
  * MonthNumber		::=	'0' ... '9' | '00' ... '09' | '10' ... '12'
  * MonthName		::=	MonthNameShort | MonthNameLong
  * MonthNameLong	::=	'January' ... 'December'
@@ -100,7 +108,10 @@ static void	 show_dateinfo(struct dateinfo *di);
  * DayOfWeekShort	::=	'Mon' ... 'Sun'
  * DayOfWeekLong	::=	'Monday' ... 'Sunday'
  * DayOfMonth		::=	'0' ... '9' | '00' ... '09' | '10' ... '29' |
- *				'30' ... '31' | '*'
+ *				'30' ... '31'
+ *
+ * AllMonths		::=	'*'
+ * AllDays		::=	'*'
  *
  * Index		::=	'' | IndexName |
  *				'+' . IndexNumber | '-' . IndexNumber
