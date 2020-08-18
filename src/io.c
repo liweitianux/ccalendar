@@ -271,7 +271,7 @@ cal_parse(FILE *in)
 	struct cal_day *cdays[CAL_MAX_REPEAT] = { NULL };
 	struct specialday *sday;
 	char *extradata[CAL_MAX_REPEAT] = { NULL };
-	bool d_first, skip, locale_changed;
+	bool d_first, skip, locale_changed, var_handled;
 	int flags, count;
 
 	assert(in != NULL);
@@ -296,6 +296,7 @@ cal_parse(FILE *in)
 		if (entry.type == T_VARIABLE) {
 			DPRINTF("%s: T_VARIABLE: |%s|=|%s|\n",
 				__func__, entry.variable, entry.value);
+			var_handled = false;
 
 			if (strcasecmp(entry.variable, "LANG") == 0) {
 				if (setlocale(LC_ALL, entry.value) == NULL) {
@@ -308,10 +309,13 @@ cal_parse(FILE *in)
 				DPRINTF("%s(): set LC_ALL='%s' (day_first=%s)\n",
 					__func__, entry.value,
 					d_first ? "true" : "false");
+				var_handled = true;
 			}
 
-			if (strcasecmp(entry.variable, "SEQUENCE") == 0)
+			if (strcasecmp(entry.variable, "SEQUENCE") == 0) {
 				set_nsequences(entry.value);
+				var_handled = true;
+			}
 
 			for (size_t i = 0; specialdays[i].name; i++) {
 				sday = &specialdays[i];
@@ -319,8 +323,14 @@ cal_parse(FILE *in)
 					free(sday->n_name);
 					sday->n_name = xstrdup(entry.value);
 					sday->n_len = strlen(sday->n_name);
+					var_handled = true;
 					break;
 				}
+			}
+
+			if (!var_handled) {
+				warnx("Unknown variable: |%s|=|%s|",
+				      entry.variable, entry.value);
 			}
 
 			free(entry.variable);
