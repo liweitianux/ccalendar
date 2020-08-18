@@ -36,6 +36,7 @@
 
 #include <assert.h>
 #include <err.h>
+#include <math.h>
 #include <stddef.h>
 
 #include "calendar.h"
@@ -47,6 +48,7 @@
 #include "gregorian.h"
 #include "nnames.h"
 #include "parsedata.h"
+#include "sun.h"
 #include "utils.h"
 
 static int	days_in_month(int month, int year);
@@ -57,6 +59,10 @@ static int	find_days_yearly(int day_flag, int offset,
 static int	find_days_easter(int, struct cal_day **, char **);
 static int	find_days_paskha(int, struct cal_day **, char **);
 static int	find_days_cny(int, struct cal_day **, char **);
+static int	find_days_marequinox(int, struct cal_day **, char **);
+static int	find_days_sepequinox(int, struct cal_day **, char **);
+static int	find_days_junsolstice(int, struct cal_day **, char **);
+static int	find_days_decsolstice(int, struct cal_day **, char **);
 
 #define SPECIALDAY_INIT0 \
 	{ NULL, 0, NULL, 0, 0, NULL }
@@ -66,12 +72,12 @@ struct specialday specialdays[] = {
 	SPECIALDAY_INIT("Easter", F_EASTER, &find_days_easter),
 	SPECIALDAY_INIT("Paskha", F_PASKHA, &find_days_paskha),
 	SPECIALDAY_INIT("ChineseNewYear", F_CNY, &find_days_cny),
+	SPECIALDAY_INIT("MarEquinox", F_MAREQUINOX, &find_days_marequinox),
+	SPECIALDAY_INIT("SepEquinox", F_SEPEQUINOX, &find_days_sepequinox),
+	SPECIALDAY_INIT("JunSolstice", F_JUNSOLSTICE, &find_days_junsolstice),
+	SPECIALDAY_INIT("DecSolstice", F_DECSOLSTICE, &find_days_decsolstice),
 	SPECIALDAY_INIT("NewMoon", F_NEWMOON, NULL),
 	SPECIALDAY_INIT("FullMoon", F_FULLMOON, NULL),
-	SPECIALDAY_INIT("MarEquinox", F_MAREQUINOX, NULL),
-	SPECIALDAY_INIT("SepEquinox", F_SEPEQUINOX, NULL),
-	SPECIALDAY_INIT("JunSolstice", F_JUNSOLSTICE, NULL),
-	SPECIALDAY_INIT("DecSolstice", F_DECSOLSTICE, NULL),
 	SPECIALDAY_INIT0,
 };
 
@@ -94,21 +100,48 @@ find_days_cny(int offset, struct cal_day **dayp, char **edp)
 	return find_days_yearly(F_CNY, offset, dayp, edp);
 }
 
+static int
+find_days_marequinox(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_MAREQUINOX, offset, dayp, edp);
+}
+
+static int
+find_days_sepequinox(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_SEPEQUINOX, offset, dayp, edp);
+}
+
+static int
+find_days_junsolstice(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_JUNSOLSTICE, offset, dayp, edp);
+}
+
+static int
+find_days_decsolstice(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(F_DECSOLSTICE, offset, dayp, edp);
+}
+
 /*
  * Find days of the yearly special day ($day_flag).
  */
 static int
 find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
-		 char **edp __unused)
+		 char **edp)
 {
 	struct cal_day *dp;
 	struct date date;
-	int day0, yday;
+	double t, longitude;
+	char buf[32];
+	int day0, yday, day_approx, month;
 	int count = 0;
 
 	for (int y = Options.year1; y <= Options.year2; y++) {
 		date_set(&date, y - 1, 12, 31);
 		day0 = fixed_from_gregorian(&date);
+		t = NAN;
 
 		switch (day_flag) {
 		case F_EASTER:
@@ -120,6 +153,29 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
 		case F_CNY:
 			yday = chinese_new_year(y) - day0;
 			break;
+		case F_MAREQUINOX:
+		case F_JUNSOLSTICE:
+		case F_SEPEQUINOX:
+		case F_DECSOLSTICE:
+			if (day_flag == F_MAREQUINOX) {
+				month = 3;
+				longitude = 0.0;
+			} else if (day_flag == F_JUNSOLSTICE) {
+				month = 6;
+				longitude = 90.0;
+			} else if (day_flag == F_SEPEQUINOX) {
+				month = 9;
+				longitude = 180.0;
+			} else {
+				month = 12;
+				longitude = 270.0;
+			}
+			date_set(&date, y, month, 1);
+			day_approx = fixed_from_gregorian(&date);
+			t = solar_longitude_atafter(longitude, day_approx);
+			t += Options.location->zone;
+			yday = floor(t) - day0;
+			break;
 		default:
 			errx(1, "%s: unknown special day: 0x%x",
 			     __func__, day_flag);
@@ -129,6 +185,10 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
 			if (count >= CAL_MAX_REPEAT) {
 				warnx("%s: too many repeats", __func__);
 				return count;
+			}
+			if (!isnan(t)) {
+				format_time(buf, sizeof(buf), t);
+				edp[count] = xstrdup(buf);
 			}
 			dayp[count++] = dp;
 		}

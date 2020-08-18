@@ -45,7 +45,6 @@
 #include "moon.h"
 #include "nnames.h"
 #include "parsedata.h"
-#include "sun.h"
 #include "utils.h"
 
 /* Maximum number of new/full moons in a year */
@@ -434,54 +433,6 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 						    yinfo->fnewmoon[i]);
 					remember(&remindex, dayp, dp, edp, buf);
 				}
-			}
-			continue;
-		}
-
-		/* (Mar|Sep)Equinox */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_MAREQUINOX)) {
-			dp = find_yd(year,
-				(int)yinfo->equinoxdays[0] + di.imodifieroffset);
-			if (dp != NULL) {
-				format_time(buf, sizeof(buf),
-					    yinfo->equinoxdays[0]);
-				remember(&remindex, dayp, dp, edp, buf);
-			}
-			continue;
-		}
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_SEPEQUINOX)) {
-			dp = find_yd(year,
-				(int)yinfo->equinoxdays[1] + di.imodifieroffset);
-			if (dp != NULL) {
-				format_time(buf, sizeof(buf),
-					    yinfo->equinoxdays[1]);
-				remember(&remindex, dayp, dp, edp, buf);
-			}
-			continue;
-		}
-
-		/* (Jun|Dec)Solstice */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_JUNSOLSTICE)) {
-			dp = find_yd(year,
-				(int)yinfo->solsticedays[0] + di.imodifieroffset);
-			if (dp != NULL) {
-				format_time(buf, sizeof(buf),
-					    yinfo->solsticedays[0]);
-				remember(&remindex, dayp, dp, edp, buf);
-			}
-			continue;
-		}
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_DECSOLSTICE)) {
-			dp = find_yd(year,
-				(int)yinfo->solsticedays[1] + di.imodifieroffset);
-			if (dp != NULL) {
-				format_time(buf, sizeof(buf),
-					    yinfo->solsticedays[1]);
-				remember(&remindex, dayp, dp, edp, buf);
 			}
 			continue;
 		}
