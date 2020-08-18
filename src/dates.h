@@ -41,6 +41,7 @@ struct event;
 
 void	generate_dates(void);
 int	first_dayofweek_of_month(int year, int month);
+struct cal_day *find_rd(int rd, int offset);
 struct cal_day *find_yd(int year, int yday, int offset);
 struct cal_day *find_ymd(int year, int month, int day);
 

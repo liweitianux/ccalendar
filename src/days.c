@@ -139,23 +139,21 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
 	struct date date;
 	double t, longitude;
 	char buf[32];
-	int day0, yday, day_approx, month;
+	int rd, approx, month;
 	int count = 0;
 
 	for (int y = Options.year1; y <= Options.year2; y++) {
-		date_set(&date, y - 1, 12, 31);
-		day0 = fixed_from_gregorian(&date);
 		t = NAN;
 
 		switch (day_flag) {
 		case F_EASTER:
-			yday = easter(y) - day0;
+			rd = easter(y);
 			break;
 		case F_PASKHA:
-			yday = orthodox_easter(y) - day0;
+			rd = orthodox_easter(y);
 			break;
 		case F_CNY:
-			yday = chinese_new_year(y) - day0;
+			rd = chinese_new_year(y);
 			break;
 		case F_MAREQUINOX:
 		case F_JUNSOLSTICE:
@@ -175,17 +173,17 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
 				longitude = 270.0;
 			}
 			date_set(&date, y, month, 1);
-			day_approx = fixed_from_gregorian(&date);
-			t = solar_longitude_atafter(longitude, day_approx);
+			approx = fixed_from_gregorian(&date);
+			t = solar_longitude_atafter(longitude, approx);
 			t += Options.location->zone;  /* to standard time */
-			yday = floor(t) - day0;
+			rd = floor(t);
 			break;
 		default:
 			errx(1, "%s: unknown special day: 0x%x",
 			     __func__, day_flag);
 		}
 
-		if ((dp = find_yd(y, yday, offset)) != NULL) {
+		if ((dp = find_rd(rd, offset)) != NULL) {
 			if (count >= CAL_MAX_REPEAT) {
 				warnx("%s: too many repeats", __func__);
 				return count;
@@ -223,14 +221,12 @@ find_days_moon(int moon_flag, int offset, struct cal_day **dayp, char **edp)
 	struct date date;
 	double t, t_begin, t_end;
 	char buf[32];
-	int day0, yday;
 	int count = 0;
 
 	for (int y = Options.year1; y <= Options.year2; y++) {
-		date_set(&date, y - 1, 12, 31);
-		day0 = fixed_from_gregorian(&date);
-		t_begin = day0 + 1 - Options.location->zone;
-		date_set(&date, y + 1, 1, 1);
+		date_set(&date, y, 1, 1);
+		t_begin = fixed_from_gregorian(&date) - Options.location->zone;
+		date.year++;
 		t_end = fixed_from_gregorian(&date) - Options.location->zone;
 
 		for (t = t_begin; t < t_end; ) {
@@ -250,8 +246,7 @@ find_days_moon(int moon_flag, int offset, struct cal_day **dayp, char **edp)
 				break;
 
 			t += Options.location->zone;  /* to standard time */
-			yday = floor(t) - day0;
-			if ((dp = find_yd(y, yday, offset)) != NULL) {
+			if ((dp = find_rd(floor(t), offset)) != NULL) {
 				if (count >= CAL_MAX_REPEAT) {
 					warnx("%s: too many repeats",
 					      __func__);
