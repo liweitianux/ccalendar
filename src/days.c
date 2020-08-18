@@ -46,6 +46,7 @@
 #include "days.h"
 #include "ecclesiastical.h"
 #include "gregorian.h"
+#include "moon.h"
 #include "nnames.h"
 #include "parsedata.h"
 #include "sun.h"
@@ -55,6 +56,8 @@ static int	days_in_month(int month, int year);
 static int	dayofweek_of_month(int dow, int index, int month, int year);
 static int	find_days_yearly(int day_flag, int offset,
 				 struct cal_day **dayp, char **edp);
+static int	find_days_moon(int moon_flag, int offset,
+			       struct cal_day **dayp, char **edp);
 
 static int	find_days_easter(int, struct cal_day **, char **);
 static int	find_days_paskha(int, struct cal_day **, char **);
@@ -63,6 +66,8 @@ static int	find_days_marequinox(int, struct cal_day **, char **);
 static int	find_days_sepequinox(int, struct cal_day **, char **);
 static int	find_days_junsolstice(int, struct cal_day **, char **);
 static int	find_days_decsolstice(int, struct cal_day **, char **);
+static int	find_days_newmoon(int, struct cal_day **, char **);
+static int	find_days_fullmoon(int, struct cal_day **, char **);
 
 #define SPECIALDAY_INIT0 \
 	{ NULL, 0, NULL, 0, 0, NULL }
@@ -76,8 +81,8 @@ struct specialday specialdays[] = {
 	SPECIALDAY_INIT("SepEquinox", F_SEPEQUINOX, &find_days_sepequinox),
 	SPECIALDAY_INIT("JunSolstice", F_JUNSOLSTICE, &find_days_junsolstice),
 	SPECIALDAY_INIT("DecSolstice", F_DECSOLSTICE, &find_days_decsolstice),
-	SPECIALDAY_INIT("NewMoon", F_NEWMOON, NULL),
-	SPECIALDAY_INIT("FullMoon", F_FULLMOON, NULL),
+	SPECIALDAY_INIT("NewMoon", F_NEWMOON, &find_days_newmoon),
+	SPECIALDAY_INIT("FullMoon", F_FULLMOON, &find_days_fullmoon),
 	SPECIALDAY_INIT0,
 };
 
@@ -128,8 +133,7 @@ find_days_decsolstice(int offset, struct cal_day **dayp, char **edp)
  * Find days of the yearly special day ($day_flag).
  */
 static int
-find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
-		 char **edp)
+find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
 {
 	struct cal_day *dp;
 	struct date date;
@@ -173,7 +177,7 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
 			date_set(&date, y, month, 1);
 			day_approx = fixed_from_gregorian(&date);
 			t = solar_longitude_atafter(longitude, day_approx);
-			t += Options.location->zone;
+			t += Options.location->zone;  /* to standard time */
 			yday = floor(t) - day0;
 			break;
 		default:
@@ -191,6 +195,72 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp,
 				edp[count] = xstrdup(buf);
 			}
 			dayp[count++] = dp;
+		}
+	}
+
+	return count;
+}
+
+static int
+find_days_newmoon(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_moon(F_NEWMOON, offset, dayp, edp);
+}
+
+static int
+find_days_fullmoon(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_moon(F_FULLMOON, offset, dayp, edp);
+}
+
+/*
+ * Find days of the moon events ($moon_flag).
+ */
+static int
+find_days_moon(int moon_flag, int offset, struct cal_day **dayp, char **edp)
+{
+	struct cal_day *dp;
+	struct date date;
+	double t, t_begin, t_end;
+	char buf[32];
+	int day0, yday;
+	int count = 0;
+
+	for (int y = Options.year1; y <= Options.year2; y++) {
+		date_set(&date, y - 1, 12, 31);
+		day0 = fixed_from_gregorian(&date);
+		t_begin = day0 + 1 - Options.location->zone;
+		date_set(&date, y + 1, 1, 1);
+		t_end = fixed_from_gregorian(&date) - Options.location->zone;
+
+		for (t = t_begin; t < t_end; ) {
+			switch (moon_flag) {
+			case F_NEWMOON:
+				t = new_moon_atafter(t);
+				break;
+			case F_FULLMOON:
+				t = lunar_phase_atafter(180, t);
+				break;
+			default:
+				errx(1, "%s: unknown special day: 0x%x",
+				     __func__, moon_flag);
+			}
+
+			if (t > t_end)
+				break;
+
+			t += Options.location->zone;  /* to standard time */
+			yday = floor(t) - day0;
+			if ((dp = find_yd(y, yday, offset)) != NULL) {
+				if (count >= CAL_MAX_REPEAT) {
+					warnx("%s: too many repeats",
+					      __func__);
+					return count;
+				}
+				format_time(buf, sizeof(buf), t);
+				edp[count] = xstrdup(buf);
+				dayp[count++] = dp;
+			}
 		}
 	}
 

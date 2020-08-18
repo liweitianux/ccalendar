@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause-FreeBSD
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1992-2009 Edwin Groothuis <edwin@FreeBSD.org>.
  * All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,7 +34,6 @@
 
 #include <ctype.h>
 #include <err.h>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,17 +41,12 @@
 
 #include "calendar.h"
 #include "basics.h"
-#include "dates.h"
 #include "days.h"
 #include "gregorian.h"
 #include "io.h"
-#include "moon.h"
 #include "nnames.h"
 #include "parsedata.h"
 #include "utils.h"
-
-/* Maximum number of new/full moons in a year */
-#define MAXMOONS	18
 
 struct dateinfo {
 	int	flags;
@@ -58,19 +56,6 @@ struct dateinfo {
 	int	idayofweek;
 	int	imodifieroffset;
 	int	imodifierindex;
-};
-
-struct yearinfo {
-	struct yearinfo *next;
-	int	*monthdays;  /* number of days in each month */
-	int	year;
-	int	ieaster;  /* day of year of Easter */
-	int	ipaskha;  /* day of year of Paskha */
-	int	firstcnyday;  /* day of year of ChineseNewYear */
-	double	ffullmoon[MAXMOONS];
-	double	fnewmoon[MAXMOONS];
-	double	equinoxdays[2];
-	double	solsticedays[2];
 };
 
 static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
@@ -402,123 +387,12 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 		}
 	}
 
-#if 0
-	for (int year = Options.year1; year <= Options.year2; year++) {
-
-		/* FullMoon */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_FULLMOON)) {
-			for (int i = 0; yinfo->ffullmoon[i] > 0; i++) {
-				dp = find_yd(year,
-					(int)floor(yinfo->ffullmoon[i]) +
-					di.imodifieroffset);
-				if (dp != NULL) {
-					format_time(buf, sizeof(buf),
-						    yinfo->ffullmoon[i]);
-					remember(&remindex, dayp, dp, edp, buf);
-				}
-			}
-			continue;
-		}
-
-		/* NewMoon */
-		if ((lflags & ~F_MODIFIEROFFSET) ==
-		    (F_SPECIALDAY | F_VARIABLE | F_NEWMOON)) {
-			for (int i = 0; yinfo->ffullmoon[i] > 0; i++) {
-				dp = find_yd(year,
-					(int)floor(yinfo->fnewmoon[i]) +
-					di.imodifieroffset);
-				if (dp != NULL) {
-					format_time(buf, sizeof(buf),
-						    yinfo->fnewmoon[i]);
-					remember(&remindex, dayp, dp, edp, buf);
-				}
-			}
-			continue;
-		}
-	}
-#endif
-
 	warnx("%s: unprocessed date: |%s|", __func__, date);
 	if (Options.debug)
 		show_dateinfo(&di);
 
 	return 0;
 }
-
-#if 0
-static struct yearinfo *
-calc_yearinfo(int year)
-{
-	struct yearinfo *yinfo;
-	struct date date = { year - 1, 12, 31 };
-	double t, t_begin, t_end;
-	int i, day0, day_approx;
-
-	day0 = fixed_from_gregorian(&date);
-
-	yinfo = xcalloc(1, sizeof(*yinfo));
-	yinfo->year = year;
-	yinfo->monthdays = monthdaytab[gregorian_leap_year(year)];
-
-	yinfo->ieaster = easter(year) - day0;
-	yinfo->ipaskha = orthodox_easter(year) - day0;
-	yinfo->firstcnyday = chinese_new_year(year) - day0;
-
-	/*
-	 * Lunar events
-	 */
-	date.year = year;
-	date.month = 1;
-	date.day = 1;
-	t_begin = fixed_from_gregorian(&date) - Options.location->zone;
-	date.year++;
-	t_end = fixed_from_gregorian(&date) - Options.location->zone;
-	/* New moon events */
-	for (t = t_begin, i = 0; (t = new_moon_atafter(t)) < t_end; i++) {
-		t += Options.location->zone;  /* to standard time */
-		yinfo->fnewmoon[i] = t - day0;
-	}
-	/* Full moon events */
-	for (t = t_begin, i = 0;
-	     (t = lunar_phase_atafter(180, t)) < t_end;
-	     i++) {
-		t += Options.location->zone;  /* to standard time */
-		yinfo->ffullmoon[i] = t - day0;
-	}
-
-	/*
-	 * Solar events
-	 */
-	date.year = year;
-	/* March Equinox, 0 degree */
-	date.month = 3;
-	date.day = 1;
-	day_approx = fixed_from_gregorian(&date);
-	t = solar_longitude_atafter(0, day_approx) + Options.location->zone;
-	yinfo->equinoxdays[0] = t - day0;
-	/* June Solstice, 90 degree */
-	date.month = 6;
-	date.day = 1;
-	day_approx = fixed_from_gregorian(&date);
-	t = solar_longitude_atafter(90, day_approx) + Options.location->zone;
-	yinfo->solsticedays[0] = t - day0;
-	/* September Equinox, 180 degree */
-	date.month = 9;
-	date.day = 1;
-	day_approx = fixed_from_gregorian(&date);
-	t = solar_longitude_atafter(180, day_approx) + Options.location->zone;
-	yinfo->equinoxdays[1] = t - day0;
-	/* December Solstice, 270 degree */
-	date.month = 12;
-	date.day = 1;
-	day_approx = fixed_from_gregorian(&date);
-	t = solar_longitude_atafter(270, day_approx) + Options.location->zone;
-	yinfo->solsticedays[1] = t - day0;
-
-	return yinfo;
-}
-#endif
 
 static bool
 checkmonth(const char *s, size_t *len, int *offset, const char **month)
