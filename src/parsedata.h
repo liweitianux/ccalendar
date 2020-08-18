@@ -49,16 +49,7 @@
 #define	F_ALLMONTH		0x00040
 #define	F_ALLDAY		0x00080
 #define	F_VARIABLE		0x00100
-#define	F_EASTER		0x00200
-#define	F_CNY			0x00400
-#define	F_PASKHA		0x00800
-#define	F_NEWMOON		0x01000
-#define	F_FULLMOON		0x02000
-#define	F_MAREQUINOX		0x04000
-#define	F_SEPEQUINOX		0x08000
-#define	F_JUNSOLSTICE		0x10000
-#define	F_DECSOLSTICE		0x20000
-#define	F_YEAR			0x40000
+#define	F_YEAR			0x00200
 
 struct cal_day;
 

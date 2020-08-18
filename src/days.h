@@ -37,14 +37,28 @@
 #ifndef DAYS_H_
 #define DAYS_H_
 
+/* IDs of special days */
+enum {
+	SD_NONE,
+	SD_EASTER,
+	SD_CNY,
+	SD_PASKHA,
+	SD_MAREQUINOX,
+	SD_SEPEQUINOX,
+	SD_JUNSOLSTICE,
+	SD_DECSOLSTICE,
+	SD_NEWMOON,
+	SD_FULLMOON,
+};
+
 struct cal_day;
 
 struct specialday {
+	int		 id;		/* enum ID of the special day */
 	const char	*name;		/* name of the special day */
 	size_t		 len;		/* length of the name */
 	char		*n_name;	/* national name of the special day */
 	size_t		 n_len;		/* length of the national name */
-	int		 flag;		/* flag to set for date parsing */
 
 	/* function to find days of the special day in [rd1, rd2] */
 	int	(*find_days)(int offset, struct cal_day **dayp, char **edp);

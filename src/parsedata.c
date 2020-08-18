@@ -50,6 +50,7 @@
 
 struct dateinfo {
 	int	flags;
+	int	sday_id;
 	int	year;
 	int	month;
 	int	dayofmonth;
@@ -133,7 +134,7 @@ determinestyle(const char *date, struct dateinfo *di)
 
 	if ((p = strchr(date2, ' ')) == NULL &&
 	    (p = strchr(date2, '/')) == NULL) {
-		for (size_t i = 0; specialdays[i].name; i++) {
+		for (size_t i = 0; specialdays[i].id != SD_NONE; i++) {
 			sday = &specialdays[i];
 			if (strncasecmp(date2, sday->name, sday->len) == 0) {
 				len = sday->len;
@@ -144,7 +145,8 @@ determinestyle(const char *date, struct dateinfo *di)
 				continue;
 			}
 
-			di->flags |= (sday->flag | F_SPECIALDAY | F_VARIABLE);
+			di->flags |= (F_SPECIALDAY | F_VARIABLE);
+			di->sday_id = sday->id;
 			if (strlen(date2) == len) {
 				ret = true;
 				goto out;
@@ -309,9 +311,9 @@ show_dateinfo(struct dateinfo *di)
 
 	if ((di->flags & F_SPECIALDAY) != 0) {
 		fprintf(stderr, " specialday");
-		for (size_t i = 0; specialdays[i].name; i++) {
+		for (size_t i = 0; specialdays[i].id != SD_NONE; i++) {
 			sday = &specialdays[i];
-			if ((di->flags & sday->flag) != 0)
+			if (di->sday_id == sday->id)
 				fprintf(stderr, "(%s)", sday->name);
 		}
 	}
@@ -378,9 +380,9 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 
 	/* Special days with optional offset (e.g., 'ChineseNewYear+14') */
 	if ((di.flags & F_SPECIALDAY) != 0) {
-		for (size_t i = 0; specialdays[i].name; i++) {
+		for (size_t i = 0; specialdays[i].id != SD_NONE; i++) {
 			sday = &specialdays[i];
-			if ((di.flags & sday->flag) != 0 && sday->find_days)
+			if (di.sday_id == sday->id && sday->find_days != NULL)
 				return (sday->find_days)(offset, dayp, edp);
 		}
 	}

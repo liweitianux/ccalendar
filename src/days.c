@@ -54,9 +54,9 @@
 
 static int	days_in_month(int month, int year);
 static int	dayofweek_of_month(int dow, int index, int month, int year);
-static int	find_days_yearly(int day_flag, int offset,
+static int	find_days_yearly(int sday_id, int offset,
 				 struct cal_day **dayp, char **edp);
-static int	find_days_moon(int moon_flag, int offset,
+static int	find_days_moon(int sday_id, int offset,
 			       struct cal_day **dayp, char **edp);
 
 static int	find_days_easter(int, struct cal_day **, char **);
@@ -70,19 +70,19 @@ static int	find_days_newmoon(int, struct cal_day **, char **);
 static int	find_days_fullmoon(int, struct cal_day **, char **);
 
 #define SPECIALDAY_INIT0 \
-	{ NULL, 0, NULL, 0, 0, NULL }
-#define SPECIALDAY_INIT(name, flag, func) \
-	{ name, sizeof(name)-1, NULL, 0, (flag), func }
+	{ SD_NONE, NULL, 0, NULL, 0, NULL }
+#define SPECIALDAY_INIT(id, name, func) \
+	{ (id), name, sizeof(name)-1, NULL, 0, func }
 struct specialday specialdays[] = {
-	SPECIALDAY_INIT("Easter", F_EASTER, &find_days_easter),
-	SPECIALDAY_INIT("Paskha", F_PASKHA, &find_days_paskha),
-	SPECIALDAY_INIT("ChineseNewYear", F_CNY, &find_days_cny),
-	SPECIALDAY_INIT("MarEquinox", F_MAREQUINOX, &find_days_marequinox),
-	SPECIALDAY_INIT("SepEquinox", F_SEPEQUINOX, &find_days_sepequinox),
-	SPECIALDAY_INIT("JunSolstice", F_JUNSOLSTICE, &find_days_junsolstice),
-	SPECIALDAY_INIT("DecSolstice", F_DECSOLSTICE, &find_days_decsolstice),
-	SPECIALDAY_INIT("NewMoon", F_NEWMOON, &find_days_newmoon),
-	SPECIALDAY_INIT("FullMoon", F_FULLMOON, &find_days_fullmoon),
+	SPECIALDAY_INIT(SD_EASTER, "Easter", &find_days_easter),
+	SPECIALDAY_INIT(SD_PASKHA, "Paskha", &find_days_paskha),
+	SPECIALDAY_INIT(SD_CNY, "ChineseNewYear", &find_days_cny),
+	SPECIALDAY_INIT(SD_MAREQUINOX, "MarEquinox", &find_days_marequinox),
+	SPECIALDAY_INIT(SD_SEPEQUINOX, "SepEquinox", &find_days_sepequinox),
+	SPECIALDAY_INIT(SD_JUNSOLSTICE, "JunSolstice", &find_days_junsolstice),
+	SPECIALDAY_INIT(SD_DECSOLSTICE, "DecSolstice", &find_days_decsolstice),
+	SPECIALDAY_INIT(SD_NEWMOON, "NewMoon", &find_days_newmoon),
+	SPECIALDAY_INIT(SD_FULLMOON, "FullMoon", &find_days_fullmoon),
 	SPECIALDAY_INIT0,
 };
 
@@ -90,50 +90,50 @@ struct specialday specialdays[] = {
 static int
 find_days_easter(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_EASTER, offset, dayp, edp);
+	return find_days_yearly(SD_EASTER, offset, dayp, edp);
 }
 
 static int
 find_days_paskha(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_PASKHA, offset, dayp, edp);
+	return find_days_yearly(SD_PASKHA, offset, dayp, edp);
 }
 
 static int
 find_days_cny(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_CNY, offset, dayp, edp);
+	return find_days_yearly(SD_CNY, offset, dayp, edp);
 }
 
 static int
 find_days_marequinox(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_MAREQUINOX, offset, dayp, edp);
+	return find_days_yearly(SD_MAREQUINOX, offset, dayp, edp);
 }
 
 static int
 find_days_sepequinox(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_SEPEQUINOX, offset, dayp, edp);
+	return find_days_yearly(SD_SEPEQUINOX, offset, dayp, edp);
 }
 
 static int
 find_days_junsolstice(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_JUNSOLSTICE, offset, dayp, edp);
+	return find_days_yearly(SD_JUNSOLSTICE, offset, dayp, edp);
 }
 
 static int
 find_days_decsolstice(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_yearly(F_DECSOLSTICE, offset, dayp, edp);
+	return find_days_yearly(SD_DECSOLSTICE, offset, dayp, edp);
 }
 
 /*
  * Find days of the yearly special day ($day_flag).
  */
 static int
-find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
+find_days_yearly(int sday_id, int offset, struct cal_day **dayp, char **edp)
 {
 	struct cal_day *dp;
 	struct date date;
@@ -145,27 +145,27 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
 	for (int y = Options.year1; y <= Options.year2; y++) {
 		t = NAN;
 
-		switch (day_flag) {
-		case F_EASTER:
+		switch (sday_id) {
+		case SD_EASTER:
 			rd = easter(y);
 			break;
-		case F_PASKHA:
+		case SD_PASKHA:
 			rd = orthodox_easter(y);
 			break;
-		case F_CNY:
+		case SD_CNY:
 			rd = chinese_new_year(y);
 			break;
-		case F_MAREQUINOX:
-		case F_JUNSOLSTICE:
-		case F_SEPEQUINOX:
-		case F_DECSOLSTICE:
-			if (day_flag == F_MAREQUINOX) {
+		case SD_MAREQUINOX:
+		case SD_JUNSOLSTICE:
+		case SD_SEPEQUINOX:
+		case SD_DECSOLSTICE:
+			if (sday_id == SD_MAREQUINOX) {
 				month = 3;
 				longitude = 0.0;
-			} else if (day_flag == F_JUNSOLSTICE) {
+			} else if (sday_id == SD_JUNSOLSTICE) {
 				month = 6;
 				longitude = 90.0;
-			} else if (day_flag == F_SEPEQUINOX) {
+			} else if (sday_id == SD_SEPEQUINOX) {
 				month = 9;
 				longitude = 180.0;
 			} else {
@@ -179,8 +179,8 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
 			rd = floor(t);
 			break;
 		default:
-			errx(1, "%s: unknown special day: 0x%x",
-			     __func__, day_flag);
+			errx(1, "%s: unknown special day: %d",
+			     __func__, sday_id);
 		}
 
 		if ((dp = find_rd(rd, offset)) != NULL) {
@@ -202,20 +202,20 @@ find_days_yearly(int day_flag, int offset, struct cal_day **dayp, char **edp)
 static int
 find_days_newmoon(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_moon(F_NEWMOON, offset, dayp, edp);
+	return find_days_moon(SD_NEWMOON, offset, dayp, edp);
 }
 
 static int
 find_days_fullmoon(int offset, struct cal_day **dayp, char **edp)
 {
-	return find_days_moon(F_FULLMOON, offset, dayp, edp);
+	return find_days_moon(SD_FULLMOON, offset, dayp, edp);
 }
 
 /*
  * Find days of the moon events ($moon_flag).
  */
 static int
-find_days_moon(int moon_flag, int offset, struct cal_day **dayp, char **edp)
+find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 {
 	struct cal_day *dp;
 	struct date date;
@@ -230,16 +230,16 @@ find_days_moon(int moon_flag, int offset, struct cal_day **dayp, char **edp)
 		t_end = fixed_from_gregorian(&date) - Options.location->zone;
 
 		for (t = t_begin; t < t_end; ) {
-			switch (moon_flag) {
-			case F_NEWMOON:
+			switch (sday_id) {
+			case SD_NEWMOON:
 				t = new_moon_atafter(t);
 				break;
-			case F_FULLMOON:
+			case SD_FULLMOON:
 				t = lunar_phase_atafter(180, t);
 				break;
 			default:
-				errx(1, "%s: unknown special day: 0x%x",
-				     __func__, moon_flag);
+				errx(1, "%s: unknown special day: %d",
+				     __func__, sday_id);
 			}
 
 			if (t > t_end)
