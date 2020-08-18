@@ -50,12 +50,12 @@
 
 struct dateinfo {
 	int	flags;
-	int	iyear;
-	int	imonth;
-	int	idayofmonth;
-	int	idayofweek;
-	int	imodifieroffset;
-	int	imodifierindex;
+	int	year;
+	int	month;
+	int	dayofmonth;
+	int	dayofweek;
+	int	offset;
+	int	index;
 };
 
 static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
@@ -77,14 +77,14 @@ static void	 show_dateinfo(struct dateinfo *di);
  *				Year . ' ' . Month . ' ' . DayOfMonth |
  *				Month . '/' . DayOfMonth |
  *				Month . ' ' . DayOfMonth |
- *				Month . '/' . DayOfWeek . ModifierIndex |
- *				Month . ' ' . DayOfWeek . ModifierIndex |
+ *				Month . '/' . DayOfWeek . Index |
+ *				Month . ' ' . DayOfWeek . Index |
  *				DayOfMonth . '/' . Month |
  *				DayOfMonth . ' ' . Month |
- *				DayOfWeek . ModifierIndex . '/' . MonthName |
- *				DayOfWeek . ModifierIndex . ' ' . MonthName |
- *				DayOfWeek . ModifierIndex
- *				SpecialDay . ModifierOffset
+ *				DayOfWeek . Index . '/' . MonthName |
+ *				DayOfWeek . Index . ' ' . MonthName |
+ *				DayOfWeek . Index
+ *				SpecialDay . Offset
  *
  * Year			::=	'0' ... '9' | '00' ... '09' | '10' ... '99' |
  *				'100' ... '999' | '1000' ... '9999'
@@ -101,14 +101,14 @@ static void	 show_dateinfo(struct dateinfo *di);
  * DayOfMonth		::=	'0' ... '9' | '00' ... '09' | '10' ... '29' |
  *				'30' ... '31' | '*'
  *
- * ModifierIndex	::=	'' | IndexName |
+ * Index		::=	'' | IndexName |
  *				'+' . IndexNumber | '-' . IndexNumber
  * IndexName		::=	'First' | 'Second' | 'Third' | 'Fourth' |
  *				'Fifth' | 'Last'
  * IndexNumber		::=	'1' ... '5'
  *
- * ModifierOffset	::=	'' | '+' . ModifierNumber | '-' . ModifierNumber
- * ModifierNumber	::=	'0' ... '9' | '00' ... '99' | '000' ... '299' |
+ * Offset		::=	'' | '+' . OffsetNumber | '-' . OffsetNumber
+ * OffsetNumber		::=	'0' ... '9' | '00' ... '99' | '000' ... '299' |
  *				'300' ... '359' | '360' ... '365'
  *
  * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear' |
@@ -149,21 +149,21 @@ determinestyle(const char *date, struct dateinfo *di)
 				ret = true;
 				goto out;
 			}
-			di->imodifieroffset = (int)strtol(date2+len, NULL, 10);
-			di->flags |= F_MODIFIEROFFSET;
+			di->offset = (int)strtol(date2+len, NULL, 10);
+			di->flags |= F_OFFSET;
 			ret = true;
 			goto out;
 		}
 
 		if (checkdayofweek(date2, &len, &offset, &dow)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
-			di->idayofweek = offset;
+			di->dayofweek = offset;
 			if (strlen(date2) == len) {
 				ret = true;
 				goto out;
 			}
-			if (parse_index(date2+len, &di->imodifierindex)) {
-				di->flags |= F_MODIFIERINDEX;
+			if (parse_index(date2+len, &di->index)) {
+				di->flags |= F_INDEX;
 				ret = true;
 			}
 			goto out;
@@ -171,7 +171,7 @@ determinestyle(const char *date, struct dateinfo *di)
 		if (isonlydigits(date2, true)) {
 			/* Assume month number only */
 			di->flags |= F_MONTH;
-			di->imonth = (int)strtol(date2, NULL, 10);
+			di->month = (int)strtol(date2, NULL, 10);
 			ret = true;
 			goto out;
 		}
@@ -188,7 +188,7 @@ determinestyle(const char *date, struct dateinfo *di)
 	    (p = strchr(p2, '/')) != NULL) {
 		/* Got a year in the date string. */
 		di->flags |= F_YEAR;
-		di->iyear = (int)strtol(p1, NULL, 10);
+		di->year = (int)strtol(p1, NULL, 10);
 		*p = '\0';
 		p1 = p2;
 		p2 = p + 1;
@@ -200,10 +200,10 @@ determinestyle(const char *date, struct dateinfo *di)
 		/* Now p2 is the non-month part */
 
 		di->flags |= F_MONTH;
-		di->imonth = offset;
+		di->month = offset;
 
 		if (isonlydigits(p2, true)) {
-			di->idayofmonth = (int)strtol(p2, NULL, 10);
+			di->dayofmonth = (int)strtol(p2, NULL, 10);
 			di->flags |= F_DAYOFMONTH;
 			ret = true;
 			goto out;
@@ -215,13 +215,13 @@ determinestyle(const char *date, struct dateinfo *di)
 		}
 		if (checkdayofweek(p2, &len, &offset, &dow)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
-			di->idayofweek = offset;
+			di->dayofweek = offset;
 			if (strlen(p2) == len) {
 				ret = true;
 				goto out;
 			}
-			if (parse_index(p2+len, &di->imodifierindex)) {
-				di->flags |= F_MODIFIERINDEX;
+			if (parse_index(p2+len, &di->index)) {
+				di->flags |= F_INDEX;
 				ret = true;
 			}
 			goto out;
@@ -234,7 +234,7 @@ determinestyle(const char *date, struct dateinfo *di)
 	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, true)) ||
 	    (strcmp(p2, "*") == 0 && isonlydigits(p1, true) && (p2 = p1))) {
 		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
-		di->idayofmonth = (int)strtol(p2, NULL, 10);
+		di->dayofmonth = (int)strtol(p2, NULL, 10);
 		ret = true;
 		goto out;
 	}
@@ -243,14 +243,14 @@ determinestyle(const char *date, struct dateinfo *di)
 	if (isonlydigits(p1, true) &&
 	    checkdayofweek(p2, &len, &offset, &dow)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
-		di->imonth = (int)strtol(p1, NULL, 10);
-		di->idayofweek = offset;
+		di->month = (int)strtol(p1, NULL, 10);
+		di->dayofweek = offset;
 		if (strlen(p2) == len) {
 			ret = true;
 			goto out;
 		}
-		if (parse_index(p2+len, &di->imodifierindex)) {
-			di->flags |= F_MODIFIERINDEX;
+		if (parse_index(p2+len, &di->index)) {
+			di->flags |= F_INDEX;
 			ret = true;
 		}
 		goto out;
@@ -272,13 +272,13 @@ determinestyle(const char *date, struct dateinfo *di)
 
 		if (m > 12)
 			swap(&m, &d);
-		di->imonth = m;
-		di->idayofmonth = d;
+		di->month = m;
+		di->dayofmonth = d;
 		ret = true;
 		goto out;
 	}
 
-	warnx("Unrecognized date: |%s|", date);
+	warnx("%s: unrecognized date: |%s|", __func__, date);
 
 out:
 	if (Options.debug)
@@ -295,17 +295,17 @@ show_dateinfo(struct dateinfo *di)
 	fprintf(stderr, "flags: 0x%x -", di->flags);
 
 	if ((di->flags & F_YEAR) != 0)
-		fprintf(stderr, " year(%d)", di->iyear);
+		fprintf(stderr, " year(%d)", di->year);
 	if ((di->flags & F_MONTH) != 0)
-		fprintf(stderr, " month(%d)", di->imonth);
+		fprintf(stderr, " month(%d)", di->month);
 	if ((di->flags & F_DAYOFWEEK) != 0)
-		fprintf(stderr, " dayofweek(%d)", di->idayofweek);
+		fprintf(stderr, " dayofweek(%d)", di->dayofweek);
 	if ((di->flags & F_DAYOFMONTH) != 0)
-		fprintf(stderr, " dayofmonth(%d)", di->idayofmonth);
-	if ((di->flags & F_MODIFIERINDEX) != 0)
-		fprintf(stderr, " modifierindex(%d)", di->imodifierindex);
-	if ((di->flags & F_MODIFIEROFFSET) != 0)
-		fprintf(stderr, " modifieroffset(%d)", di->imodifieroffset);
+		fprintf(stderr, " dayofmonth(%d)", di->dayofmonth);
+	if ((di->flags & F_INDEX) != 0)
+		fprintf(stderr, " index(%d)", di->index);
+	if ((di->flags & F_OFFSET) != 0)
+		fprintf(stderr, " offset(%d)", di->offset);
 
 	if ((di->flags & F_SPECIALDAY) != 0) {
 		fprintf(stderr, " specialday");
@@ -340,43 +340,41 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 		return -1;
 
 	*flags = di.flags;
-	index = (di.flags & F_MODIFIERINDEX) ? di.imodifierindex : 0;
-	offset = (di.flags & F_MODIFIEROFFSET) ? di.imodifieroffset : 0;
+	index = (di.flags & F_INDEX) ? di.index : 0;
+	offset = (di.flags & F_OFFSET) ? di.offset : 0;
 
 	/* Specified year, month and day (e.g., '2020/Aug/16') */
 	if ((di.flags & ~F_VARIABLE) == (F_YEAR | F_MONTH | F_DAYOFMONTH))
-		return find_days_ymd(di.iyear, di.imonth, di.idayofmonth,
+		return find_days_ymd(di.year, di.month, di.dayofmonth,
 				     dayp, edp);
 
 	/* Specified month and day (e.g., 'Aug/16') */
 	if ((di.flags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH))
-		return find_days_ymd(-1, di.imonth, di.idayofmonth,
+		return find_days_ymd(-1, di.month, di.dayofmonth,
 				     dayp, edp);
 
 	/* Same day every month (e.g., '* 16') */
 	if (di.flags == (F_ALLMONTH | F_DAYOFMONTH))
-		return find_days_dom(di.idayofmonth, dayp, edp);
+		return find_days_dom(di.dayofmonth, dayp, edp);
 
 	/* Every day of a month (e.g., 'Aug *') */
 	if (di.flags == (F_ALLDAY | F_MONTH))
-		return find_days_month(di.imonth, dayp, edp);
+		return find_days_month(di.month, dayp, edp);
 
 	/*
 	 * Every day-of-week of a month (e.g., 'Aug/Sun')
 	 * One indexed day-of-week of a month (e.g., 'Aug/Sun+3')
 	 */
-	if ((di.flags & ~F_MODIFIERINDEX) ==
-	    (F_MONTH | F_DAYOFWEEK | F_VARIABLE)) {
-		return find_days_mdow(di.imonth, di.idayofweek, index,
+	if ((di.flags & ~F_INDEX) == (F_MONTH | F_DAYOFWEEK | F_VARIABLE))
+		return find_days_mdow(di.month, di.dayofweek, index,
 				      dayp, edp);
-	}
 
 	/*
 	 * Every day-of-week of the year (e.g., 'Sun')
 	 * One indexed day-of-week of every month (e.g., 'Sun+3')
 	 */
-	if ((di.flags & ~F_MODIFIERINDEX) == (F_DAYOFWEEK | F_VARIABLE))
-		return find_days_mdow(-1, di.idayofweek, index, dayp, edp);
+	if ((di.flags & ~F_INDEX) == (F_DAYOFWEEK | F_VARIABLE))
+		return find_days_mdow(-1, di.dayofweek, index, dayp, edp);
 
 	/* Special days with optional offset (e.g., 'ChineseNewYear+14') */
 	if ((di.flags & F_SPECIALDAY) != 0) {
