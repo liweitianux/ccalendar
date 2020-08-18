@@ -350,6 +350,8 @@ cal_parse(FILE *in)
 				event_add(cdays[i], d_first,
 				          ((flags & F_VARIABLE) != 0),
 				          entry.contents, extradata[i]);
+				cdays[i] = NULL;
+				extradata[i] = NULL;
 			}
 
 			free(entry.date);
