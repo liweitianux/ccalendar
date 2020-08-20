@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 2, 2020
+.Dd August 20, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -45,7 +45,7 @@
 .Op Fl h
 .Op Fl L Ar latitude,longitude[,elevation]
 .Op Fl s Ar chinese|moon|sun
-.Op Fl t Ar [[[cc]yy]mm]dd
+.Op Fl t Ar [[[CC]YY]MM]DD
 .Op Fl U Ar \(+-hh[[:]mm]
 .Op Fl W Ar num
 .Sh DESCRIPTION
@@ -97,7 +97,9 @@ The
 .Ar latitude
 and
 .Ar longitude
-arguments are given in units of degrees.
+arguments are given in units of degrees,
+which can be a decimal number or in the DMS format of
+.Dq [+-]d:m:s .
 The
 .Ar elevation
 argument is optional and is given in units of meters.
@@ -120,22 +122,22 @@ Show Moon position, phases, rise and set times, and lunar events in this year.
 .It Va sun
 Show Sun position, rise and set times, and solar events in this year.
 .El
-.It Fl t Ar [[[cc]yy]mm]dd
+.It Fl t Ar [[[CC]YY]MM]DD
 Act like the specified value is
 .Dq today
 instead of using the current date.
 If
-.Ar yy
+.Ar YY
 is specified, but
-.Ar cc
+.Ar CC
 is not,
 a value for
-.Ar yy
+.Ar YY
 between 69 and 99 results in a
-.Ar cc
+.Ar CC
 value of 19.
 Otherwise, a
-.Ar cc
+.Ar CC
 value of 20 is used.
 .It Fl U Ar \(+-hh[[:]mm]
 Specify the timezone with a UTC offset.

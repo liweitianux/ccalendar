@@ -589,7 +589,7 @@ parse_timezone(const char *s, int *result)
 	if (*s != '\0')
 		return false;
 
-	int offset = hh * 3600L + mm * 60L;
+	int offset = hh * 3600 + mm * 60;
 	*result = (sign == '+') ? offset : -offset;
 
 	return true;
@@ -612,7 +612,7 @@ parse_angle(const char *s, double *result)
 	double v;
 	v = strtod(s, &endp);
 	if (s == endp || *endp != '\0') {
-		/* try to parse in format: d:m:s */
+		/* try to parse format of 'd:m:s' */
 		int deg = 0;
 		int min = 0;
 		double sec = 0.0;
@@ -620,7 +620,7 @@ parse_angle(const char *s, double *result)
 		case 3:
 		case 2:
 		case 1:
-			if (min < 0 || min > 60 || sec < 0 || sec > 60)
+			if (min < 0 || min >= 60 || sec < 0 || sec >= 60)
 				return false;
 			v = deg + min / 60.0 + sec / 3600.0;
 			break;
@@ -653,7 +653,7 @@ parse_location(const char *s, double *latitude, double *longitude,
 	if (parse_angle(p, &v) && fabs(v) <= 90) {
 		*latitude = v;
 	} else {
-		warnx("%s: invalid latitude: '%s'", __func__, p);
+		warnx("%s: invalid latitude: |%s|", __func__, p);
 		return false;
 	}
 
@@ -665,7 +665,7 @@ parse_location(const char *s, double *latitude, double *longitude,
 	if (parse_angle(p, &v) && fabs(v) <= 180) {
 		*longitude = v;
 	} else {
-		warnx("%s: invalid longitude: '%s'", __func__, p);
+		warnx("%s: invalid longitude: |%s|", __func__, p);
 		return false;
 	}
 
@@ -674,14 +674,14 @@ parse_location(const char *s, double *latitude, double *longitude,
 		char *endp;
 		v = strtod(p, &endp);
 		if (p == endp || *endp != '\0' || v < 0) {
-			warnx("%s: invalid elevation: '%s'", __func__, p);
+			warnx("%s: invalid elevation: |%s|", __func__, p);
 			return false;
 		}
 		*elevation = v;
 	}
 
 	if ((p = strtok(NULL, sep)) != NULL) {
-		warnx("%s: unknown value: '%s'", __func__, p);
+		warnx("%s: unknown value: |%s|", __func__, p);
 		return false;
 	}
 
@@ -689,7 +689,7 @@ parse_location(const char *s, double *latitude, double *longitude,
 }
 
 /*
- * Parse date string of format '[[[cc]yy]mm]dd' into a fixed date.
+ * Parse date string of format '[[[CC]YY]MM]DD' into a fixed date.
  * Return true on success, otherwise false.
  */
 bool
@@ -728,7 +728,7 @@ parse_date(const char *date, int *rd_out)
 
 	*rd_out = fixed_from_gregorian(&gdate);
 
-	DPRINTF("%s(): |%s| -> %04d-%02d-%02d\n",
+	DPRINTF("%s: parsed |%s| -> %d-%02d-%02d\n",
 		__func__, date, gdate.year, gdate.month, gdate.day);
 	return true;
 }
