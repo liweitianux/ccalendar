@@ -117,7 +117,7 @@ main(int argc, char *argv[])
 	Options.today = get_fixed_of_today();
 	loc.zone = get_utc_offset() / (3600.0 * 24.0);
 
-	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:t:U:W:")) != -1) {
+	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:T:t:U:W:")) != -1) {
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
@@ -165,6 +165,11 @@ main(int argc, char *argv[])
 
 		case 's': /* show info of specified category */
 			show_info = optarg;
+			break;
+
+		case 'T': /* specify time of day */
+			if (!parse_time(optarg, &Options.time))
+				errx(1, "invalid time: |%s|", optarg);
 			break;
 
 		case 't': /* specify date */
@@ -441,7 +446,8 @@ usage(const char *progname)
 		"usage:\n"
 		"%s [-A days] [-a] [-B days] [-d] [-F friday]\n"
 		"\t[-f calendarfile] [-L latitude,longitude[,elevation]]\n"
-		"\t[-s chinese|moon|sun] [-t [[[cc]yy]mm]dd] [-U ±hh[[:]mm]] [-W days]\n",
+		"\t[-s chinese|moon|sun] [-T hh:mm[:ss]] [-t [[[CC]YY]MM]DD]\n"
+		"\t[-U ±hh[[:]mm]] [-W days]\n",
 		progname);
 	exit(1);
 }

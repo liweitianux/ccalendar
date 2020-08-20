@@ -45,6 +45,7 @@
 .Op Fl h
 .Op Fl L Ar latitude,longitude[,elevation]
 .Op Fl s Ar chinese|moon|sun
+.Op Fl T Ar hh:mm[:ss]
 .Op Fl t Ar [[[CC]YY]MM]DD
 .Op Fl U Ar \(+-hh[[:]mm]
 .Op Fl W Ar num
@@ -122,6 +123,9 @@ Show Moon position, phases, rise and set times, and lunar events in this year.
 .It Va sun
 Show Sun position, rise and set times, and solar events in this year.
 .El
+.It Fl T Ar hh:mm[:ss]
+Specify the time of day to use instead of the current system time.
+This time is only used in determining the Sun and Moon information.
 .It Fl t Ar [[[CC]YY]MM]DD
 Act like the specified value is
 .Dq today

@@ -732,3 +732,30 @@ parse_date(const char *date, int *rd_out)
 		__func__, date, gdate.year, gdate.month, gdate.day);
 	return true;
 }
+
+/*
+ * Parse time string of format 'hh:mm[:ss]' into a float time in
+ * units of days.
+ * Return true on success, otherwise false.
+ */
+bool
+parse_time(const char *time, double *t_out)
+{
+	int hh = 0;
+	int mm = 0;
+	int ss = 0;
+
+	switch (sscanf(time, "%d:%d:%d", &hh, &mm, &ss)) {
+	case 3:
+	case 2:
+		break;
+	default:
+		return false;
+	}
+
+	if (hh < 0 || hh >= 24 || mm < 0 || mm >= 60 || ss < 0 || ss > 60)
+		return false;
+
+	*t_out = (hh + mm/60.0 + ss/3600.0) / 24.0;
+	return true;
+}

@@ -60,5 +60,6 @@ bool	parse_timezone(const char *s, int *result);
 bool	parse_location(const char *s, double *latitude, double *longitude,
 		       double *elevation);
 bool	parse_date(const char *date, int *rd_out);
+bool	parse_time(const char *time, double *t_out);
 
 #endif
