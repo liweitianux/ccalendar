@@ -47,7 +47,7 @@
 
 struct event {
 	bool		 variable;  /* Whether a variable event ? */
-	char		*date;  /* human readable */
+	char		 date[32];  /* human readable date for output */
 	char		*contents[CAL_MAX_LINES];  /* lines of contents */
 	char		*extra;
 	struct event	*next;
@@ -180,20 +180,19 @@ struct event *
 event_add(struct cal_day *dp, bool day_first, bool variable,
 	  char *contents[], char *extra)
 {
-	static char dbuf[32];
-	struct date gdate = { 0 };
-	struct tm tm = { 0 };
 	struct event *e;
+	struct date gdate;
+	struct tm tm = { 0 };
 
 	gregorian_from_fixed(dp->rd, &gdate);
 	tm.tm_year = gdate.year - 1900;
 	tm.tm_mon = gdate.month - 1;
 	tm.tm_mday = gdate.day;
-	strftime(dbuf, sizeof(dbuf), (day_first ? "%e %b" : "%b %e"), &tm);
 
 	e = xcalloc(1, sizeof(*e));
+	strftime(e->date, sizeof(e->date),
+		 (day_first ? "%e %b" : "%b %e"), &tm);
 	e->variable = variable;
-	e->date = xstrdup(dbuf);
 	for (int i = 0; i < CAL_MAX_LINES; i++)
 		e->contents[i] = contents[i];
 	if (extra != NULL && extra[0] != '\0')
