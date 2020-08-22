@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 20, 2020
+.Dd August 22, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -251,13 +251,7 @@ and
 to specify moving events, like
 .Dq the last Monday in April .
 Numeric sequence
-.Dq ( -4
-.Li ...
-.Dq -1 ,
-and
-.Dq +1
-.Li ...
-.Dq +5 )
+.Dq ( \(+-[12345] )
 can also be used.
 .It
 A date may be followed by an asterisk
