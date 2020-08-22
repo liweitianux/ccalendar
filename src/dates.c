@@ -53,10 +53,6 @@ struct event {
 	struct event	*next;
 };
 
-struct cal_day {
-	int		 rd;
-	struct event	*events;
-};
 static struct cal_day *cal_days = NULL;
 
 
@@ -65,22 +61,67 @@ generate_dates(void)
 {
 	struct cal_day *dp;
 	struct date date;
-	int daycount, dow;
+	int daycount, dow, year, month, day;
+	int rd_month1, rd_nextmonth, rd_nextyear;
 
 	daycount = Options.day_end - Options.day_begin + 1;
 	cal_days = xcalloc((size_t)daycount, sizeof(struct cal_day));
+
+	dow = (int)dayofweek_from_fixed(Options.day_begin);
+	gregorian_from_fixed(Options.day_begin, &date);
+	year = date.year;
+	month = date.month;
+	day = date.day;
+
+	date.day = 1;
+	rd_month1 = fixed_from_gregorian(&date);
+	if (date.month == 12) {
+		date_set(&date, date.year+1, 1, 1);
+		rd_nextmonth = fixed_from_gregorian(&date);
+		rd_nextyear = rd_nextmonth;
+	} else {
+		date.month++;
+		rd_nextmonth = fixed_from_gregorian(&date);
+		date_set(&date, date.year+1, 1, 1);
+		rd_nextyear = fixed_from_gregorian(&date);
+	}
+
 	for (int i = 0; i < daycount; i++) {
 		dp = &cal_days[i];
 		dp->rd = Options.day_begin + i;
 
-		if (Options.debug) {
-			gregorian_from_fixed(dp->rd, &date);
-			dow = (int)dayofweek_from_fixed(dp->rd);
-			fprintf(stderr,
-				"%s: [%d] rd:%d, date:%d-%02d-%02d, dow:%d\n",
-				__func__, i, dp->rd, date.year, date.month,
-				date.day, dow);
+		if (dp->rd == rd_nextmonth) {
+			month++;
+			day = 1;
+			rd_month1 = rd_nextmonth;
+			if (dp->rd == rd_nextyear) {
+				year++;
+				month = 1;
+			}
+
+			date_set(&date, year, month, day);
+			if (date.month == 12) {
+				date_set(&date, date.year+1, 1, 1);
+				rd_nextmonth = fixed_from_gregorian(&date);
+				rd_nextyear = rd_nextmonth;
+			} else {
+				date.month++;
+				rd_nextmonth = fixed_from_gregorian(&date);
+				date_set(&date, date.year+1, 1, 1);
+				rd_nextyear = fixed_from_gregorian(&date);
+			}
 		}
+
+		dp->year = year;
+		dp->month = month;
+		dp->day = dp->rd - rd_month1 + 1;
+		dp->dow[0] = (dow + i) % 7;
+		dp->dow[1] = (dp->rd - rd_month1) / 7 + 1;
+		dp->dow[2] = -((rd_nextmonth - dp->rd - 1) / 7 + 1);
+
+		DPRINTF("%s: [%d] rd:%d, date:%d-%02d-%02d, dow:[%d,%d,%d]\n",
+			__func__, i, dp->rd, dp->year, dp->month,
+			dp->day, dp->dow[0], dp->dow[1], dp->dow[2]);
 	}
 }
 

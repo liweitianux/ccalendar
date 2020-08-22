@@ -36,8 +36,16 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-struct cal_day;
 struct event;
+
+struct cal_day {
+	int	rd;
+	int	year;
+	int	month;
+	int	day;
+	int	dow[3];  /* [day-of-week, index-in-month, reverse-index] */
+	struct event *events;
+};
 
 void	generate_dates(void);
 int	first_dayofweek_of_month(int year, int month);
