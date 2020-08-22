@@ -500,3 +500,12 @@ internal preprocessor only recognizes
 and
 .Sy #define .
 Quoted or escaped comment marks are not supported yet.
+.Pp
+An event can repeat at most 100 times in the specified date range.
+The most repeated event is an weekly event, so a maximum of 100 repeats
+covers a date range of about 2 years.
+If more repeats of events are needed, you're likely using
+.Nm
+in the wrong way ;)
+.Pp
+An event can have at most 50 lines of contents.
