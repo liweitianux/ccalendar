@@ -205,8 +205,6 @@ main(int argc, char *argv[])
 
 	Options.day_begin = Options.today - days_before;
 	Options.day_end = Options.today + days_after;
-	Options.year1 = gregorian_year_from_fixed(Options.day_begin);
-	Options.year2 = gregorian_year_from_fixed(Options.day_end);
 	generate_dates();
 
 	setlocale(LC_ALL, "");

@@ -138,9 +138,12 @@ find_days_yearly(int sday_id, int offset, struct cal_day **dayp, char **edp)
 	double t, longitude;
 	char buf[32];
 	int rd, approx, month;
+	int year1, year2;
 	int count = 0;
 
-	for (int y = Options.year1; y <= Options.year2; y++) {
+	year1 = gregorian_year_from_fixed(Options.day_begin);
+	year2 = gregorian_year_from_fixed(Options.day_end);
+	for (int y = year1; y <= year2; y++) {
 		t = NAN;
 
 		switch (sday_id) {
@@ -219,9 +222,12 @@ find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 	struct date date;
 	double t, t_begin, t_end;
 	char buf[32];
+	int year1, year2;
 	int count = 0;
 
-	for (int y = Options.year1; y <= Options.year2; y++) {
+	year1 = gregorian_year_from_fixed(Options.day_begin);
+	year2 = gregorian_year_from_fixed(Options.day_end);
+	for (int y = year1; y <= year2; y++) {
 		date_set(&date, y, 1, 1);
 		t_begin = fixed_from_gregorian(&date) - Options.location->zone;
 		date.year++;

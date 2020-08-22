@@ -68,8 +68,6 @@ struct cal_options {
 	int today;  /* R.D. of today to remind events */
 	int day_begin;  /* beginning of date range to remind events */
 	int day_end;  /* end of date range to remind events */
-	int year1;  /* year of the beginning day */
-	int year2;  /* year of the ending day */
 	bool allmode;  /* whether to process calendars for all users */
 	bool debug;
 };
