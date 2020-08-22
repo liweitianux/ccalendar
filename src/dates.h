@@ -48,6 +48,8 @@ struct cal_day {
 };
 
 void	generate_dates(void);
+struct cal_day *loop_dates(struct cal_day *dp);
+
 int	first_dayofweek_of_month(int year, int month);
 struct cal_day *find_rd(int rd, int offset);
 struct cal_day *find_yd(int year, int yday, int offset);

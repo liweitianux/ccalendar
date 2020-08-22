@@ -125,6 +125,22 @@ generate_dates(void)
 	}
 }
 
+struct cal_day *
+loop_dates(struct cal_day *dp)
+{
+	int daycount = Options.day_end - Options.day_begin + 1;
+
+	if (dp == NULL)
+		dp = &cal_days[0];
+	else
+		dp++;
+
+	if (dp < &cal_days[0] || dp > &cal_days[daycount-1])
+		return NULL;
+	else
+		return dp;
+}
+
 int
 first_dayofweek_of_month(int year, int month)
 {
@@ -194,20 +210,19 @@ event_print_all(FILE *fp)
 {
 	struct event *e;
 	struct cal_day *dp;
-	int daycount = Options.day_end - Options.day_begin + 1;
 	int last;
 
-	for (int i = 0; i < daycount; i++) {
-		dp = &cal_days[i];
+	dp = NULL;
+	while ((dp = loop_dates(dp)) != NULL) {
 		for (e = dp->events; e != NULL; e = e->next) {
 			last = 0;
 			while (last < CAL_MAX_LINES && e->contents[last])
 			     last++;
 
 			fprintf(fp, "%s%c", e->date, e->variable ? '*' : ' ');
-			for (int j = 0; j < last; j++) {
-				fprintf(fp, "\t%s%s", e->contents[j],
-					(j == last - 1) ? "" : "\n");
+			for (int i = 0; i < last; i++) {
+				fprintf(fp, "\t%s%s", e->contents[i],
+					(i == last - 1) ? "" : "\n");
 			}
 			if (e->extra)
 				fprintf(fp, " (%s)", e->extra);
