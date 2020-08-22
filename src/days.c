@@ -52,8 +52,6 @@
 #include "sun.h"
 #include "utils.h"
 
-static int	days_in_month(int month, int year);
-static int	dayofweek_of_month(int dow, int index, int month, int year);
 static int	find_days_yearly(int sday_id, int offset,
 				 struct cal_day **dayp, char **edp);
 static int	find_days_moon(int sday_id, int offset,
@@ -272,13 +270,13 @@ int
 find_days_ymd(int year, int month, int day,
 	      struct cal_day **dayp, char **edp __unused)
 {
-	struct cal_day *dp;
+	struct cal_day *dp = NULL;
 	int count = 0;
 
-	for (int y = Options.year1; y <= Options.year2; y++) {
-		if (year >= 0 && year != y)
+	while ((dp = loop_dates(dp)) != NULL) {
+		if (year >= 0 && year != dp->year)
 			continue;
-		if ((dp = find_ymd(y, month, day)) != NULL) {
+		if (dp->month == month && dp->day == day) {
 			if (count >= CAL_MAX_REPEAT) {
 				warnx("%s: too many repeats", __func__);
 				return count;
@@ -296,19 +294,16 @@ find_days_ymd(int year, int month, int day,
 int
 find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
 {
-	struct cal_day *dp;
+	struct cal_day *dp = NULL;
 	int count = 0;
 
-	for (int y = Options.year1; y <= Options.year2; y++) {
-		for (int m = 1; m <= NMONTHS; m++) {
-			if ((dp = find_ymd(y, m, dom)) != NULL) {
-				if (count >= CAL_MAX_REPEAT) {
-					warnx("%s: too many repeats",
-					      __func__);
-					return count;
-				}
-				dayp[count++] = dp;
+	while ((dp = loop_dates(dp)) != NULL) {
+		if (dp->day == dom) {
+			if (count >= CAL_MAX_REPEAT) {
+				warnx("%s: too many repeats", __func__);
+				return count;
 			}
+			dayp[count++] = dp;
 		}
 	}
 
@@ -321,21 +316,16 @@ find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
 int
 find_days_month(int month, struct cal_day **dayp, char **edp __unused)
 {
-	struct cal_day *dp;
-	int mdays;
+	struct cal_day *dp = NULL;
 	int count = 0;
 
-	for (int y = Options.year1; y <= Options.year2; y++) {
-		mdays = days_in_month(month, y);
-		for (int d = 1; d <= mdays; d++) {
-			if ((dp = find_ymd(y, month, d)) != NULL) {
-				if (count >= CAL_MAX_REPEAT) {
-					warnx("%s: too many repeats",
-					      __func__);
-					return count;
-				}
-				dayp[count++] = dp;
+	while ((dp = loop_dates(dp)) != NULL) {
+		if (dp->month == month) {
+			if (count >= CAL_MAX_REPEAT) {
+				warnx("%s: too many repeats", __func__);
+				return count;
 			}
+			dayp[count++] = dp;
 		}
 	}
 
@@ -351,86 +341,25 @@ int
 find_days_mdow(int month, int dow, int index,
 	       struct cal_day **dayp, char **edp __unused)
 {
-	struct cal_day *dp;
-	int d, dow_m1, mdays;
+	struct cal_day *dp = NULL;
 	int count = 0;
 
-	for (int y = Options.year1; y <= Options.year2; y++) {
-		for (int m = 1; m <= NMONTHS; m++) {
-			if (month >= 0 && month != m)
+	while ((dp = loop_dates(dp)) != NULL) {
+		if (month >= 0 && month != dp->month)
+			continue;
+		if (dp->dow[0] == dow) {
+			if (index != 0 &&
+			    (index != dp->dow[1] && index != dp->dow[2])) {
+				/* Not the indexed day-of-week of month */
 				continue;
-			if (index == 0) {
-				/* Every day-of-week of month */
-				mdays = days_in_month(m, y);
-				dow_m1 = first_dayofweek_of_month(y, m);
-				d = mod1(dow - dow_m1 + 8, 7);
-				while (d <= mdays) {
-					dp = find_ymd(y, m, d);
-					if (dp != NULL) {
-						if (count >= CAL_MAX_REPEAT) {
-							warnx("%s: too many repeats",
-							      __func__);
-							return count;
-						}
-						dayp[count++] = dp;
-					}
-					d += 7;
-				}
-			} else {
-				/* One indexed day-of-week of month */
-				d = dayofweek_of_month(dow, index, m, y);
-				if ((dp = find_ymd(y, m, d)) != NULL) {
-					if (count >= CAL_MAX_REPEAT) {
-						warnx("%s: too many repeats",
-						      __func__);
-						return count;
-					}
-					dayp[count++] = dp;
-				}
 			}
+			if (count >= CAL_MAX_REPEAT) {
+				warnx("%s: too many repeats", __func__);
+				return count;
+			}
+			dayp[count++] = dp;
 		}
 	}
 
 	return count;
-}
-
-
-/*
- * Return the days in the given month ($month) of year ($year)
- */
-static int
-days_in_month(int month, int year)
-{
-	static int mdays[][12] = {
-		{ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
-		{ 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
-	};
-
-	assert(month >= 0 && month <= 12);
-
-	if (gregorian_leap_year(year))
-		return mdays[1][month-1];
-	else
-		return mdays[0][month-1];
-}
-
-/*
- * Calculate the date of an indexed day-of-week in the month, e.g.,
- * 'Thu-3', 'Wed+2'.
- * The 'index' is the ordinal number of the day-of-week in the month.
- */
-static int
-dayofweek_of_month(int dow, int index, int month, int year)
-{
-	assert(index != 0);
-
-	struct date date = { year, month, 1 };
-	int day1 = fixed_from_gregorian(&date);
-
-	if (index < 0) {	/* count back from the end of month */
-		date.month++;
-		date.day = 0;	/* the last day of previous month */
-	}
-
-	return nth_kday(index, dow, &date) - day1 + 1;
 }
