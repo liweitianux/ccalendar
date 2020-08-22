@@ -279,7 +279,7 @@ determinestyle(const char *date, struct dateinfo *di)
 		int d = (int)strtol(p2, NULL, 10);
 
 		if (m > 12 && d > 12) {
-			warnx("Invalid date: |%s|", date);
+			warnx("%s: invalid date: |%s|", __func__, date);
 			goto out;
 		}
 
@@ -317,8 +317,6 @@ show_dateinfo(struct dateinfo *di)
 		fprintf(stderr, " dayofmonth(%d)", di->dayofmonth);
 	if ((di->flags & F_INDEX) != 0)
 		fprintf(stderr, " index(%d)", di->index);
-	if ((di->flags & F_OFFSET) != 0)
-		fprintf(stderr, " offset(%d)", di->offset);
 
 	if ((di->flags & F_SPECIALDAY) != 0) {
 		fprintf(stderr, " specialday");
@@ -328,6 +326,8 @@ show_dateinfo(struct dateinfo *di)
 				fprintf(stderr, "(%s)", sday->name);
 		}
 	}
+	if ((di->flags & F_OFFSET) != 0)
+		fprintf(stderr, " offset(%d)", di->offset);
 
 	if ((di->flags & F_ALLMONTH) != 0)
 		fprintf(stderr, " allmonth");
@@ -335,6 +335,7 @@ show_dateinfo(struct dateinfo *di)
 		fprintf(stderr, " allday");
 	if ((di->flags & F_VARIABLE) != 0)
 		fprintf(stderr, " variable");
+
 	fprintf(stderr, "\n");
 	fflush(stderr);
 }
@@ -514,7 +515,7 @@ parse_index(const char *s, int *index)
 		if (*endp != '\0')
 			return false;  /* has trailing junk */
 		if (v == 0 || v <= -6 || v >= 6) {
-			warnx("%s(): invalid value: %d", __func__, v);
+			warnx("%s: invalid value: %d", __func__, v);
 			return false;
 		}
 
@@ -531,7 +532,7 @@ parse_index(const char *s, int *index)
 		}
 	}
 
-	DPRINTF("%s(): |%s| -> %d (%s)\n",
+	DPRINTF("%s: |%s| -> %d (status=%s)\n",
 		__func__, s, *index, (parsed ? "ok" : "fail"));
 	return parsed;
 }

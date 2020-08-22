@@ -258,7 +258,7 @@ static bool
 locale_day_first(void)
 {
 	char *d_fmt = nl_langinfo(D_FMT);
-	DPRINTF("%s(): d_fmt=|%s|\n", __func__, d_fmt);
+	DPRINTF("%s: d_fmt=|%s|\n", __func__, d_fmt);
 	/* NOTE: BSDs use '%e' in D_FMT while Linux uses '%d' */
 	return (strpbrk(d_fmt, "ed") < strchr(d_fmt, 'm'));
 }
@@ -306,7 +306,7 @@ cal_parse(FILE *in)
 				d_first = locale_day_first();
 				set_nnames();
 				locale_changed = true;
-				DPRINTF("%s(): set LC_ALL='%s' (day_first=%s)\n",
+				DPRINTF("%s: set LC_ALL='%s' (day_first=%s)\n",
 					__func__, entry.value,
 					d_first ? "true" : "false");
 				var_handled = true;
@@ -379,6 +379,7 @@ cal_parse(FILE *in)
 	if (locale_changed) {
 		setlocale(LC_ALL, "");
 		set_nnames();
+		DPRINTF("%s: reset LC_ALL\n", __func__);
 	}
 
 	free(cfile.line);

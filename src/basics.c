@@ -87,7 +87,7 @@ int
 nth_kday(int n, enum dayofweek k, struct date *date)
 {
 	if (n == 0)
-		errx(1, "%s(): n = 0 invalid!", __func__);
+		errx(1, "%s: invalid n = 0!", __func__);
 
 	int rd = fixed_from_gregorian(date);
 	int kday;
