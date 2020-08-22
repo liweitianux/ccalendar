@@ -236,6 +236,8 @@ matches every month.
 .It
 A day without a month matches that day of every week.
 .It
+A day of zero means the last day of previous month.
+.It
 The names of special days may be followed by a
 positive or negative integer to represent the date offset, like:
 .Dq Easter+3

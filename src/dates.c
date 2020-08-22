@@ -118,6 +118,7 @@ generate_dates(void)
 		dp->dow[0] = (dow + i) % 7;
 		dp->dow[1] = (dp->rd - rd_month1) / 7 + 1;
 		dp->dow[2] = -((rd_nextmonth - dp->rd - 1) / 7 + 1);
+		dp->last_dom = (dp->rd == rd_nextmonth - 1);
 
 		DPRINTF("%s: [%d] rd:%d, date:%d-%02d-%02d, dow:[%d,%d,%d]\n",
 			__func__, i, dp->rd, dp->year, dp->month,

@@ -276,7 +276,9 @@ find_days_ymd(int year, int month, int day,
 	while ((dp = loop_dates(dp)) != NULL) {
 		if (year >= 0 && year != dp->year)
 			continue;
-		if (dp->month == month && dp->day == day) {
+		if ((dp->month == month && dp->day == day) ||
+		    /* day of zero means the last day of previous month */
+		    (day == 0 && dp->last_dom && month == dp->month % 12 + 1)) {
 			if (count >= CAL_MAX_REPEAT) {
 				warnx("%s: too many repeats", __func__);
 				return count;

@@ -44,6 +44,7 @@ struct cal_day {
 	int	month;
 	int	day;
 	int	dow[3];  /* [day-of-week, index-in-month, reverse-index] */
+	bool	last_dom;  /* true if the last day of month */
 	struct event *events;
 };
 
