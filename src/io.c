@@ -102,6 +102,7 @@ static bool	 is_date_entry(char *line, char **content);
 static bool	 is_variable_entry(char *line, char **value);
 
 static struct cal_desc *cal_desc_new(struct cal_desc **head);
+static void	 cal_desc_freeall(struct cal_desc *head);
 static void	 cal_desc_addline(struct cal_desc *desc, const char *line);
 
 /*
@@ -559,6 +560,23 @@ cal_desc_new(struct cal_desc **head)
 }
 
 static void	
+cal_desc_freeall(struct cal_desc *head)
+{
+	struct cal_desc *desc;
+	struct cal_line *line;
+
+	while ((desc = head) != NULL) {
+		head = head->next;
+		while ((line = desc->firstline) != NULL) {
+			desc->firstline = desc->firstline->next;
+			free(line->str);
+			free(line);
+		}
+		free(desc);
+	}
+}
+
+static void	
 cal_desc_addline(struct cal_desc *desc, const char *line)
 {
 	struct cal_line *cline;
@@ -601,6 +619,8 @@ cal(FILE *fpin)
 
 	list_freeall(definitions, free, NULL);
 	definitions = NULL;
+	cal_desc_freeall(descriptions);
+	descriptions = NULL;
 
 	return 0;
 }

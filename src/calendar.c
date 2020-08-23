@@ -364,6 +364,7 @@ main(int argc, char *argv[])
 		fclose(fp);
 	}
 
+	free_dates();
 	return (ret);
 }
 

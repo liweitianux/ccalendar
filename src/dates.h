@@ -50,6 +50,7 @@ struct cal_day {
 };
 
 void	generate_dates(void);
+void	free_dates(void);
 struct cal_day *loop_dates(struct cal_day *dp);
 
 int	first_dayofweek_of_month(int year, int month);

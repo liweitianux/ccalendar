@@ -127,6 +127,22 @@ generate_dates(void)
 	}
 }
 
+void
+free_dates(void)
+{
+	struct event *e;
+	struct cal_day *dp = NULL;
+
+	while ((dp = loop_dates(dp)) != NULL) {
+		while ((e = dp->events) != NULL) {
+			dp->events = e->next;
+			free(e->extra);
+			free(e);
+		}
+	}
+	free(cal_days);
+}
+
 struct cal_day *
 loop_dates(struct cal_day *dp)
 {
