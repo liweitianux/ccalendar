@@ -221,9 +221,13 @@ main(int argc, char *argv[])
 		} else if (strcmp(show_info, "moon") == 0) {
 			show_moon_info(Options.today + Options.time,
 				       Options.location);
+			if (!L_flag)
+				printf("\nWARNING: location not specified!\n");
 		} else if (strcmp(show_info, "sun") == 0) {
 			show_sun_info(Options.today + Options.time,
 				      Options.location);
+			if (!L_flag)
+				printf("\nWARNING: location not specified!\n");
 		} else {
 			errx(1, "unknown -s value: |%s|", show_info);
 		}

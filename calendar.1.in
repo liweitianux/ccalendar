@@ -489,7 +489,7 @@ the late evening.
 .Pp
 The adopted methods to calculate solar and lunar events is are
 simplified astronomical algorithms, so the accuracy of events is
-about several minutes.
+within several minutes, provided that the precise location is specified.
 Druids and Werewolves should double-check the start and end time of
 solar and lunar events.
 .Sh BUGS
