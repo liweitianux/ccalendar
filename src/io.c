@@ -71,8 +71,8 @@ struct cal_entry {
 	char *token;		/* token to process (T_TOKEN) */
 	char *variable;		/* variable name (T_VARIABLE) */
 	char *value;		/* variable value (T_VARIABLE) */
-	char *date;		/* date of event (T_DATE) */
-	char *contents[CAL_MAX_LINES];  /* content lines of event (T_DATE) */
+	char *date;		/* event date (T_DATE) */
+	struct cal_desc *description;  /* event description (T_DATE) */
 };
 
 struct cal_file {
@@ -84,21 +84,25 @@ struct cal_file {
 	bool	 rewinded;	/* if 'nextline' has the rewinded line */
 };
 
+static struct cal_desc *descriptions = NULL;
 static struct node *definitions = NULL;
 
 static FILE	*cal_fopen(const char *file);
 static bool	 cal_parse(FILE *in);
+static bool	 process_token(char *line, bool *skip);
+static void	 send_mail(FILE *fp);
+static char	*skip_comment(char *line, int *comment);
+static void	 write_mailheader(FILE *fp);
+
 static bool	 cal_readentry(struct cal_file *cfile,
 			       struct cal_entry *entry, bool skip);
 static char	*cal_readline(struct cal_file *cfile);
 static void	 cal_rewindline(struct cal_file *cfile);
 static bool	 is_date_entry(char *line, char **content);
 static bool	 is_variable_entry(char *line, char **value);
-static bool	 process_token(char *line, bool *skip);
-static void	 send_mail(FILE *fp);
-static char	*skip_comment(char *line, int *comment);
-static void	 write_mailheader(FILE *fp);
 
+static struct cal_desc *cal_desc_new(struct cal_desc **head);
+static void	 cal_desc_addline(struct cal_desc *desc, const char *line);
 
 /*
  * XXX: Quoted or escaped comment marks are not supported yet.
@@ -268,6 +272,8 @@ cal_parse(FILE *in)
 {
 	struct cal_file cfile = { 0 };
 	struct cal_entry entry = { 0 };
+	struct cal_desc *desc;
+	struct cal_line *line;
 	struct cal_day *cdays[CAL_MAX_REPEAT] = { NULL };
 	struct specialday *sday;
 	char *extradata[CAL_MAX_REPEAT] = { NULL };
@@ -339,27 +345,28 @@ cal_parse(FILE *in)
 		}
 
 		if (entry.type == T_DATE) {
+			desc = entry.description;
 			DPRINTF("%s: T_DATE: |%s|\n", __func__, entry.date);
-			for (int i = 0; i < CAL_MAX_LINES && entry.contents[i]; i++)
-				DPRINTF("\t[%d] |%s|\n", i, entry.contents[i]);
+			for (line = desc->firstline; line; line = line->next)
+				DPRINTF("\t|%s|\n", line->str);
 
 			count = parse_cal_date(entry.date, &flags, cdays,
 					       extradata);
 			if (count < 0) {
 				warnx("Cannot parse date |%s| with content |%s|",
-				      entry.date, entry.contents[0]);
+				      entry.date, desc->firstline->str);
 				continue;
 			} else if (count == 0) {
 				DPRINTF("Ignore out-of-range date |%s| "
 					"with content |%s|\n",
-					entry.date, entry.contents[0]);
+					entry.date, desc->firstline->str);
 				continue;
 			}
 
 			for (int i = 0; i < count; i++) {
 				event_add(cdays[i], d_first,
 				          ((flags & F_VARIABLE) != 0),
-				          entry.contents, extradata[i]);
+				          desc, extradata[i]);
 				cdays[i] = NULL;
 				extradata[i] = NULL;
 			}
@@ -392,7 +399,7 @@ static bool
 cal_readentry(struct cal_file *cfile, struct cal_entry *entry, bool skip)
 {
 	char *p, *value, *content;
-	int comment, ci;
+	int comment;
 
 	memset(entry, 0, sizeof(*entry));
 	entry->type = T_NONE;
@@ -438,12 +445,12 @@ cal_readentry(struct cal_file *cfile, struct cal_entry *entry, bool skip)
 				continue;
 			}
 
-			ci = 0;
 			entry->type = T_DATE;
 			entry->date = xstrdup(p);
-			entry->contents[ci++] = xstrdup(content);
+			entry->description = cal_desc_new(&descriptions);
+			cal_desc_addline(entry->description, content);
 
-			/* Continuous contents of the event */
+			/* Continuous description of the event */
 			while ((p = cal_readline(cfile)) != NULL) {
 				p = trimr(skip_comment(p, &comment));
 				if (*p == '\0')
@@ -451,13 +458,8 @@ cal_readentry(struct cal_file *cfile, struct cal_entry *entry, bool skip)
 
 				if (*p == '\t') {
 					content = triml(p);
-					if (ci >= CAL_MAX_LINES) {
-						warnx("%s: date |%s| has too "
-						      "many lines of contents",
-						      __func__, entry->date);
-						break;
-					}
-					entry->contents[ci++] = xstrdup(content);
+					cal_desc_addline(entry->description,
+							 content);
 				} else {
 					cal_rewindline(cfile);
 					break;
@@ -538,6 +540,37 @@ is_date_entry(char *line, char **content)
 		*content = p + 1;
 
 	return true;
+}
+
+
+static struct cal_desc *
+cal_desc_new(struct cal_desc **head)
+{
+	struct cal_desc *desc = xcalloc(1, sizeof(*desc));
+
+	if (*head == NULL) {
+		*head = desc;
+	} else {
+		desc->next = *head;
+		*head = desc;
+	}
+
+	return desc;
+}
+
+static void	
+cal_desc_addline(struct cal_desc *desc, const char *line)
+{
+	struct cal_line *cline;
+
+	cline = xcalloc(1, sizeof(*cline));
+	cline->str = xstrdup(line);
+	if (desc->lastline != NULL) {
+		desc->lastline->next = cline;
+		desc->lastline = cline;
+	} else {
+		desc->firstline = desc->lastline = cline;
+	}
 }
 
 

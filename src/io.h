@@ -36,6 +36,17 @@
 #ifndef IO_H_
 #define IO_H_
 
+struct cal_line {
+	struct cal_line *next;
+	char		*str;
+};
+
+struct cal_desc {
+	struct cal_desc *next;
+	struct cal_line *firstline;
+	struct cal_line *lastline;
+};
+
 int	cal(FILE *fp);
 
 #endif

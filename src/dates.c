@@ -42,14 +42,15 @@
 #include "basics.h"
 #include "dates.h"
 #include "gregorian.h"
+#include "io.h"
 #include "utils.h"
 
 
 struct event {
 	bool		 variable;  /* Whether a variable event ? */
 	char		 date[32];  /* human readable date for output */
-	char		*contents[CAL_MAX_LINES];  /* lines of contents */
-	char		*extra;
+	struct cal_desc *description;  /* Event description */
+	char		*extra;  /* Extra data of the event */
 	struct event	*next;
 };
 
@@ -179,7 +180,7 @@ find_ymd(int year, int month, int day)
 
 struct event *
 event_add(struct cal_day *dp, bool day_first, bool variable,
-	  char *contents[], char *extra)
+	  struct cal_desc *desc, char *extra)
 {
 	struct event *e;
 	struct date gdate;
@@ -194,8 +195,7 @@ event_add(struct cal_day *dp, bool day_first, bool variable,
 	strftime(e->date, sizeof(e->date),
 		 (day_first ? "%e %b" : "%b %e"), &tm);
 	e->variable = variable;
-	for (int i = 0; i < CAL_MAX_LINES; i++)
-		e->contents[i] = contents[i];
+	e->description = desc;
 	if (extra != NULL && extra[0] != '\0')
 		e->extra = extra;
 
@@ -209,20 +209,17 @@ void
 event_print_all(FILE *fp)
 {
 	struct event *e;
-	struct cal_day *dp;
-	int last;
+	struct cal_day *dp = NULL;
+	struct cal_desc *desc;
+	struct cal_line *line;
 
-	dp = NULL;
 	while ((dp = loop_dates(dp)) != NULL) {
 		for (e = dp->events; e != NULL; e = e->next) {
-			last = 0;
-			while (last < CAL_MAX_LINES && e->contents[last])
-			     last++;
-
 			fprintf(fp, "%s%c", e->date, e->variable ? '*' : ' ');
-			for (int i = 0; i < last; i++) {
-				fprintf(fp, "\t%s%s", e->contents[i],
-					(i == last - 1) ? "" : "\n");
+			desc = e->description;
+			for (line = desc->firstline; line; line = line->next) {
+				fprintf(fp, "\t%s%s", line->str,
+					(line == desc->lastline) ? "" : "\n");
 			}
 			if (e->extra)
 				fprintf(fp, " (%s)", e->extra);

@@ -37,6 +37,7 @@
 #include <stdio.h>
 
 struct event;
+struct cal_desc;
 
 struct cal_day {
 	int	rd;
@@ -57,7 +58,7 @@ struct cal_day *find_yd(int year, int yday, int offset);
 struct cal_day *find_ymd(int year, int month, int day);
 
 struct event *event_add(struct cal_day *dp, bool day_first, bool variable,
-			char *contents[], char *extra);
+			struct cal_desc *desc, char *extra);
 void	event_print_all(FILE *fp);
 
 #endif

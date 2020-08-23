@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 22, 2020
+.Dd August 23, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -509,5 +509,3 @@ covers a date range of about 2 years.
 If more repeats of events are needed, you're likely using
 .Nm
 in the wrong way ;)
-.Pp
-An event can have at most 50 lines of contents.
