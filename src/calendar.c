@@ -39,6 +39,7 @@
 #include <err.h>
 #include <grp.h>  /* required on Linux for initgroups() */
 #include <locale.h>
+#include <math.h>
 #include <pwd.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -93,6 +94,8 @@ static int	get_fixed_of_today(void);
 static double	get_time_of_now(void);
 static int	get_utc_offset(void);
 static void	handle_sigchld(int signo __unused);
+static void	print_datetime(double t, const struct location *loc);
+static void	print_location(const struct location *loc, bool warn);
 static void	usage(const char *progname) __dead2;
 
 
@@ -216,18 +219,17 @@ main(int argc, char *argv[])
 	/* We're in UTC from now on */
 
 	if (show_info != NULL) {
+		double t = Options.today + Options.time;
 		if (strcmp(show_info, "chinese") == 0) {
 			show_chinese_calendar(Options.today);
 		} else if (strcmp(show_info, "moon") == 0) {
-			show_moon_info(Options.today + Options.time,
-				       Options.location);
-			if (!L_flag)
-				printf("\nWARNING: location not specified!\n");
+			print_datetime(t, Options.location);
+			print_location(Options.location, !L_flag);
+			show_moon_info(t, Options.location);
 		} else if (strcmp(show_info, "sun") == 0) {
-			show_sun_info(Options.today + Options.time,
-				      Options.location);
-			if (!L_flag)
-				printf("\nWARNING: location not specified!\n");
+			print_datetime(t, Options.location);
+			print_location(Options.location, !L_flag);
+			show_sun_info(t, Options.location);
 		} else {
 			errx(1, "unknown -s value: |%s|", show_info);
 		}
@@ -440,6 +442,36 @@ cd_home(const char *home)
 	}
 
 	return true;
+}
+
+static void
+print_datetime(double t, const struct location *loc)
+{
+	struct date date;
+	char buf[64];
+
+	gregorian_from_fixed(floor(t), &date);
+	printf("Gregorian date: %d-%02d-%02d\n",
+	       date.year, date.month, date.day);
+
+	format_time(buf, sizeof(buf), t);
+	printf("Time: %s", buf);
+	if (loc != NULL) {
+		format_zone(buf, sizeof(buf), loc->zone);
+		printf(" %s\n", buf);
+	} else {
+		printf("\n");
+	}
+}
+
+static void
+print_location(const struct location *loc, bool warn)
+{
+	char buf[64];
+
+	format_location(buf, sizeof(buf), loc);
+	printf("Location: %s%s\n", buf,
+	       warn ? "  [WARNING: use '-L' to specify]" : "");
 }
 
 static void __dead2

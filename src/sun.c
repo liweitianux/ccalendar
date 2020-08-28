@@ -365,21 +365,8 @@ static const struct solar_event {
 void
 show_sun_info(double t, const struct location *loc)
 {
-	struct date date;
-	char buf[128];
-
+	char buf[64];
 	int rd = (int)floor(t);
-	gregorian_from_fixed(rd, &date);
-	printf("Gregorian date: %d-%02d-%02d\n",
-	       date.year, date.month, date.day);
-
-	format_time(buf, sizeof(buf), t);
-	printf("Time: %s ", buf);
-	format_zone(buf, sizeof(buf), loc->zone);
-	printf("%s\n", buf);
-
-	format_location(buf, sizeof(buf), loc);
-	printf("Location: %s\n", buf);
 
 	/*
 	 * Sun position
@@ -393,7 +380,6 @@ show_sun_info(double t, const struct location *loc)
 	/*
 	 * Sun rise and set
 	 */
-
 	double moments[2] = { sunrise(rd, loc), sunset(rd, loc) };
 	const char *names[2] = { "Sunrise", "Sunset" };
 	for (size_t i = 0; i < nitems(moments); i++) {
@@ -407,11 +393,12 @@ show_sun_info(double t, const struct location *loc)
 	/*
 	 * Equinoxes and solstices
 	 */
-
 	const struct solar_event *event;
 	int lambda, day_approx;
+	int year = gregorian_year_from_fixed(rd);
+	struct date date = { year, 1, 1 };
 
-	printf("\nSolar events in year %d:\n", date.year);
+	printf("\nSolar events in year %d:\n", year);
 	for (size_t i = 0; i < nitems(SOLAR_EVENTS); i++) {
 		event = &SOLAR_EVENTS[i];
 		lambda = event->longitude;

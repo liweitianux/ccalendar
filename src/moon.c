@@ -815,23 +815,9 @@ moonset(int rd, const struct location *loc)
 void
 show_moon_info(double t, const struct location *loc)
 {
-	struct date date;
-	char buf[128];
-
+	char buf[64];
 	int rd = (int)floor(t);
 	double t_u = t - loc->zone;  /* universal time */
-
-	gregorian_from_fixed(rd, &date);
-	printf("Gregorian date: %d-%02d-%02d\n",
-	       date.year, date.month, date.day);
-
-	format_time(buf, sizeof(buf), t);
-	printf("Time: %s ", buf);
-	format_zone(buf, sizeof(buf), loc->zone);
-	printf("%s\n", buf);
-
-	format_location(buf, sizeof(buf), loc);
-	printf("Location: %s\n", buf);
 
 	/*
 	 * Lunar phase
@@ -897,22 +883,23 @@ show_moon_info(double t, const struct location *loc)
 	 * Moon phases in the year
 	 */
 
-	struct date date2 = { date.year, 1, 1 };
-	double t_begin = fixed_from_gregorian(&date2) - loc->zone;
-	date2.year++;
-	double t_end = fixed_from_gregorian(&date2) - loc->zone;
+	int year = gregorian_year_from_fixed(rd);
+	struct date date = { year, 1, 1 };
+	double t_begin = fixed_from_gregorian(&date) - loc->zone;
+	date.year++;
+	double t_end = fixed_from_gregorian(&date) - loc->zone;
 
-	printf("\nLunar events in year %d:\n", date.year);
+	printf("\nLunar events in year %d:\n", year);
 	printf("%19s   %19s   %19s   %19s\n",
 	       "New Moon", "First Quarter", "Full Moon", "Last Quarter");
 
 	double t_newmoon = t_begin;
 	while ((t_newmoon = new_moon_atafter(t_newmoon)) < t_end) {
 		t_newmoon += loc->zone;  /* to standard time */
-		gregorian_from_fixed((int)floor(t_newmoon), &date2);
+		gregorian_from_fixed((int)floor(t_newmoon), &date);
 		format_time(buf, sizeof(buf), t_newmoon);
 		printf("%d-%02d-%02d %s",
-		       date2.year, date2.month, date2.day, buf);
+		       date.year, date.month, date.day, buf);
 
 		/*
 		 * first quarter, full moon, last quarter
@@ -922,10 +909,10 @@ show_moon_info(double t, const struct location *loc)
 		for (size_t i = 0; i < nitems(phi_events); i++) {
 			t_event = lunar_phase_atafter(phi_events[i], t_event);
 			t_event += loc->zone;
-			gregorian_from_fixed((int)floor(t_event), &date2);
+			gregorian_from_fixed((int)floor(t_event), &date);
 			format_time(buf, sizeof(buf), t_event);
 			printf("   %d-%02d-%02d %s",
-			       date2.year, date2.month, date2.day, buf);
+			       date.year, date.month, date.day, buf);
 		}
 		printf("\n");
 
