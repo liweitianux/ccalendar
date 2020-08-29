@@ -47,12 +47,22 @@ struct chinese_date {
 	int	day;
 };
 
+struct chinese_jieqi {
+	const char	*name;
+	const char	*zhname;
+	bool		is_major;  /* whether a major solar term (Zhōngqì) */
+	int		longitude;  /* longitude of Sun */
+};
+
+enum { C_JIEQI_ALL, C_JIEQI_MAJOR, C_JIEQI_MINOR };
+
 int	chinese_new_year(int year);
 
 void	chinese_from_fixed(int rd, struct chinese_date *date);
 int	fixed_from_chinese(const struct chinese_date *date);
 
 int	chinese_qingming(int g_year);
+int	chinese_jieqi_onafter(int rd, int type, const struct chinese_jieqi **jieqi);
 void	show_chinese_calendar(int rd);
 
 #endif

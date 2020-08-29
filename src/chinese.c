@@ -375,12 +375,7 @@ static const char *mdays[] = {
 };
 
 /* 24 major and minor solar terms (节气) */
-static const struct solar_term {
-	const char	*name;
-	const char	*zhname;
-	bool		major;  /* whether a major solar term */
-	int		longitude;  /* longitude of Sun */
-} SOLAR_TERMS[] = {
+static const struct chinese_jieqi jieqis[] = {
 	{ "Lìchūn",      "立春", false, 315 },
 	{ "Yǔshuǐ",      "雨水", true,  330 },
 	{ "Jīngzhé",     "惊蛰", false, 345 },
@@ -406,6 +401,48 @@ static const struct solar_term {
 	{ "Xiǎohán",     "小寒", false, 285 },
 	{ "Dàhán",       "大寒", true,  300 },
 };
+
+/*
+ * Calculate the fixed date (in China) of the following jiéqì on or after
+ * the given fixed date $rd, with the calculated jiéqì information stored
+ * in $jieqi.
+ * If $type is C_JIEQI_ALL, find either major or minor jiéqì;
+ * If $type is C_JIEQI_MAJOR, find only major jiéqì;
+ * If $type is C_JIEQI_MINOR, find only minor jiéqì.
+ */
+int
+chinese_jieqi_onafter(int rd, int type, const struct chinese_jieqi **jieqi)
+{
+	const struct chinese_jieqi *jq1, *jq2;
+	const double zone = chinese_zone(rd);
+	double t_u = midnight_in_china(rd);
+	double lon = solar_longitude(t_u);
+	double lon1, lon2;
+	size_t n = nitems(jieqis);
+
+	for (size_t i = 0; i < n; i++) {
+		jq1 = &jieqis[i];
+		jq2 = &jieqis[(i+1) % n];
+		if ((type == C_JIEQI_MINOR && jq2->is_major) ||
+		    (type == C_JIEQI_MAJOR && !jq2->is_major)) {
+			jq2 = &jieqis[(i+2) % n];
+		}
+
+		lon1 = jq1->longitude;
+		lon2 = jq2->longitude;
+		if (lon2 < lon1)
+			lon2 += 360;
+
+		if ((lon >= lon1 && lon < lon2) ||
+		    (lon + 360 >= lon1 && lon + 360 < lon2)) {
+			break;
+		}
+	}
+
+	t_u = solar_longitude_atafter(jq2->longitude, floor(t_u));
+	*jieqi = jq2;
+	return (int)floor(t_u + zone);
+}
 
 /*
  * Print the Chinese calendar of the given date $rd and events of the year.
@@ -441,27 +478,27 @@ show_chinese_calendar(int rd)
 	       gdate.year, gdate.month, gdate.day);
 
 	const double zone = chinese_zone(rd);
-	const struct solar_term *term;
-	double t_term;
+	const struct chinese_jieqi *jq;
+	double t_jq;
 	char buf_time[32], buf_zone[32];
 	int lambda;
 
 	/* 1st solar term (Lìchūn) is generally around February 4 */
 	date_set(&gdate, g_year, 2, 1);
-	t_term = (double)fixed_from_gregorian(&gdate);
+	t_jq = (double)fixed_from_gregorian(&gdate);
 
 	format_zone(buf_zone, sizeof(buf_zone), zone);
 
 	printf("\n二十四节气 (solar terms):\n");
-	for (size_t i = 0; i < nitems(SOLAR_TERMS); i++) {
-		term = &SOLAR_TERMS[i];
-		lambda = term->longitude;
-		t_term = solar_longitude_atafter(lambda, floor(t_term)) + zone;
-		gregorian_from_fixed((int)floor(t_term), &gdate);
-		format_time(buf_time, sizeof(buf_time), t_term);
+	for (size_t i = 0; i < nitems(jieqis); i++) {
+		jq = &jieqis[i];
+		lambda = jq->longitude;
+		t_jq = solar_longitude_atafter(lambda, floor(t_jq)) + zone;
+		gregorian_from_fixed(floor(t_jq), &gdate);
+		format_time(buf_time, sizeof(buf_time), t_jq);
 
 		printf("%s (%-13s): %3d°, %d-%02d-%02d %s %s\n",
-		       term->zhname, term->name, lambda,
+		       jq->zhname, jq->name, lambda,
 		       gdate.year, gdate.month, gdate.day,
 		       buf_time, buf_zone);
 	}
