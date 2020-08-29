@@ -358,37 +358,50 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 	offset = (di.flags & F_OFFSET) ? di.offset : 0;
 
 	/* Specified year, month and day (e.g., '2020/Aug/16') */
-	if ((di.flags & ~F_VARIABLE) == (F_YEAR | F_MONTH | F_DAYOFMONTH))
-		return find_days_ymd(di.year, di.month, di.dayofmonth,
-				     dayp, edp);
+	if ((di.flags & ~F_VARIABLE) == (F_YEAR | F_MONTH | F_DAYOFMONTH) &&
+	    Calendar->find_days_ymd != NULL) {
+		return (Calendar->find_days_ymd)(di.year, di.month,
+						 di.dayofmonth, dayp, edp);
+	}
 
 	/* Specified month and day (e.g., 'Aug/16') */
-	if ((di.flags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH))
-		return find_days_ymd(-1, di.month, di.dayofmonth,
-				     dayp, edp);
+	if ((di.flags & ~F_VARIABLE) == (F_MONTH | F_DAYOFMONTH) &&
+	    Calendar->find_days_ymd != NULL) {
+		return (Calendar->find_days_ymd)(-1, di.month, di.dayofmonth,
+						 dayp, edp);
+	}
 
 	/* Same day every month (e.g., '* 16') */
-	if (di.flags == (F_ALLMONTH | F_DAYOFMONTH))
-		return find_days_dom(di.dayofmonth, dayp, edp);
+	if (di.flags == (F_ALLMONTH | F_DAYOFMONTH) &&
+	    Calendar->find_days_dom != NULL) {
+		return (Calendar->find_days_dom)(di.dayofmonth, dayp, edp);
+	}
 
 	/* Every day of a month (e.g., 'Aug *') */
-	if (di.flags == (F_ALLDAY | F_MONTH))
-		return find_days_month(di.month, dayp, edp);
+	if (di.flags == (F_ALLDAY | F_MONTH) &&
+	    Calendar->find_days_month != NULL) {
+		return (Calendar->find_days_month)(di.month, dayp, edp);
+	}
 
 	/*
 	 * Every day-of-week of a month (e.g., 'Aug/Sun')
 	 * One indexed day-of-week of a month (e.g., 'Aug/Sun+3')
 	 */
-	if ((di.flags & ~F_INDEX) == (F_MONTH | F_DAYOFWEEK | F_VARIABLE))
-		return find_days_mdow(di.month, di.dayofweek, index,
-				      dayp, edp);
+	if ((di.flags & ~F_INDEX) == (F_MONTH | F_DAYOFWEEK | F_VARIABLE) &&
+	    Calendar->find_days_mdow != NULL) {
+		return (Calendar->find_days_mdow)(di.month, di.dayofweek,
+						  index, dayp, edp);
+	}
 
 	/*
 	 * Every day-of-week of the year (e.g., 'Sun')
 	 * One indexed day-of-week of every month (e.g., 'Sun+3')
 	 */
-	if ((di.flags & ~F_INDEX) == (F_DAYOFWEEK | F_VARIABLE))
-		return find_days_mdow(-1, di.dayofweek, index, dayp, edp);
+	if ((di.flags & ~F_INDEX) == (F_DAYOFWEEK | F_VARIABLE) &&
+	    Calendar->find_days_mdow != NULL) {
+		return (Calendar->find_days_mdow)(-1, di.dayofweek, index,
+						  dayp, edp);
+	}
 
 	/* Special days with optional offset (e.g., 'ChineseNewYear+14') */
 	if ((di.flags & F_SPECIALDAY) != 0) {

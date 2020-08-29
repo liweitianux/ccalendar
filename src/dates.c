@@ -48,7 +48,8 @@
 
 struct event {
 	bool		 variable;  /* Whether a variable event ? */
-	char		 date[32];  /* human readable date for output */
+	char		 date[32];  /* Date in Gregorian calendar */
+	char		 date_user[64];  /* Date in user-chosen calendar */
 	struct cal_desc *description;  /* Event description */
 	char		*extra;  /* Extra data of the event */
 	struct event	*next;
@@ -202,14 +203,19 @@ event_add(struct cal_day *dp, bool day_first, bool variable,
 	struct date gdate;
 	struct tm tm = { 0 };
 
+	e = xcalloc(1, sizeof(*e));
+
 	gregorian_from_fixed(dp->rd, &gdate);
 	tm.tm_year = gdate.year - 1900;
 	tm.tm_mon = gdate.month - 1;
 	tm.tm_mday = gdate.day;
-
-	e = xcalloc(1, sizeof(*e));
 	strftime(e->date, sizeof(e->date),
 		 (day_first ? "%e %b" : "%b %e"), &tm);
+	if (Calendar->format_date != NULL) {
+		(Calendar->format_date)(e->date_user, sizeof(e->date_user),
+					dp->rd);
+	}
+
 	e->variable = variable;
 	e->description = desc;
 	if (extra != NULL && extra[0] != '\0')
@@ -232,6 +238,9 @@ event_print_all(FILE *fp)
 	while ((dp = loop_dates(dp)) != NULL) {
 		for (e = dp->events; e != NULL; e = e->next) {
 			fprintf(fp, "%s%c", e->date, e->variable ? '*' : ' ');
+			if (e->date_user[0] != '\0')
+				fprintf(fp, "\t[%s]", e->date_user);
+
 			desc = e->description;
 			for (line = desc->firstline; line; line = line->next) {
 				fprintf(fp, "\t%s%s", line->str,
@@ -239,6 +248,7 @@ event_print_all(FILE *fp)
 			}
 			if (e->extra)
 				fprintf(fp, " (%s)", e->extra);
+
 			fputc('\n', fp);
 			fflush(fp);
 		}

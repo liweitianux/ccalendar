@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,6 +59,7 @@
 
 
 struct location;
+struct cal_day;
 
 struct cal_options {
 	struct location *location;
@@ -66,7 +71,22 @@ struct cal_options {
 	bool debug;
 };
 
+struct calendar {
+	const char *name;
+	int	(*format_date)(char *buf, size_t size, int rd);
+	int	(*find_days_ymd)(int year, int month, int day,
+				 struct cal_day **dayp, char **edp);
+	int	(*find_days_dom)(int dom, struct cal_day **dayp, char **edp);
+	int	(*find_days_month)(int month, struct cal_day **dayp,
+				   char **edp);
+	int	(*find_days_mdow)(int month, int dow, int index,
+				  struct cal_day **dayp, char **edp);
+};
+
 extern struct cal_options Options;
+extern struct calendar *Calendar;
 extern const char *calendarDirs[];  /* paths to search for calendar files */
+
+bool	set_calendar(const char *name);
 
 #endif

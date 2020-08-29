@@ -1,8 +1,12 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
+ * Copyright (c) 2020 The DragonFly Project.  All rights reserved.
  * Copyright (c) 1989, 1993, 1994
  *	The Regents of the University of California.  All rights reserved.
+ *
+ * This code is derived from software contributed to The DragonFly Project
+ * by Aaron LI <aly@aaronly.me>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,6 +58,7 @@
 #include "basics.h"
 #include "chinese.h"
 #include "dates.h"
+#include "days.h"
 #include "gregorian.h"
 #include "io.h"
 #include "julian.h"
@@ -61,6 +66,7 @@
 #include "nnames.h"
 #include "parsedata.h"
 #include "sun.h"
+#include "utils.h"
 
 
 struct cal_options Options = {
@@ -75,6 +81,21 @@ const char *calendarDirs[] = {
 	CALENDAR_ETCDIR,
 	CALENDAR_DIR,
 	NULL,
+};
+
+/* selected calendar to use */
+struct calendar *Calendar;
+
+/* all supported calendars */
+static struct calendar calendars[] = {
+	{
+		.name = "Gregorian",
+		.format_date = NULL,
+		.find_days_ymd = find_days_ymd,
+		.find_days_dom = find_days_dom,
+		.find_days_month = find_days_month,
+		.find_days_mdow = find_days_mdow,
+	},
 };
 
 /* user's calendar home directory (relative to $HOME) */
@@ -98,6 +119,29 @@ static void	handle_sigchld(int signo __unused);
 static void	print_datetime(double t, const struct location *loc);
 static void	print_location(const struct location *loc, bool warn);
 static void	usage(const char *progname) __dead2;
+
+
+bool
+set_calendar(const char *name)
+{
+	struct calendar *cal;
+
+	if (name == NULL) {
+		Calendar = &calendars[0];
+		return true;
+	}
+
+	for (size_t i = 0; i < nitems(calendars); i++) {
+		cal = &calendars[i];
+		if (strcasecmp(name, cal->name) == 0) {
+			Calendar = cal;
+			return true;
+		}
+	}
+
+	warnx("%s: unknown calendar: |%s|", __func__, name);
+	return false;
+}
 
 
 int
@@ -210,6 +254,7 @@ main(int argc, char *argv[])
 	Options.day_begin = Options.today - days_before;
 	Options.day_end = Options.today + days_after;
 	generate_dates();
+	set_calendar(NULL);
 
 	setlocale(LC_ALL, "");
 	set_nnames();

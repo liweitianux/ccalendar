@@ -278,7 +278,8 @@ cal_parse(FILE *in)
 	struct cal_day *cdays[CAL_MAX_REPEAT] = { NULL };
 	struct specialday *sday;
 	char *extradata[CAL_MAX_REPEAT] = { NULL };
-	bool d_first, skip, locale_changed, var_handled;
+	bool d_first, skip, var_handled;
+	bool locale_changed, calendar_changed;
 	int flags, count;
 
 	assert(in != NULL);
@@ -286,6 +287,7 @@ cal_parse(FILE *in)
 	d_first = locale_day_first();
 	skip = false;
 	locale_changed = false;
+	calendar_changed = false;
 
 	while (cal_readentry(&cfile, &entry, skip)) {
 		if (entry.type == T_TOKEN) {
@@ -316,6 +318,17 @@ cal_parse(FILE *in)
 				DPRINTF("%s: set LC_ALL='%s' (day_first=%s)\n",
 					__func__, entry.value,
 					d_first ? "true" : "false");
+				var_handled = true;
+			}
+
+			if (strcasecmp(entry.variable, "CALENDAR") == 0) {
+				if (!set_calendar(entry.value)) {
+					warnx("Failed to set CALENDAR='%s'",
+					      entry.value);
+				}
+				calendar_changed = true;
+				DPRINTF("%s: set CALENDAR='%s'\n",
+					__func__, entry.value);
 				var_handled = true;
 			}
 
@@ -388,6 +401,11 @@ cal_parse(FILE *in)
 		setlocale(LC_ALL, "");
 		set_nnames();
 		DPRINTF("%s: reset LC_ALL\n", __func__);
+	}
+
+	if (calendar_changed) {
+		set_calendar(NULL);
+		DPRINTF("%s: reset CALENDAR\n", __func__);
 	}
 
 	free(cfile.line);
