@@ -688,7 +688,7 @@ write_mailheader(FILE *fp)
 	struct passwd *pw = getpwuid(uid);
 	struct date date;
 	char dayname[32] = { 0 };
-	enum dayofweek dow;
+	int dow;
 
 	gregorian_from_fixed(Options.today, &date);
 	dow = dayofweek_from_fixed(Options.today);

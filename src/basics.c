@@ -51,40 +51,42 @@
  * Determine the day of week of the fixed date $rd.
  * Ref: Sec.(1.12), Eq.(1.60)
  */
-enum dayofweek
+int
 dayofweek_from_fixed(int rd)
 {
 	/* NOTE: R.D. 1 is Monday */
-	return (enum dayofweek)mod(rd, 7);
+	return mod(rd, 7);
 }
 
 /*
- * Calculate the fixed date of the $k-day on or before the fixed date $date.
+ * Calculate the fixed date of the day-of-week $dow on or before
+ * the fixed date $date.
  * Ref: Sec.(1.12), Eq.(1.62)
  */
 int
-kday_onbefore(enum dayofweek k, int rd)
+kday_onbefore(int dow, int rd)
 {
-	return rd - (int)dayofweek_from_fixed(rd - (int)k);
+	return rd - dayofweek_from_fixed(rd - dow);
 }
 
 /*
- * Calculate the fixed date of the $k-day after the fixed date $date.
+ * Calculate the fixed date of the day-of-week $dow after
+ * the fixed date $date.
  * Ref: Sec.(1.12), Eq.(1.68)
  */
 int
-kday_after(enum dayofweek k, int rd)
+kday_after(int dow, int rd)
 {
-	return kday_onbefore(k, rd + 7);
+	return kday_onbefore(dow, rd + 7);
 }
 
 /*
- * Calculate the $n-th occurrence of a given day of week counting from
- * either after (if $n > 0) or before (if $n < 0) the given $date.
+ * Calculate the $n-th occurrence of a given day-of-week $dow counting
+ * from either after (if $n > 0) or before (if $n < 0) the given $date.
  * Ref: Sec.(2.5), Eq.(2.33)
  */
 int
-nth_kday(int n, enum dayofweek k, struct date *date)
+nth_kday(int n, int dow, struct date *date)
 {
 	if (n == 0)
 		errx(1, "%s: invalid n = 0!", __func__);
@@ -92,9 +94,9 @@ nth_kday(int n, enum dayofweek k, struct date *date)
 	int rd = fixed_from_gregorian(date);
 	int kday;
 	if (n > 0)
-		kday = kday_onbefore(k, rd - 1);  /* Sec.(1.12), Eq.(1.67) */
+		kday = kday_onbefore(dow, rd - 1);  /* Sec.(1.12), Eq.(1.67) */
 	else
-		kday = kday_onbefore(k, rd + 7);  /* Sec.(1.12), Eq.(1.68) */
+		kday = kday_onbefore(dow, rd + 7);  /* Sec.(1.12), Eq.(1.68) */
 	return 7 * n + kday;
 }
 

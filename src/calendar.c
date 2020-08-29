@@ -107,8 +107,8 @@ main(int argc, char *argv[])
 	int	days_before = 0;
 	int	days_after = 0;
 	int	Friday = 5;  /* days before weekend */
+	int	dow;
 	int	ch, utc_offset;
-	enum dayofweek dow;
 	struct passwd *pw;
 	struct location loc = { 0 };
 	const char *show_info = NULL;
@@ -204,7 +204,7 @@ main(int argc, char *argv[])
 	/* Friday displays Monday's events */
 	dow = dayofweek_from_fixed(Options.today);
 	if (days_after == 0 && Friday != -1)
-		days_after = ((int)dow == Friday) ? 3 : 1;
+		days_after = (dow == Friday) ? 3 : 1;
 
 	Options.day_begin = Options.today - days_before;
 	Options.day_end = Options.today + days_after;

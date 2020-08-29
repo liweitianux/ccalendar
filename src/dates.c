@@ -68,7 +68,7 @@ generate_dates(void)
 	daycount = Options.day_end - Options.day_begin + 1;
 	cal_days = xcalloc((size_t)daycount, sizeof(struct cal_day));
 
-	dow = (int)dayofweek_from_fixed(Options.day_begin);
+	dow = dayofweek_from_fixed(Options.day_begin);
 	gregorian_from_fixed(Options.day_begin, &date);
 	year = date.year;
 	month = date.month;
@@ -164,7 +164,7 @@ first_dayofweek_of_month(int year, int month)
 {
 	struct date date = { year, month, 1 };
 	int rd = fixed_from_gregorian(&date);
-	return (int)dayofweek_from_fixed(rd);
+	return dayofweek_from_fixed(rd);
 }
 
 struct cal_day *

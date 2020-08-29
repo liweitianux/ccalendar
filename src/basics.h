@@ -70,10 +70,10 @@ enum dayofweek {
 	SATURDAY,
 };
 
-enum dayofweek	dayofweek_from_fixed(int rd);
-int	kday_after(enum dayofweek k, int rd);
-int	kday_onbefore(enum dayofweek k, int rd);
-int	nth_kday(int n, enum dayofweek k, struct date *date);
+int	dayofweek_from_fixed(int rd);
+int	kday_after(int dow, int rd);
+int	kday_onbefore(int dow, int rd);
+int	nth_kday(int n, int dow, struct date *date);
 int	dayofyear_from_fixed(int rd);
 
 double	julian_centuries(double t);
