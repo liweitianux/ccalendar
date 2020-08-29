@@ -1,7 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright (c) 2019 The DragonFly Project.  All rights reserved.
+ * Copyright (c) 2019-2020 The DragonFly Project.  All rights reserved.
  *
  * This code is derived from software contributed to The DragonFly Project
  * by Aaron LI <aly@aaronly.me>
@@ -52,6 +52,7 @@ int	chinese_new_year(int year);
 void	chinese_from_fixed(int rd, struct chinese_date *date);
 int	fixed_from_chinese(const struct chinese_date *date);
 
+int	chinese_qingming(int g_year);
 void	show_chinese_calendar(int rd);
 
 #endif

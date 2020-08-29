@@ -306,6 +306,21 @@ fixed_from_chinese(const struct chinese_date *date)
 	return newmoon + date->day - 1;
 }
 
+/*
+ * Calculate the fixed date of Qīngmíng (清明) in Gregorian year $g_year.
+ * Ref: Sec.(19.6), Eq.(19.28)
+ */
+int
+chinese_qingming(int g_year)
+{
+	double lambda = 15.0;  /* Solar longitude of Qīngmíng */
+	struct date date = { g_year, 4, 1 }; /* Qīngmíng is around April 5 */
+	int rd = fixed_from_gregorian(&date);
+	double zone = chinese_zone(rd);
+	double t = solar_longitude_atafter(lambda, rd) + zone;
+	return (int)floor(t);
+}
+
 /**************************************************************************/
 
 /* celestial stem, tiāngān (天干) */

@@ -212,6 +212,8 @@ The solar equinox in September.
 The solar solstice in December.
 .It ChineseNewYear
 The first day of the Chinese year.
+.It ChineseQingming
+The Chinese Qīngmíng festival (a.k.a. Tomb-sweeping Day).
 .El
 .Pp
 These names may be reassigned to their local names via an assignment
