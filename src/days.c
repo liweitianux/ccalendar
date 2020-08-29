@@ -61,6 +61,7 @@ static int	find_days_easter(int, struct cal_day **, char **);
 static int	find_days_paskha(int, struct cal_day **, char **);
 static int	find_days_cny(int, struct cal_day **, char **);
 static int	find_days_cqingming(int, struct cal_day **, char **);
+static int	find_days_cjieqi(int, struct cal_day **, char **);
 static int	find_days_marequinox(int, struct cal_day **, char **);
 static int	find_days_sepequinox(int, struct cal_day **, char **);
 static int	find_days_junsolstice(int, struct cal_day **, char **);
@@ -77,6 +78,7 @@ struct specialday specialdays[] = {
 	SPECIALDAY_INIT(SD_PASKHA, "Paskha", &find_days_paskha),
 	SPECIALDAY_INIT(SD_CNY, "ChineseNewYear", &find_days_cny),
 	SPECIALDAY_INIT(SD_CQINGMING, "ChineseQingming", &find_days_cqingming),
+	SPECIALDAY_INIT(SD_CJIEQI, "ChineseJieqi", &find_days_cjieqi),
 	SPECIALDAY_INIT(SD_MAREQUINOX, "MarEquinox", &find_days_marequinox),
 	SPECIALDAY_INIT(SD_SEPEQUINOX, "SepEquinox", &find_days_sepequinox),
 	SPECIALDAY_INIT(SD_JUNSOLSTICE, "JunSolstice", &find_days_junsolstice),
@@ -205,6 +207,50 @@ find_days_yearly(int sday_id, int offset, struct cal_day **dayp, char **edp)
 				edp[count] = xstrdup(buf);
 			}
 			dayp[count++] = dp;
+		}
+	}
+
+	return count;
+}
+
+/*
+ * Find days of the 24 Chinese Jiéqì (节气)
+ */
+static int
+find_days_cjieqi(int offset, struct cal_day **dayp, char **edp)
+{
+	const struct chinese_jieqi *jq;
+	struct cal_day *dp;
+	struct date date;
+	char buf[32];
+	int year1, year2;
+	int rd, rd_begin, rd_end;
+	int count = 0;
+
+	year1 = gregorian_year_from_fixed(Options.day_begin);
+	year2 = gregorian_year_from_fixed(Options.day_end);
+	for (int y = year1; y <= year2; y++) {
+		date_set(&date, y, 1, 1);
+		rd_begin = fixed_from_gregorian(&date);
+		date.year++;
+		rd_end = fixed_from_gregorian(&date);
+
+		for (rd = rd_begin; rd <= rd_end; rd++) {
+			rd = chinese_jieqi_onafter(rd, C_JIEQI_ALL, &jq);
+			if (rd > rd_end)
+				break;
+
+			if ((dp = find_rd(rd, offset)) != NULL) {
+				if (count >= CAL_MAX_REPEAT) {
+					warnx("%s: too many repeats",
+					      __func__);
+					return count;
+				}
+				snprintf(buf, sizeof(buf), "%s, %s",
+					 jq->name, jq->zhname);
+				edp[count] = xstrdup(buf);
+				dayp[count++] = dp;
+			}
 		}
 	}
 

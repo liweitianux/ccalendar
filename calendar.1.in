@@ -214,6 +214,8 @@ The solar solstice in December.
 The first day of the Chinese year.
 .It ChineseQingming
 The Chinese Qīngmíng festival (a.k.a. Tomb-sweeping Day).
+.It ChineseJieqi
+The 24 solar terms (Jiéqì) in Chinese calendar.
 .El
 .Pp
 These names may be reassigned to their local names via an assignment
