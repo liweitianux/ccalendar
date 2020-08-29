@@ -40,8 +40,10 @@
  */
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "basics.h"
+#include "gregorian.h"
 #include "julian.h"
 #include "utils.h"
 
@@ -130,4 +132,32 @@ julian_dayofweek_from_fixed(const struct date *jdate)
 	int h = d + div_floor(13 * (m+1), 5) + div_floor(y, 4) + y + 5;
 		/* 0 = Sat, 1 = Sun, ... , 5 = Thu, 6 = Fri */
 	return mod(h - 1, 7);  /* 0 = Sun, 1 = Mon, ... , 5 = Fri, 6 = Sat */
+}
+
+/*
+ * Print the Julian calendar of the given date $rd.
+ */
+void
+show_julian_calendar(int rd)
+{
+	static const char *dow_names[] = {
+		"Sunday", "Monday", "Tuesday", "Wednesday",
+		"Thursday", "Friday", "Saturday",
+	};
+
+	struct date gdate, jdate;
+	bool leap;
+	int gdow, jdow;
+
+	gregorian_from_fixed(rd, &gdate);
+	julian_from_fixed(rd, &jdate);
+	leap = julian_leap_year(jdate.year);
+	gdow = dayofweek_from_fixed(rd);
+	jdow = julian_dayofweek_from_fixed(&jdate);
+
+	printf("Gregorian date: %d-%02d-%02d, %s\n",
+	       gdate.year, gdate.month, gdate.day, dow_names[gdow]);
+	printf("Julian date: %d-%02d-%02d, %s\n",
+	       jdate.year, jdate.month, jdate.day, dow_names[jdow]);
+	printf("Leap year: %s\n", leap ? "yes" : "no");
 }

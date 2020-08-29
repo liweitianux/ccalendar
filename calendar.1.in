@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 23, 2020
+.Dd August 29, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -44,7 +44,7 @@
 .Op Fl f Ar calendarfile
 .Op Fl h
 .Op Fl L Ar latitude,longitude[,elevation]
-.Op Fl s Ar chinese|moon|sun
+.Op Fl s Ar chinese|julian|moon|sun
 .Op Fl T Ar hh:mm[:ss]
 .Op Fl t Ar [[[CC]YY]MM]DD
 .Op Fl U Ar \(+-hh[[:]mm]
@@ -112,11 +112,13 @@ arguments are default to 0, while the
 .Ar longitude
 argument is calculated from the adopted UTC offset
 (i.e., 15 degrees times the UTC offset in hours).
-.It Fl s Ar chinese|moon|sun
+.It Fl s Ar chinese|julian|moon|sun
 Show information of the specified category:
 .Bl -tag -width chinese
 .It Va chinese
 Show the Chinese calendar and the 24 solar terms in this year.
+.It Va julian
+Show the Julian calendar.
 .It Va moon
 Show Moon position, phases, rise and set times, and lunar events in this year.
 .It Va sun
