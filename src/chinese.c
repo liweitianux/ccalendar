@@ -102,8 +102,8 @@ midnight_in_china(int rd)
 static int
 current_major_solar_term(int rd)
 {
-	double ut = midnight_in_china(rd);
-	double lon = solar_longitude(ut);
+	double t_u = midnight_in_china(rd);
+	double lon = solar_longitude(t_u);
 	return mod1(2 + div_floor((int)lon, 30), 12);
 }
 
@@ -139,9 +139,9 @@ static int
 chinese_new_moon_onafter(int rd)
 {
 	double t = new_moon_atafter(midnight_in_china(rd));
-	double st = t + chinese_zone(rd);  /* in standard time */
+	double t_s = t + chinese_zone(rd);  /* in standard time */
 
-	return (int)floor(st);
+	return (int)floor(t_s);
 }
 
 /*
@@ -153,9 +153,9 @@ static int
 chinese_new_moon_before(int rd)
 {
 	double t = new_moon_before(midnight_in_china(rd));
-	double st = t + chinese_zone(rd);  /* in standard time */
+	double t_s = t + chinese_zone(rd);  /* in standard time */
 
-	return (int)floor(st);
+	return (int)floor(t_s);
 }
 
 /*
