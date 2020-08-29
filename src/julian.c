@@ -112,3 +112,22 @@ julian_from_fixed(int rd, struct date *date)
 	d.month = date->month;
 	date->day = rd - fixed_from_julian(&d) + 1;
 }
+
+/**************************************************************************/
+
+/*
+ * Determine the day of week of the Julian date $jdate,
+ * using the Zeller's congruence.
+ * Ref: https://en.wikipedia.org/wiki/Zeller%27s_congruence
+ */
+int
+julian_dayofweek_from_fixed(const struct date *jdate)
+{
+	/* January/February counted as month 13/14 of previous year */
+	int y = (jdate->month > 2) ? jdate->year : (jdate->year - 1);
+	int m = (jdate->month > 2) ? jdate->month : (jdate->month + 12);
+	int d = jdate->day;
+	int h = d + div_floor(13 * (m+1), 5) + div_floor(y, 4) + y + 5;
+		/* 0 = Sat, 1 = Sun, ... , 5 = Thu, 6 = Fri */
+	return mod(h - 1, 7);  /* 0 = Sun, 1 = Mon, ... , 5 = Fri, 6 = Sat */
+}
