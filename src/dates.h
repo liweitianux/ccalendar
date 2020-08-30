@@ -53,10 +53,7 @@ void	generate_dates(void);
 void	free_dates(void);
 struct cal_day *loop_dates(struct cal_day *dp);
 
-int	first_dayofweek_of_month(int year, int month);
 struct cal_day *find_rd(int rd, int offset);
-struct cal_day *find_yd(int year, int yday, int offset);
-struct cal_day *find_ymd(int year, int month, int day);
 
 struct event *event_add(struct cal_day *dp, bool day_first, bool variable,
 			struct cal_desc *desc, char *extra);

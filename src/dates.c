@@ -160,13 +160,6 @@ loop_dates(struct cal_day *dp)
 		return dp;
 }
 
-int
-first_dayofweek_of_month(int year, int month)
-{
-	struct date date = { year, month, 1 };
-	int rd = fixed_from_gregorian(&date);
-	return dayofweek_from_fixed(rd);
-}
 
 struct cal_day *
 find_rd(int rd, int offset)
@@ -176,22 +169,6 @@ find_rd(int rd, int offset)
 		return NULL;
 
 	return &cal_days[rd - Options.day_begin];
-}
-
-struct cal_day *
-find_yd(int year, int yday, int offset)
-{
-	struct date gdate = { year, 1, 1 };
-	int rd = fixed_from_gregorian(&gdate) + yday - 1;
-	return find_rd(rd, offset);
-}
-
-struct cal_day *
-find_ymd(int year, int month, int day)
-{
-	struct date gdate = { year, month, day };
-	int rd = fixed_from_gregorian(&gdate);
-	return find_rd(rd, 0);
 }
 
 
