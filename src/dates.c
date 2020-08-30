@@ -237,13 +237,15 @@ event_print_all(FILE *fp)
 
 	while ((dp = loop_dates(dp)) != NULL) {
 		for (e = dp->events; e != NULL; e = e->next) {
-			fprintf(fp, "%s%c", e->date, e->variable ? '*' : ' ');
+			fprintf(fp, "%s%c\t", e->date, e->variable ? '*' : ' ');
 			if (e->date_user[0] != '\0')
-				fprintf(fp, "\t[%s]", e->date_user);
+				fprintf(fp, "[%s]", e->date_user);
 
 			desc = e->description;
 			for (line = desc->firstline; line; line = line->next) {
-				fprintf(fp, "\t%s%s", line->str,
+				fprintf(fp, "%s%s%s",
+					(line == desc->firstline) ? " " : "\t",
+					line->str,
 					(line == desc->lastline) ? "" : "\n");
 			}
 			if (e->extra)
