@@ -114,7 +114,8 @@ argument is calculated from the adopted UTC offset
 (i.e., 15 degrees times the UTC offset in hours).
 .It Fl s Ar chinese|julian|moon|sun
 Show information of the specified category:
-.Bl -tag -width chinese
+.Pp
+.Bl -tag -width chinese -compact
 .It Va chinese
 Show the Chinese calendar and the 24 solar terms in this year.
 .It Va julian
@@ -192,8 +193,7 @@ To handle the local name of sequences, specify them as
 in the calendar file.
 .Pp
 The names of the following special days are recognized:
-.Pp
-.Bl -tag -offset indent -width 123456789012345 -compact
+.Bl -tag -offset indent -width 1234567890123456 -compact
 .It Easter
 Catholic Easter.
 .It Paskha
@@ -217,7 +217,6 @@ The Chinese Qīngmíng festival (a.k.a. Tomb-sweeping Day).
 .It ChineseJieqi
 The 24 solar terms (Jiéqì) in Chinese calendar.
 .El
-.Pp
 These names may be reassigned to their local names via an assignment
 like
 .Dq <name>=<local_name>
@@ -346,6 +345,7 @@ Easter=Ostern
 Jun. 15\fB\et\fRJune 15
 15 June\fB\et\fRJune 15
 15 *\fB\et\fR15th of every month
+March/0\fB\et\fRLast day of February
 2010/4/15\fB\et\fR15 April 2010
 
 Thursday\fB\et\fREvery Thursday
@@ -386,7 +386,7 @@ mode.
 The following calendar files are provided in
 .Pa @@CALENDAR_DIR@@ :
 .Pp
-.Bl -tag -width calendar.southafrica -compact
+.Bl -tag -width calendar.123456789012 -compact
 .It Pa calendar.all
 File which includes all the calendar files.
 .It Pa calendar.australia
@@ -460,7 +460,7 @@ Includes all calendar files except for national ones.
 .Sh COMPATIBILITY
 The
 .Nm
-program previously selected lines which had the correct date anywhere
+utility previously selected lines which had the correct date anywhere
 in the line.
 This is no longer true: the date is only recognized when it occurs
 at the beginning of a line.
@@ -485,7 +485,7 @@ command appeared in
 .Pp
 The
 .Nm
-program was significantly enhanced in
+utility was significantly enhanced in
 .Fx 9.0
 by
 .An Edwin Groothuis Aq Mt edwin@FreeBSD.org .
