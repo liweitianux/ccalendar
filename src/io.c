@@ -360,7 +360,8 @@ cal_parse(FILE *in)
 
 		if (entry.type == T_DATE) {
 			desc = entry.description;
-			DPRINTF("%s: T_DATE: |%s|\n", __func__, entry.date);
+			DPRINTF("----------------\n%s: T_DATE: |%s|\n",
+				__func__, entry.date);
 			for (line = desc->firstline; line; line = line->next)
 				DPRINTF("\t|%s|\n", line->str);
 

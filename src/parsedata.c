@@ -139,7 +139,6 @@ determinestyle(const char *date, struct dateinfo *di)
 	bool ret;
 	int offset;
 
-	DPRINTF("-------\ndate: |%s|\n", date);
 	date2 = xstrdup(date);
 	ret = false;
 
