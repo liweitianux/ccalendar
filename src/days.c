@@ -138,7 +138,7 @@ find_days_decsolstice(int offset, struct cal_day **dayp, char **edp)
 }
 
 /*
- * Find days of the yearly special day ($day_flag).
+ * Find days of the yearly special day specified by $sday_id.
  */
 static int
 find_days_yearly(int sday_id, int offset, struct cal_day **dayp, char **edp)
@@ -270,7 +270,7 @@ find_days_fullmoon(int offset, struct cal_day **dayp, char **edp)
 }
 
 /*
- * Find days of the moon events ($moon_flag).
+ * Find days of the moon events specified by $sday_id.
  */
 static int
 find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
@@ -299,7 +299,7 @@ find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 				t = lunar_phase_atafter(180, t);
 				break;
 			default:
-				errx(1, "%s: unknown special day: %d",
+				errx(1, "%s: unknown moon event: %d",
 				     __func__, sday_id);
 			}
 
