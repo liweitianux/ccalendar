@@ -124,6 +124,7 @@ static void	 show_dateinfo(struct dateinfo *di);
  *				'300' ... '359' | '360' ... '365'
  *
  * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear' |
+ *				'ChineseQingming' | 'ChineseJieqi' |
  *				'NewMoon' | 'FullMoon' |
  *				'MarEquinox' | 'SepEquinox' |
  *				'JunSolstice' | 'DecSolstice'

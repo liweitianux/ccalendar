@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 29, 2020
+.Dd August 30, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -326,6 +326,7 @@ OffsetNumber            ::=     '0' ... '9' | '00' ... '99' | '000' ... '299' |
                                 '300' ... '359' | '360' ... '365'
 
 SpecialDay              ::=     'Easter' | 'Paskha' | 'ChineseNewYear' |
+                                'ChineseQingming' | 'ChineseJieqi' |
                                 'NewMoon' | 'FullMoon' |
                                 'MarEquinox' | 'SepEquinox' |
                                 'JunSolstice' | 'DecSolstice'
