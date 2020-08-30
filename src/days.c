@@ -368,7 +368,9 @@ find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
 	int count = 0;
 
 	while ((dp = loop_dates(dp)) != NULL) {
-		if (dp->day == dom) {
+		if (dp->day == dom ||
+		    /* day of zero means the last day of previous month */
+		    (dom == 0 && dp->last_dom)) {
 			if (count >= CAL_MAX_REPEAT) {
 				warnx("%s: too many repeats", __func__);
 				return count;
