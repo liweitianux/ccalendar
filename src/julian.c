@@ -42,7 +42,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "calendar.h"
 #include "basics.h"
+#include "dates.h"
 #include "gregorian.h"
 #include "julian.h"
 #include "utils.h"
@@ -133,6 +135,144 @@ julian_dayofweek_from_fixed(const struct date *jdate)
 		/* 0 = Sat, 1 = Sun, ... , 5 = Thu, 6 = Fri */
 	return mod(h - 1, 7);  /* 0 = Sun, 1 = Mon, ... , 5 = Fri, 6 = Sat */
 }
+
+
+/*
+ * Format the given fixed date $rd to '<month>/<day>' string in $buf.
+ * Return the formatted string length.
+ */
+int
+julian_format_date(char *buf, size_t size, int rd)
+{
+	static const char *month_names[] = {
+		"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+		"Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+	};
+	struct date jdate;
+
+	julian_from_fixed(rd, &jdate);
+	return snprintf(buf, size, "%s/%02d",
+			month_names[jdate.month - 1], jdate.day);
+}
+
+/*
+ * Calculate the Julian year corresponding to the fixed date $rd.
+ */
+static int
+julian_year_from_fixed(int rd)
+{
+	struct date jdate;
+	julian_from_fixed(rd, &jdate);
+	return jdate.year;
+}
+
+/*
+ * Find days of the specified Julian year ($year), month ($month) and
+ * day ($day).
+ * If year $year < 0, then year is ignored.
+ */
+int
+julian_find_days_ymd(int year, int month, int day, struct cal_day **dayp,
+		     char **edp __unused)
+{
+	struct cal_day *dp;
+	struct date date;
+	int rd, year1, year2;
+	int count = 0;
+
+	year1 = julian_year_from_fixed(Options.day_begin);
+	year2 = julian_year_from_fixed(Options.day_end);
+	for (int y = year1; y <= year2; y++) {
+		if (year >= 0 && year != y)
+			continue;
+		date_set(&date, y, month, day);
+		rd = fixed_from_julian(&date);
+		if ((dp = find_rd(rd, 0)) != NULL) {
+			if (count >= CAL_MAX_REPEAT) {
+				warnx("%s: too many repeats", __func__);
+				return count;
+			}
+			dayp[count++] = dp;
+		}
+	}
+
+	return count;
+}
+
+/*
+ * Find days of the specified Julian day of month ($dom) of all months.
+ */
+int
+julian_find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
+{
+	struct cal_day *dp;
+	struct date date;
+	int year1, year2;
+	int rd_begin, rd_end;
+	int count = 0;
+
+	year1 = julian_year_from_fixed(Options.day_begin);
+	year2 = julian_year_from_fixed(Options.day_end);
+	for (int y = year1; y <= year2; y++) {
+		date_set(&date, y, 1, 1);
+		rd_begin = fixed_from_julian(&date);
+		date.year++;
+		rd_end = fixed_from_julian(&date);
+
+		for (int m = 1, rd = rd_begin; rd < rd_end; m++) {
+			date_set(&date, y, m, dom);
+			rd = fixed_from_julian(&date);
+			if ((dp = find_rd(rd, 0)) != NULL) {
+				if (count >= CAL_MAX_REPEAT) {
+					warnx("%s: too many repeats",
+					      __func__);
+					return count;
+				}
+				dayp[count++] = dp;
+			}
+		}
+	}
+
+	return count;
+}
+
+/*
+ * Find days of all days of the specified Julian month ($month).
+ */
+int
+julian_find_days_month(int month, struct cal_day **dayp, char **edp __unused)
+{
+	struct cal_day *dp;
+	struct date date;
+	int year1, year2;
+	int rd_begin, rd_end;
+	int count = 0;
+
+	year1 = julian_year_from_fixed(Options.day_begin);
+	year2 = julian_year_from_fixed(Options.day_end);
+	for (int y = year1; y <= year2; y++) {
+		date_set(&date, y, month, 1);
+		rd_begin = fixed_from_julian(&date);
+		date.month++;
+		if (date.month > 12)
+			date_set(&date, y+1, 1, 1);
+		rd_end = fixed_from_julian(&date);
+
+		for (int rd = rd_begin; rd < rd_end; rd++) {
+			if ((dp = find_rd(rd, 0)) != NULL) {
+				if (count >= CAL_MAX_REPEAT) {
+					warnx("%s: too many repeats",
+					      __func__);
+					return count;
+				}
+				dayp[count++] = dp;
+			}
+		}
+	}
+
+	return count;
+}
+
 
 /*
  * Print the Julian calendar of the given date $rd.

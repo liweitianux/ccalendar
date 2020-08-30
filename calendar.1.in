@@ -183,6 +183,21 @@ and C++-style comment
 .Pq Li // ...
 are supported.
 .Pp
+The default calendar used by the
+.Nm
+utility is the
+.Dq Gregorian calendar .
+In addition, the following calendar is supported:
+.Bl -tag -offset indent -width julian -compact
+.It Julian
+The Julian calendar
+.El
+Specify
+.Dq CALENDAR=<calendar>
+in the calendar file to select the calendar to use.
+The calendar will be reset to the default Gregorian calendar
+at the end of the calendar file.
+.Pp
 To handle calendars in national code table, specify
 .Dq LANG=<locale>
 in the calendar file, before the national names being used.
@@ -273,7 +288,8 @@ Lines starting with a <tab> character are treated as a continuation of
 the previous line, allowing multiple-line description of an event.
 .El
 .Pp
-The supported date styles are as follows:
+The supported date styles can vary with calendars.
+In the Gregorian calendar, the following date styles are supported:
 .Bd -literal -offset indent
 Date                    ::=     Year . '/' . Month . '/' . DayOfMonth |
                                 Year . ' ' . Month . ' ' . DayOfMonth |
@@ -334,6 +350,7 @@ SpecialDay              ::=     'Easter' | 'Paskha' | 'ChineseNewYear' |
 Some possible calendar entries (<tab> characters highlighted as
 .Sq \fB\et\fR ) :
 .Bd -unfilled -offset indent
+CLANEDAR=Gregorian
 LANG=C
 Easter=Ostern
 

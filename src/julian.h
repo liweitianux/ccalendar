@@ -39,10 +39,18 @@
 
 #include <stdbool.h>
 
+struct cal_day;
+
 int	fixed_from_julian(const struct date *date);
 int	julian_dayofweek_from_fixed(const struct date *jdate);
 void	julian_from_fixed(int rd, struct date *date);
 bool	julian_leap_year(int year);
+
+int	julian_format_date(char *buf, size_t size, int rd);
+int	julian_find_days_ymd(int year, int month, int day,
+			     struct cal_day **dayp, char **edp);
+int	julian_find_days_dom(int dom, struct cal_day **dayp, char **edp);
+int	julian_find_days_month(int month, struct cal_day **dayp, char **edp);
 void	show_julian_calendar(int rd);
 
 #endif

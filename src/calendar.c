@@ -83,18 +83,26 @@ const char *calendarDirs[] = {
 	NULL,
 };
 
-/* selected calendar to use */
+/* currently selected calendar to use */
 struct calendar *Calendar;
 
 /* all supported calendars */
 static struct calendar calendars[] = {
-	{
+	{  /* the default */
 		.name = "Gregorian",
 		.format_date = NULL,
 		.find_days_ymd = find_days_ymd,
 		.find_days_dom = find_days_dom,
 		.find_days_month = find_days_month,
 		.find_days_mdow = find_days_mdow,
+	},
+	{
+		.name = "Julian",
+		.format_date = julian_format_date,
+		.find_days_ymd = julian_find_days_ymd,
+		.find_days_dom = julian_find_days_dom,
+		.find_days_month = julian_find_days_month,
+		.find_days_mdow = NULL,
 	},
 };
 
