@@ -187,10 +187,12 @@ The default calendar used by the
 .Nm
 utility is the
 .Dq Gregorian calendar .
-In addition, the following calendar is supported:
-.Bl -tag -offset indent -width julian -compact
+In addition, the following calendars are supported:
+.Bl -tag -offset indent -width chinese -compact
 .It Julian
 The Julian calendar
+.It Chinese
+The Chinese calendar
 .El
 Specify
 .Dq CALENDAR=<calendar>

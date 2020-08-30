@@ -104,6 +104,14 @@ static struct calendar calendars[] = {
 		.find_days_month = julian_find_days_month,
 		.find_days_mdow = NULL,
 	},
+	{
+		.name = "Chinese",
+		.format_date = chinese_format_date,
+		.find_days_ymd = chinese_find_days_ymd,
+		.find_days_dom = chinese_find_days_dom,
+		.find_days_month = NULL,
+		.find_days_mdow = NULL,
+	},
 };
 
 /* user's calendar home directory (relative to $HOME) */

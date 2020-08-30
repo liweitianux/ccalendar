@@ -56,8 +56,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "calendar.h"
 #include "basics.h"
 #include "chinese.h"
+#include "dates.h"
 #include "gregorian.h"
 #include "moon.h"
 #include "sun.h"
@@ -443,6 +445,71 @@ chinese_jieqi_onafter(int rd, int type, const struct chinese_jieqi **jieqi)
 	*jieqi = jq2;
 	return (int)floor(t_u + zone);
 }
+
+
+/*
+ * Format the Chinese date of the given fixed date $rd in $buf.
+ * Return the formatted string length.
+ */
+int
+chinese_format_date(char *buf, size_t size, int rd)
+{
+	struct chinese_date cdate;
+	chinese_from_fixed(rd, &cdate);
+	return snprintf(buf, size, "%s%s月%s",
+			cdate.leap ? "闰" : "", months[cdate.month - 1],
+			mdays[cdate.day - 1]);
+}
+
+
+/*
+ * Find days of the specified Chinese month ($month) and day ($day).
+ * If month $month < 0, then month is ignored (i.e., all months).
+ * (NOTE: The year $year is ignored.)
+ */
+int
+chinese_find_days_ymd(int year __unused, int month, int day,
+		      struct cal_day **dayp, char **edp __unused)
+{
+	struct cal_day *dp;
+	struct chinese_date cdate;
+	int rd, rd_begin, rd_end;
+	int count = 0;
+
+	rd_begin = chinese_new_moon_before(Options.day_begin);
+	rd_end = chinese_new_moon_onafter(Options.day_end);
+	rd = rd_begin;
+	while (rd <= rd_end) {
+		chinese_from_fixed(rd, &cdate);
+		if (cdate.month == month || month < 0) {
+			cdate.day = day;
+			rd = fixed_from_chinese(&cdate);
+			if ((dp = find_rd(rd, 0)) != NULL) {
+				if (count >= CAL_MAX_REPEAT) {
+					warnx("%s: too many repeats",
+					      __func__);
+					return count;
+				}
+				dayp[count++] = dp;
+			}
+		}
+
+		/* go to next month */
+		rd = chinese_new_moon_onafter(rd + (day == 0 ? 2 : 1));
+	}
+
+	return count;
+}
+
+/*
+ * Find days of the specified Chinese day of month ($dom) of all months.
+ */
+int
+chinese_find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
+{
+	return chinese_find_days_ymd(-1, -1, dom, dayp, NULL);
+}
+
 
 /*
  * Print the Chinese calendar of the given date $rd and events of the year.

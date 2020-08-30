@@ -56,6 +56,8 @@ struct chinese_jieqi {
 
 enum { C_JIEQI_ALL, C_JIEQI_MAJOR, C_JIEQI_MINOR };
 
+struct cal_day;
+
 int	chinese_new_year(int year);
 
 void	chinese_from_fixed(int rd, struct chinese_date *date);
@@ -63,6 +65,11 @@ int	fixed_from_chinese(const struct chinese_date *date);
 
 int	chinese_qingming(int g_year);
 int	chinese_jieqi_onafter(int rd, int type, const struct chinese_jieqi **jieqi);
+
+int	chinese_format_date(char *buf, size_t size, int rd);
+int	chinese_find_days_ymd(int year, int month, int day, struct cal_day **dayp,
+			      char **edp);
+int	chinese_find_days_dom(int dom, struct cal_day **dayp, char **edp);
 void	show_chinese_calendar(int rd);
 
 #endif
