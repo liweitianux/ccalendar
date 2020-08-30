@@ -8,6 +8,7 @@
 #define _uk_UA_UTF_8_orthodox_
 
 LANG=uk_UA.UTF-8
+CALENDAR=Julian
 Paskha=Великдень
 
 Великдень-46	Великий Піст
