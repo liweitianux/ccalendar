@@ -218,8 +218,10 @@ julian_find_days_dom(int dom, struct cal_day **dayp, char **edp __unused)
 		rd_begin = fixed_from_julian(&date);
 		date.year++;
 		rd_end = fixed_from_julian(&date);
+		if (rd_end > Options.day_end)
+			rd_end = Options.day_end;
 
-		for (int m = 1, rd = rd_begin; rd < rd_end; m++) {
+		for (int m = 1, rd = rd_begin; rd <= rd_end; m++) {
 			date_set(&date, y, m, dom);
 			rd = fixed_from_julian(&date);
 			if ((dp = find_rd(rd, 0)) != NULL) {
@@ -257,8 +259,10 @@ julian_find_days_month(int month, struct cal_day **dayp, char **edp __unused)
 		if (date.month > 12)
 			date_set(&date, y+1, 1, 1);
 		rd_end = fixed_from_julian(&date);
+		if (rd_end > Options.day_end)
+			rd_end = Options.day_end;
 
-		for (int rd = rd_begin; rd < rd_end; rd++) {
+		for (int rd = rd_begin; rd <= rd_end; rd++) {
 			if ((dp = find_rd(rd, 0)) != NULL) {
 				if (count >= CAL_MAX_REPEAT) {
 					warnx("%s: too many repeats",

@@ -234,10 +234,12 @@ find_days_cjieqi(int offset, struct cal_day **dayp, char **edp)
 		rd_begin = fixed_from_gregorian(&date);
 		date.year++;
 		rd_end = fixed_from_gregorian(&date);
+		if (rd_end > Options.day_end)
+			rd_end = Options.day_end;
 
-		for (rd = rd_begin; rd < rd_end; rd += 14) {
+		for (rd = rd_begin; rd <= rd_end; rd += 14) {
 			rd = chinese_jieqi_onafter(rd, C_JIEQI_ALL, &jq);
-			if (rd >= rd_end)
+			if (rd > rd_end)
 				break;
 
 			if ((dp = find_rd(rd, offset)) != NULL) {
@@ -289,8 +291,11 @@ find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 		t_begin = fixed_from_gregorian(&date) - Options.location->zone;
 		date.year++;
 		t_end = fixed_from_gregorian(&date) - Options.location->zone;
+		if (t_end > Options.day_end + 1 - Options.location->zone)
+			t_end = Options.day_end + 1 - Options.location->zone;
+				/* NOTE: '+1' to include the ending day */
 
-		for (t = t_begin; t < t_end; ) {
+		for (t = t_begin; t <= t_end; ) {
 			switch (sday_id) {
 			case SD_NEWMOON:
 				t = new_moon_atafter(t);
@@ -303,7 +308,7 @@ find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 				     __func__, sday_id);
 			}
 
-			if (t >= t_end)
+			if (t > t_end)
 				break;
 
 			t += Options.location->zone;  /* to standard time */
