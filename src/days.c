@@ -235,9 +235,9 @@ find_days_cjieqi(int offset, struct cal_day **dayp, char **edp)
 		date.year++;
 		rd_end = fixed_from_gregorian(&date);
 
-		for (rd = rd_begin; rd <= rd_end; rd++) {
+		for (rd = rd_begin; rd < rd_end; rd += 14) {
 			rd = chinese_jieqi_onafter(rd, C_JIEQI_ALL, &jq);
-			if (rd > rd_end)
+			if (rd >= rd_end)
 				break;
 
 			if ((dp = find_rd(rd, offset)) != NULL) {
@@ -303,7 +303,7 @@ find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 				     __func__, sday_id);
 			}
 
-			if (t > t_end)
+			if (t >= t_end)
 				break;
 
 			t += Options.location->zone;  /* to standard time */
@@ -326,8 +326,8 @@ find_days_moon(int sday_id, int offset, struct cal_day **dayp, char **edp)
 /**************************************************************************/
 
 /*
- * Find days of the specified year ($y), month ($m) and day ($d).
- * If year $y < 0, then year is ignored.
+ * Find days of the specified year ($year), month ($month) and day ($day).
+ * If year $year < 0, then year is ignored.
  */
 int
 find_days_ymd(int year, int month, int day,
