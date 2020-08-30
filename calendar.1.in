@@ -230,7 +230,7 @@ The solar solstice in December.
 .It ChineseNewYear
 The first day of the Chinese year.
 .It ChineseQingming
-The Chinese Qīngmíng festival (a.k.a. Tomb-sweeping Day).
+The Chinese Qīngmíng festival (a.k.a. Tomb-Sweeping Day).
 .It ChineseJieqi
 The 24 solar terms (Jiéqì) in Chinese calendar.
 .El
@@ -417,6 +417,8 @@ Births and deaths of famous (and not-so-famous) people.
 Calendar of events in Brazil.
 .It Pa calendar.canada
 Canadian holidays.
+.It Pa calendar.chinese
+Calendar of events in China.
 .It Pa calendar.christian
 Christian holidays.
 This calendar should be updated yearly by the local system administrator
