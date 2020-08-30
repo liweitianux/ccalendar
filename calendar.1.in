@@ -455,6 +455,8 @@ Musical events, births, and deaths.
 Strongly oriented toward rock 'n' roll and classical.
 .It Pa calendar.newzealand
 Calendar of events in New Zealand.
+.It Pa calendar.orthodox
+Orthodox holidays.
 .It Pa calendar.russian
 Russian calendar.
 .It Pa calendar.southafrica

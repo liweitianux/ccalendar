@@ -16,6 +16,7 @@
 #include <calendar.holiday>
 #include <calendar.judaic>
 #include <calendar.music>
+#include <calendar.orthodox>
 #include <calendar.space>
 #include <calendar.ushistory>
 
