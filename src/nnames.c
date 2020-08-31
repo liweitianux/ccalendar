@@ -114,6 +114,10 @@ set_nnames(void)
 		free(nname->fn_name);
 		nname->fn_name = xstrdup(buf);
 		nname->fn_len = strlen(nname->fn_name);
+
+		DPRINTF("%s: dow[%d]: %s, %s, %s, %s\n", __func__, i,
+			nname->name, nname->f_name,
+			nname->n_name, nname->fn_name);
 	}
 
 	memset(&tm, 0, sizeof(tm));
@@ -131,6 +135,10 @@ set_nnames(void)
 		free(nname->fn_name);
 		nname->fn_name = xstrdup(triml(buf));
 		nname->fn_len = strlen(nname->fn_name);
+
+		DPRINTF("%s: month[%02d]: %s, %s, %s, %s\n", __func__, i+1,
+			nname->name, nname->f_name,
+			nname->n_name, nname->fn_name);
 	}
 }
 
@@ -156,6 +164,9 @@ set_nsequences(const char *seq)
 		nname->n_name = xcalloc(1, len + 1);
 		strncpy(nname->n_name, seq, len);
 		nname->n_len = strlen(nname->n_name);
+		DPRINTF("%s: sequence[%d]: %s, %s, %s, %s\n", __func__, i+1,
+			nname->name, nname->f_name,
+			nname->n_name, nname->fn_name);
 
 		seq = ++p;
 	}
