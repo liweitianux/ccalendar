@@ -132,15 +132,15 @@ static void	 show_dateinfo(struct dateinfo *di);
 static bool
 determine_style(const char *date, struct dateinfo *di)
 {
+	static char date2[128];
 	struct specialday *sday;
 	const char *dow, *pmonth;
-	char *date2;
 	char *p, *p1, *p2;
 	size_t len;
 	bool ret;
 	int offset;
 
-	date2 = xstrdup(date);
+	snprintf(date2, sizeof(date2), "%s", date);
 	ret = false;
 
 	if ((p = strchr(date2, ' ')) == NULL &&
@@ -298,7 +298,6 @@ determine_style(const char *date, struct dateinfo *di)
 out:
 	if (Options.debug)
 		show_dateinfo(di);
-	free(date2);
 	return ret;
 }
 
