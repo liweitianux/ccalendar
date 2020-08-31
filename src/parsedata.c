@@ -59,10 +59,8 @@ struct dateinfo {
 	int	index;
 };
 
-static bool	 check_dayofweek(const char *s, size_t *len, int *offset,
-				 const char **dow);
-static bool	 check_month(const char *s, size_t *len, int *offset,
-			     const char **month);
+static bool	 check_dayofweek(const char *s, size_t *len, int *offset);
+static bool	 check_month(const char *s, size_t *len, int *offset);
 static bool	 determine_style(const char *date, struct dateinfo *di);
 static bool	 is_onlydigits(const char *s, bool endstar);
 static bool	 parse_angle(const char *s, double *result);
@@ -134,7 +132,6 @@ determine_style(const char *date, struct dateinfo *di)
 {
 	static char date2[128];
 	struct specialday *sday;
-	const char *dow, *pmonth;
 	char *p, *p1, *p2;
 	size_t len;
 	bool ret;
@@ -168,7 +165,7 @@ determine_style(const char *date, struct dateinfo *di)
 			goto out;
 		}
 
-		if (check_dayofweek(date2, &len, &offset, &dow)) {
+		if (check_dayofweek(date2, &len, &offset)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			di->dayofweek = offset;
 			if (strlen(date2) == len) {
@@ -209,8 +206,8 @@ determine_style(const char *date, struct dateinfo *di)
 	}
 
 	/* Check if there is a month string */
-	if (check_month(p1, &len, &offset, &pmonth) ||
-	    (check_month(p2, &len, &offset, &pmonth) && (p2 = p1))) {
+	if (check_month(p1, &len, &offset) ||
+	    (check_month(p2, &len, &offset) && (p2 = p1))) {
 		/* Now p2 is the non-month part */
 
 		di->flags |= F_MONTH;
@@ -227,7 +224,7 @@ determine_style(const char *date, struct dateinfo *di)
 			ret = true;
 			goto out;
 		}
-		if (check_dayofweek(p2, &len, &offset, &dow)) {
+		if (check_dayofweek(p2, &len, &offset)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			di->dayofweek = offset;
 			if (strlen(p2) == len) {
@@ -255,7 +252,7 @@ determine_style(const char *date, struct dateinfo *di)
 
 	/* Month as a number, then a weekday */
 	if (is_onlydigits(p1, false) &&
-	    check_dayofweek(p2, &len, &offset, &dow)) {
+	    check_dayofweek(p2, &len, &offset)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 		di->month = (int)strtol(p1, NULL, 10);
 		di->dayofweek = offset;
@@ -421,7 +418,7 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 }
 
 static bool
-check_month(const char *s, size_t *len, int *offset, const char **month)
+check_month(const char *s, size_t *len, int *offset)
 {
 	struct nname *nname;
 
@@ -430,7 +427,6 @@ check_month(const char *s, size_t *len, int *offset, const char **month)
 
 		if (nname->fn_name &&
 		    strncasecmp(s, nname->fn_name, nname->fn_len) == 0) {
-			*month = nname->fn_name;
 			*len = nname->fn_len;
 			*offset = i + 1;
 			return (true);
@@ -438,7 +434,6 @@ check_month(const char *s, size_t *len, int *offset, const char **month)
 
 		if (nname->n_name &&
 		    strncasecmp(s, nname->n_name, nname->n_len) == 0) {
-			*month = nname->n_name;
 			*len = nname->n_len;
 			*offset = i + 1;
 			return (true);
@@ -446,14 +441,12 @@ check_month(const char *s, size_t *len, int *offset, const char **month)
 
 		if (nname->f_name &&
 		    strncasecmp(s, nname->f_name, nname->f_len) == 0) {
-			*month = nname->f_name;
 			*len = nname->f_len;
 			*offset = i + 1;
 			return (true);
 		}
 
 		if (strncasecmp(s, nname->name, nname->len) == 0) {
-			*month = nname->name;
 			*len = nname->len;
 			*offset = i + 1;
 			return (true);
@@ -464,7 +457,7 @@ check_month(const char *s, size_t *len, int *offset, const char **month)
 }
 
 static bool
-check_dayofweek(const char *s, size_t *len, int *offset, const char **dow)
+check_dayofweek(const char *s, size_t *len, int *offset)
 {
 	struct nname *nname;
 
@@ -473,7 +466,6 @@ check_dayofweek(const char *s, size_t *len, int *offset, const char **dow)
 
 		if (nname->fn_name &&
 		    strncasecmp(s, nname->fn_name, nname->fn_len) == 0) {
-			*dow = nname->fn_name;
 			*len = nname->fn_len;
 			*offset = i;
 			return (true);
@@ -481,7 +473,6 @@ check_dayofweek(const char *s, size_t *len, int *offset, const char **dow)
 
 		if (nname->n_name &&
 		    strncasecmp(s, nname->n_name, nname->n_len) == 0) {
-			*dow = nname->n_name;
 			*len = nname->n_len;
 			*offset = i;
 			return (true);
@@ -489,14 +480,12 @@ check_dayofweek(const char *s, size_t *len, int *offset, const char **dow)
 
 		if (nname->f_name &&
 		    strncasecmp(s, nname->f_name, nname->f_len) == 0) {
-			*dow = nname->f_name;
 			*len = nname->f_len;
 			*offset = i;
 			return (true);
 		}
 
 		if (strncasecmp(s, nname->name, nname->len) == 0) {
-			*dow = nname->name;
 			*len = nname->len;
 			*offset = i;
 			return (true);
