@@ -208,14 +208,14 @@ determine_style(const char *date, struct dateinfo *di)
 	    (check_month(p2, &len, &di->month) && (p2 = p1))) {
 		/* Now p2 is the non-month part */
 		di->flags |= F_MONTH;
-		if (is_onlydigits(p2, false)) {
-			di->dayofmonth = (int)strtol(p2, NULL, 10);
-			di->flags |= F_DAYOFMONTH;
+		if (strcmp(p2, "*") == 0) {
+			di->flags |= F_ALLDAY;
 			ret = true;
 			goto out;
 		}
-		if (strcmp(p2, "*") == 0) {
-			di->flags |= F_ALLDAY;
+		if (is_onlydigits(p2, false)) {
+			di->dayofmonth = (int)strtol(p2, NULL, 10);
+			di->flags |= F_DAYOFMONTH;
 			ret = true;
 			goto out;
 		}
