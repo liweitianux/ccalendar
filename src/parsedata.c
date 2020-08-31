@@ -64,7 +64,7 @@ static bool	 check_dayofweek(const char *s, size_t *len, int *offset,
 static bool	 check_month(const char *s, size_t *len, int *offset,
 			     const char **month);
 static bool	 determine_style(const char *date, struct dateinfo *di);
-static bool	 is_onlydigits(const char *s, bool nostar);
+static bool	 is_onlydigits(const char *s, bool endstar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
@@ -182,7 +182,7 @@ determine_style(const char *date, struct dateinfo *di)
 			goto out;
 		}
 
-		if (is_onlydigits(date2, true)) {
+		if (is_onlydigits(date2, false)) {
 			/* Assume month number only */
 			di->flags |= F_MONTH;
 			di->month = (int)strtol(date2, NULL, 10);
@@ -216,7 +216,7 @@ determine_style(const char *date, struct dateinfo *di)
 		di->flags |= F_MONTH;
 		di->month = offset;
 
-		if (is_onlydigits(p2, true)) {
+		if (is_onlydigits(p2, false)) {
 			di->dayofmonth = (int)strtol(p2, NULL, 10);
 			di->flags |= F_DAYOFMONTH;
 			ret = true;
@@ -245,8 +245,8 @@ determine_style(const char *date, struct dateinfo *di)
 	}
 
 	/* Check if there is an every-month specifier */
-	if ((strcmp(p1, "*") == 0 && is_onlydigits(p2, true)) ||
-	    (strcmp(p2, "*") == 0 && is_onlydigits(p1, true) && (p2 = p1))) {
+	if ((strcmp(p1, "*") == 0 && is_onlydigits(p2, false)) ||
+	    (strcmp(p2, "*") == 0 && is_onlydigits(p1, false) && (p2 = p1))) {
 		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
 		di->dayofmonth = (int)strtol(p2, NULL, 10);
 		ret = true;
@@ -254,7 +254,7 @@ determine_style(const char *date, struct dateinfo *di)
 	}
 
 	/* Month as a number, then a weekday */
-	if (is_onlydigits(p1, true) &&
+	if (is_onlydigits(p1, false) &&
 	    check_dayofweek(p2, &len, &offset, &dow)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 		di->month = (int)strtol(p1, NULL, 10);
@@ -272,7 +272,7 @@ determine_style(const char *date, struct dateinfo *di)
 	}
 
 	/* Both the month and date are specified as numbers */
-	if (is_onlydigits(p1, true) && is_onlydigits(p2, false)) {
+	if (is_onlydigits(p1, false) && is_onlydigits(p2, true)) {
 		di->flags |= (F_MONTH | F_DAYOFMONTH);
 		if (strchr(p2, '*') != NULL)
 			di->flags |= F_VARIABLE;
@@ -508,10 +508,10 @@ check_dayofweek(const char *s, size_t *len, int *offset, const char **dow)
 }
 
 static bool
-is_onlydigits(const char *s, bool nostar)
+is_onlydigits(const char *s, bool endstar)
 {
 	for (int i = 0; s[i] != '\0'; i++) {
-		if (nostar == false && s[i] == '*' && s[i+1] == '\0')
+		if (endstar && s[i] == '*' && s[i+1] == '\0')
 			return (true);
 		if (!isdigit((unsigned char)s[i]))
 			return (false);
