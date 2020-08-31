@@ -59,12 +59,12 @@ struct dateinfo {
 	int	index;
 };
 
-static bool	 checkdayofweek(const char *s, size_t *len, int *offset,
-				const char **dow);
-static bool	 checkmonth(const char *s, size_t *len, int *offset,
-			    const char **month);
-static bool	 determinestyle(const char *date, struct dateinfo *di);
-static bool	 isonlydigits(const char *s, bool nostar);
+static bool	 check_dayofweek(const char *s, size_t *len, int *offset,
+				 const char **dow);
+static bool	 check_month(const char *s, size_t *len, int *offset,
+			     const char **month);
+static bool	 determine_style(const char *date, struct dateinfo *di);
+static bool	 is_onlydigits(const char *s, bool nostar);
 static bool	 parse_angle(const char *s, double *result);
 static const char *parse_int_ranged(const char *s, size_t len, int min,
 				    int max, int *result);
@@ -130,7 +130,7 @@ static void	 show_dateinfo(struct dateinfo *di);
  *				'JunSolstice' | 'DecSolstice'
  */
 static bool
-determinestyle(const char *date, struct dateinfo *di)
+determine_style(const char *date, struct dateinfo *di)
 {
 	struct specialday *sday;
 	const char *dow, *pmonth;
@@ -168,7 +168,7 @@ determinestyle(const char *date, struct dateinfo *di)
 			goto out;
 		}
 
-		if (checkdayofweek(date2, &len, &offset, &dow)) {
+		if (check_dayofweek(date2, &len, &offset, &dow)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			di->dayofweek = offset;
 			if (strlen(date2) == len) {
@@ -181,7 +181,8 @@ determinestyle(const char *date, struct dateinfo *di)
 			}
 			goto out;
 		}
-		if (isonlydigits(date2, true)) {
+
+		if (is_onlydigits(date2, true)) {
 			/* Assume month number only */
 			di->flags |= F_MONTH;
 			di->month = (int)strtol(date2, NULL, 10);
@@ -208,14 +209,14 @@ determinestyle(const char *date, struct dateinfo *di)
 	}
 
 	/* Check if there is a month string */
-	if (checkmonth(p1, &len, &offset, &pmonth) ||
-	    (checkmonth(p2, &len, &offset, &pmonth) && (p2 = p1))) {
+	if (check_month(p1, &len, &offset, &pmonth) ||
+	    (check_month(p2, &len, &offset, &pmonth) && (p2 = p1))) {
 		/* Now p2 is the non-month part */
 
 		di->flags |= F_MONTH;
 		di->month = offset;
 
-		if (isonlydigits(p2, true)) {
+		if (is_onlydigits(p2, true)) {
 			di->dayofmonth = (int)strtol(p2, NULL, 10);
 			di->flags |= F_DAYOFMONTH;
 			ret = true;
@@ -226,7 +227,7 @@ determinestyle(const char *date, struct dateinfo *di)
 			ret = true;
 			goto out;
 		}
-		if (checkdayofweek(p2, &len, &offset, &dow)) {
+		if (check_dayofweek(p2, &len, &offset, &dow)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			di->dayofweek = offset;
 			if (strlen(p2) == len) {
@@ -244,8 +245,8 @@ determinestyle(const char *date, struct dateinfo *di)
 	}
 
 	/* Check if there is an every-month specifier */
-	if ((strcmp(p1, "*") == 0 && isonlydigits(p2, true)) ||
-	    (strcmp(p2, "*") == 0 && isonlydigits(p1, true) && (p2 = p1))) {
+	if ((strcmp(p1, "*") == 0 && is_onlydigits(p2, true)) ||
+	    (strcmp(p2, "*") == 0 && is_onlydigits(p1, true) && (p2 = p1))) {
 		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
 		di->dayofmonth = (int)strtol(p2, NULL, 10);
 		ret = true;
@@ -253,11 +254,12 @@ determinestyle(const char *date, struct dateinfo *di)
 	}
 
 	/* Month as a number, then a weekday */
-	if (isonlydigits(p1, true) &&
-	    checkdayofweek(p2, &len, &offset, &dow)) {
+	if (is_onlydigits(p1, true) &&
+	    check_dayofweek(p2, &len, &offset, &dow)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 		di->month = (int)strtol(p1, NULL, 10);
 		di->dayofweek = offset;
+
 		if (strlen(p2) == len) {
 			ret = true;
 			goto out;
@@ -270,7 +272,7 @@ determinestyle(const char *date, struct dateinfo *di)
 	}
 
 	/* Both the month and date are specified as numbers */
-	if (isonlydigits(p1, true) && isonlydigits(p2, false)) {
+	if (is_onlydigits(p1, true) && is_onlydigits(p2, false)) {
 		di->flags |= (F_MONTH | F_DAYOFMONTH);
 		if (strchr(p2, '*') != NULL)
 			di->flags |= F_VARIABLE;
@@ -350,7 +352,7 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 	memset(&di, 0, sizeof(di));
 	di.flags = F_NONE;
 
-	if (!determinestyle(date, &di))
+	if (!determine_style(date, &di))
 		return -1;
 
 	*flags = di.flags;
@@ -420,7 +422,7 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 }
 
 static bool
-checkmonth(const char *s, size_t *len, int *offset, const char **month)
+check_month(const char *s, size_t *len, int *offset, const char **month)
 {
 	struct nname *nname;
 
@@ -463,7 +465,7 @@ checkmonth(const char *s, size_t *len, int *offset, const char **month)
 }
 
 static bool
-checkdayofweek(const char *s, size_t *len, int *offset, const char **dow)
+check_dayofweek(const char *s, size_t *len, int *offset, const char **dow)
 {
 	struct nname *nname;
 
@@ -506,7 +508,7 @@ checkdayofweek(const char *s, size_t *len, int *offset, const char **dow)
 }
 
 static bool
-isonlydigits(const char *s, bool nostar)
+is_onlydigits(const char *s, bool nostar)
 {
 	for (int i = 0; s[i] != '\0'; i++) {
 		if (nostar == false && s[i] == '*' && s[i+1] == '\0')
