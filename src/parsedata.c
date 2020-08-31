@@ -134,10 +134,8 @@ determine_style(const char *date, struct dateinfo *di)
 	struct specialday *sday;
 	char *p, *p1, *p2;
 	size_t len;
-	bool ret;
 
 	snprintf(date2, sizeof(date2), "%s", date);
-	ret = false;
 
 	if ((p = strchr(date2, ' ')) == NULL &&
 	    (p = strchr(date2, '/')) == NULL) {
@@ -154,38 +152,33 @@ determine_style(const char *date, struct dateinfo *di)
 
 			di->flags |= (F_SPECIALDAY | F_VARIABLE);
 			di->sday_id = sday->id;
-			if (strlen(date2) == len) {
-				ret = true;
-				goto out;
-			}
+			if (strlen(date2) == len)
+				return true;
+
 			di->offset = (int)strtol(date2+len, NULL, 10);
 			di->flags |= F_OFFSET;
-			ret = true;
-			goto out;
+			return true;
 		}
 
 		if (check_dayofweek(date2, &len, &di->dayofweek)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
-			if (strlen(date2) == len) {
-				ret = true;
-				goto out;
-			}
+			if (strlen(date2) == len)
+				return true;
+
 			if (parse_index(date2+len, &di->index)) {
 				di->flags |= F_INDEX;
-				ret = true;
+				return true;
 			}
-			goto out;
 		}
 
 		if (is_onlydigits(date2, false)) {
 			/* Assume month number only */
 			di->flags |= F_MONTH;
 			di->month = (int)strtol(date2, NULL, 10);
-			ret = true;
-			goto out;
+			return true;
 		}
 
-		goto out;
+		goto error;
 	}
 
 	*p = '\0';
@@ -210,29 +203,27 @@ determine_style(const char *date, struct dateinfo *di)
 		di->flags |= F_MONTH;
 		if (strcmp(p2, "*") == 0) {
 			di->flags |= F_ALLDAY;
-			ret = true;
-			goto out;
+			return true;
 		}
 		if (is_onlydigits(p2, false)) {
 			di->dayofmonth = (int)strtol(p2, NULL, 10);
 			di->flags |= F_DAYOFMONTH;
-			ret = true;
-			goto out;
+			return true;
 		}
 		if (check_dayofweek(p2, &len, &di->dayofweek)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
-			if (strlen(p2) == len) {
-				ret = true;
-				goto out;
-			}
+			if (strlen(p2) == len)
+				return true;
+
 			if (parse_index(p2+len, &di->index)) {
 				di->flags |= F_INDEX;
-				ret = true;
+				return true;
 			}
-			goto out;
 		}
 
-		goto out;
+		warnx("%s: invalid non-month part |%s| in date |%s|",
+		      __func__, p2, date);
+		goto error;
 	}
 
 	/* Check if there is an every-month specifier */
@@ -240,8 +231,7 @@ determine_style(const char *date, struct dateinfo *di)
 	    (strcmp(p2, "*") == 0 && is_onlydigits(p1, false) && (p2 = p1))) {
 		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
 		di->dayofmonth = (int)strtol(p2, NULL, 10);
-		ret = true;
-		goto out;
+		return true;
 	}
 
 	/* Month as a number, then a weekday */
@@ -249,15 +239,17 @@ determine_style(const char *date, struct dateinfo *di)
 	    check_dayofweek(p2, &len, &di->dayofweek)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 		di->month = (int)strtol(p1, NULL, 10);
-		if (strlen(p2) == len) {
-			ret = true;
-			goto out;
-		}
+		if (strlen(p2) == len)
+			return true;
+
 		if (parse_index(p2+len, &di->index)) {
 			di->flags |= F_INDEX;
-			ret = true;
+			return true;
 		}
-		goto out;
+
+		warnx("%s: invalid weekday part |%s| in date |%s|",
+		      __func__, p2, date);
+		goto error;
 	}
 
 	/* Both the month and date are specified as numbers */
@@ -270,24 +262,21 @@ determine_style(const char *date, struct dateinfo *di)
 		int d = (int)strtol(p2, NULL, 10);
 
 		if (m > 12 && d > 12) {
-			warnx("%s: invalid date: |%s|", __func__, date);
-			goto out;
+			warnx("%s: invalid month |%d| in date: |%s|",
+			      __func__, m, date);
+			goto error;
 		}
 
 		if (m > 12)
 			swap(&m, &d);
 		di->month = m;
 		di->dayofmonth = d;
-		ret = true;
-		goto out;
+		return true;
 	}
 
+error:
 	warnx("%s: unrecognized date: |%s|", __func__, date);
-
-out:
-	if (Options.debug)
-		show_dateinfo(di);
-	return ret;
+	return false;
 }
 
 static void
@@ -340,8 +329,11 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 	memset(&di, 0, sizeof(di));
 	di.flags = F_NONE;
 
-	if (!determine_style(date, &di))
+	if (!determine_style(date, &di)) {
+		if (Options.debug)
+			show_dateinfo(&di);
 		return -1;
+	}
 
 	*flags = di.flags;
 	index = (di.flags & F_INDEX) ? di.index : 0;
