@@ -59,8 +59,8 @@ struct dateinfo {
 	int	index;
 };
 
-static bool	 check_dayofweek(const char *s, size_t *len, int *offset);
-static bool	 check_month(const char *s, size_t *len, int *offset);
+static bool	 check_dayofweek(const char *s, size_t *len, int *dow);
+static bool	 check_month(const char *s, size_t *len, int *month);
 static bool	 determine_style(const char *date, struct dateinfo *di);
 static bool	 is_onlydigits(const char *s, bool endstar);
 static bool	 parse_angle(const char *s, double *result);
@@ -135,7 +135,6 @@ determine_style(const char *date, struct dateinfo *di)
 	char *p, *p1, *p2;
 	size_t len;
 	bool ret;
-	int offset;
 
 	snprintf(date2, sizeof(date2), "%s", date);
 	ret = false;
@@ -165,9 +164,8 @@ determine_style(const char *date, struct dateinfo *di)
 			goto out;
 		}
 
-		if (check_dayofweek(date2, &len, &offset)) {
+		if (check_dayofweek(date2, &len, &di->dayofweek)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
-			di->dayofweek = offset;
 			if (strlen(date2) == len) {
 				ret = true;
 				goto out;
@@ -206,13 +204,10 @@ determine_style(const char *date, struct dateinfo *di)
 	}
 
 	/* Check if there is a month string */
-	if (check_month(p1, &len, &offset) ||
-	    (check_month(p2, &len, &offset) && (p2 = p1))) {
+	if (check_month(p1, &len, &di->month) ||
+	    (check_month(p2, &len, &di->month) && (p2 = p1))) {
 		/* Now p2 is the non-month part */
-
 		di->flags |= F_MONTH;
-		di->month = offset;
-
 		if (is_onlydigits(p2, false)) {
 			di->dayofmonth = (int)strtol(p2, NULL, 10);
 			di->flags |= F_DAYOFMONTH;
@@ -224,9 +219,8 @@ determine_style(const char *date, struct dateinfo *di)
 			ret = true;
 			goto out;
 		}
-		if (check_dayofweek(p2, &len, &offset)) {
+		if (check_dayofweek(p2, &len, &di->dayofweek)) {
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
-			di->dayofweek = offset;
 			if (strlen(p2) == len) {
 				ret = true;
 				goto out;
@@ -252,11 +246,9 @@ determine_style(const char *date, struct dateinfo *di)
 
 	/* Month as a number, then a weekday */
 	if (is_onlydigits(p1, false) &&
-	    check_dayofweek(p2, &len, &offset)) {
+	    check_dayofweek(p2, &len, &di->dayofweek)) {
 		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
 		di->month = (int)strtol(p1, NULL, 10);
-		di->dayofweek = offset;
-
 		if (strlen(p2) == len) {
 			ret = true;
 			goto out;
@@ -418,7 +410,7 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 }
 
 static bool
-check_month(const char *s, size_t *len, int *offset)
+check_month(const char *s, size_t *len, int *month)
 {
 	struct nname *nname;
 
@@ -428,27 +420,27 @@ check_month(const char *s, size_t *len, int *offset)
 		if (nname->fn_name &&
 		    strncasecmp(s, nname->fn_name, nname->fn_len) == 0) {
 			*len = nname->fn_len;
-			*offset = i + 1;
+			*month = nname->value;
 			return (true);
 		}
 
 		if (nname->n_name &&
 		    strncasecmp(s, nname->n_name, nname->n_len) == 0) {
 			*len = nname->n_len;
-			*offset = i + 1;
+			*month = nname->value;
 			return (true);
 		}
 
 		if (nname->f_name &&
 		    strncasecmp(s, nname->f_name, nname->f_len) == 0) {
 			*len = nname->f_len;
-			*offset = i + 1;
+			*month = nname->value;
 			return (true);
 		}
 
 		if (strncasecmp(s, nname->name, nname->len) == 0) {
 			*len = nname->len;
-			*offset = i + 1;
+			*month = nname->value;
 			return (true);
 		}
 	}
@@ -457,7 +449,7 @@ check_month(const char *s, size_t *len, int *offset)
 }
 
 static bool
-check_dayofweek(const char *s, size_t *len, int *offset)
+check_dayofweek(const char *s, size_t *len, int *dow)
 {
 	struct nname *nname;
 
@@ -467,27 +459,27 @@ check_dayofweek(const char *s, size_t *len, int *offset)
 		if (nname->fn_name &&
 		    strncasecmp(s, nname->fn_name, nname->fn_len) == 0) {
 			*len = nname->fn_len;
-			*offset = i;
+			*dow = nname->value;
 			return (true);
 		}
 
 		if (nname->n_name &&
 		    strncasecmp(s, nname->n_name, nname->n_len) == 0) {
 			*len = nname->n_len;
-			*offset = i;
+			*dow = nname->value;
 			return (true);
 		}
 
 		if (nname->f_name &&
 		    strncasecmp(s, nname->f_name, nname->f_len) == 0) {
 			*len = nname->f_len;
-			*offset = i;
+			*dow = nname->value;
 			return (true);
 		}
 
 		if (strncasecmp(s, nname->name, nname->len) == 0) {
 			*len = nname->len;
-			*offset = i;
+			*dow = nname->value;
 			return (true);
 		}
 	}
@@ -510,6 +502,7 @@ is_onlydigits(const char *s, bool endstar)
 static bool
 parse_index(const char *s, int *index)
 {
+	struct nname *nname;
 	bool parsed = false;
 
 	if (s[0] == '+' || s[0] == '-') {
@@ -526,12 +519,12 @@ parse_index(const char *s, int *index)
 		parsed = true;
 	}
 
-	for (int i = 0; !parsed && sequence_names[i].name; i++) {
-		if (strcasecmp(s, sequence_names[i].name) == 0 ||
-		    (sequence_names[i].n_name &&
-		     strcasecmp(s, sequence_names[i].n_name) == 0)) {
+	for (int i = 0; !parsed && sequence_names[i].name != NULL; i++) {
+		nname = &sequence_names[i];
+		if (strcasecmp(s, nname->name) == 0 ||
+		    (nname->n_name && strcasecmp(s, nname->n_name) == 0)) {
+			*index = nname->value;
 			parsed = true;
-			*index = (i == 5) ? -1 : (i+1);  /* 'Last' -> '-1' */
 		}
 	}
 
