@@ -71,9 +71,12 @@ include $(wildcard $(DEPFILES))
 
 .PHONY: install
 install:
-	install -s -Dm 0755 $(PROG) $(PREFIX)/bin/$(PROG)
-	install -Dm 0644 $(MAN).gz $(MAN_DIR)/man1/$(MAN).gz
-	install -Dm 0644 $(CALFILE) $(CALENDAR_ETCDIR)/default
+	[ -d "$(PREFIX)/bin" ] || mkdir -p $(PREFIX)/bin
+	install -m 0755 -s $(PROG) $(PREFIX)/bin/$(PROG)
+	[ -d "$(MAN_DIR)/man1" ] || mkdir -p $(MAN_DIR)/man1
+	install -m 0644 $(MAN).gz $(MAN_DIR)/man1/$(MAN).gz
+	[ -d "$(CALENDAR_ETCDIR)" ] || mkdir -p $(CALENDAR_ETCDIR)
+	install -m 0644 $(CALFILE) $(CALENDAR_ETCDIR)/default
 	[ -d "$(CALENDAR_DIR)" ] || mkdir -p $(CALENDAR_DIR)
 	cp -R calendars/* $(CALENDAR_DIR)/
 	find $(CALENDAR_DIR)/ -type d | xargs chmod 0755
