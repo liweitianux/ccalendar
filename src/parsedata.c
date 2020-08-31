@@ -416,7 +416,7 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 	if (Options.debug)
 		show_dateinfo(&di);
 
-	return 0;
+	return -1;
 }
 
 static bool
