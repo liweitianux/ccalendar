@@ -46,49 +46,50 @@
 
 
 #define NNAME_INIT0 \
-	{ NULL, 0, NULL, 0, NULL, 0, NULL, 0 }
-#define NNAME_INIT1(name) \
-	{ name, sizeof(name)-1, NULL, 0, NULL, 0, NULL, 0 }
-#define NNAME_INIT2(name, f_name) \
-	{ name, sizeof(name)-1, f_name, sizeof(f_name)-1, NULL, 0, NULL, 0 }
+	{ 0, NULL, 0, NULL, 0, NULL, 0, NULL, 0 }
+#define NNAME_INIT1(val, name) \
+	{ (val), name, sizeof(name)-1, NULL, 0, NULL, 0, NULL, 0 }
+#define NNAME_INIT2(val, name, f_name) \
+	{ (val), name, sizeof(name)-1, f_name, sizeof(f_name)-1, \
+	  NULL, 0, NULL, 0 }
 
 /* names of every day of week */
 struct nname dow_names[NDOWS+1] = {
-	NNAME_INIT2("Sun", "Sunday"),
-	NNAME_INIT2("Mon", "Monday"),
-	NNAME_INIT2("Tue", "Tuesday"),
-	NNAME_INIT2("Wed", "Wednesday"),
-	NNAME_INIT2("Thu", "Thursday"),
-	NNAME_INIT2("Fri", "Friday"),
-	NNAME_INIT2("Sat", "Saturday"),
+	NNAME_INIT2(0, "Sun", "Sunday"),
+	NNAME_INIT2(1, "Mon", "Monday"),
+	NNAME_INIT2(2, "Tue", "Tuesday"),
+	NNAME_INIT2(3, "Wed", "Wednesday"),
+	NNAME_INIT2(4, "Thu", "Thursday"),
+	NNAME_INIT2(5, "Fri", "Friday"),
+	NNAME_INIT2(6, "Sat", "Saturday"),
 	NNAME_INIT0,
 };
 
 /* names of every month */
 struct nname month_names[NMONTHS+1] = {
-	NNAME_INIT2("Jan", "January"),
-	NNAME_INIT2("Feb", "February"),
-	NNAME_INIT2("Mar", "March"),
-	NNAME_INIT2("Apr", "April"),
-	NNAME_INIT2("May", "May"),
-	NNAME_INIT2("Jun", "June"),
-	NNAME_INIT2("Jul", "July"),
-	NNAME_INIT2("Aug", "August"),
-	NNAME_INIT2("Sep", "September"),
-	NNAME_INIT2("Oct", "October"),
-	NNAME_INIT2("Nov", "November"),
-	NNAME_INIT2("Dec", "December"),
+	NNAME_INIT2(1, "Jan", "January"),
+	NNAME_INIT2(2, "Feb", "February"),
+	NNAME_INIT2(3, "Mar", "March"),
+	NNAME_INIT2(4, "Apr", "April"),
+	NNAME_INIT2(5, "May", "May"),
+	NNAME_INIT2(6, "Jun", "June"),
+	NNAME_INIT2(7, "Jul", "July"),
+	NNAME_INIT2(8, "Aug", "August"),
+	NNAME_INIT2(9, "Sep", "September"),
+	NNAME_INIT2(10, "Oct", "October"),
+	NNAME_INIT2(11, "Nov", "November"),
+	NNAME_INIT2(12, "Dec", "December"),
 	NNAME_INIT0,
 };
 
 /* names of every sequence */
 struct nname sequence_names[NSEQUENCES+1] = {
-	NNAME_INIT1("First"),
-	NNAME_INIT1("Second"),
-	NNAME_INIT1("Third"),
-	NNAME_INIT1("Fourth"),
-	NNAME_INIT1("Fifth"),
-	NNAME_INIT1("Last"),
+	NNAME_INIT1(1, "First"),
+	NNAME_INIT1(2, "Second"),
+	NNAME_INIT1(3, "Third"),
+	NNAME_INIT1(4, "Fourth"),
+	NNAME_INIT1(5, "Fifth"),
+	NNAME_INIT1(-1, "Last"),
 	NNAME_INIT0,
 };
 
@@ -115,8 +116,8 @@ set_nnames(void)
 		nname->fn_name = xstrdup(buf);
 		nname->fn_len = strlen(nname->fn_name);
 
-		DPRINTF("%s: dow[%d]: %s, %s, %s, %s\n", __func__, i,
-			nname->name, nname->f_name,
+		DPRINTF("%s: dow[%d]: %s, %s, %s, %s\n", __func__,
+			nname->value, nname->name, nname->f_name,
 			nname->n_name, nname->fn_name);
 	}
 
@@ -136,8 +137,8 @@ set_nnames(void)
 		nname->fn_name = xstrdup(triml(buf));
 		nname->fn_len = strlen(nname->fn_name);
 
-		DPRINTF("%s: month[%02d]: %s, %s, %s, %s\n", __func__, i+1,
-			nname->name, nname->f_name,
+		DPRINTF("%s: month[%02d]: %s, %s, %s, %s\n", __func__,
+			nname->value, nname->name, nname->f_name,
 			nname->n_name, nname->fn_name);
 	}
 }
@@ -164,8 +165,8 @@ set_nsequences(const char *seq)
 		nname->n_name = xcalloc(1, len + 1);
 		strncpy(nname->n_name, seq, len);
 		nname->n_len = strlen(nname->n_name);
-		DPRINTF("%s: sequence[%d]: %s, %s, %s, %s\n", __func__, i+1,
-			nname->name, nname->f_name,
+		DPRINTF("%s: sequence[%d]: %s, %s, %s, %s\n", __func__,
+			nname->value, nname->name, nname->f_name,
 			nname->n_name, nname->fn_name);
 
 		seq = ++p;

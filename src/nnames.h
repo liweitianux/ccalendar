@@ -41,14 +41,15 @@
 #define NSEQUENCES	6
 
 struct nname {
+	int		 value;		/* month number, dow value, etc. */
 	const char	*name;		/* short name */
-	size_t		len;		/* length of short name */
+	size_t		 len;		/* length of short name */
 	const char	*f_name;	/* full name */
-	size_t		f_len;		/* length of full name */
+	size_t		 f_len;		/* length of full name */
 	char		*n_name;	/* short national name */
-	size_t		n_len;		/* length of short national name */
+	size_t		 n_len;		/* length of short national name */
 	char		*fn_name;	/* full national name */
-	size_t		fn_len;		/* length of full national name */
+	size_t		 fn_len;	/* length of full national name */
 };
 
 extern struct nname dow_names[];	/* names of every day of week */
