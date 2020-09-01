@@ -164,7 +164,6 @@ determine_style(const char *date, struct dateinfo *di)
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			if (strlen(date2) == len)
 				return true;
-
 			if (parse_index(date2+len, &di->index)) {
 				di->flags |= F_INDEX;
 				return true;
@@ -196,7 +195,61 @@ determine_style(const char *date, struct dateinfo *di)
 		p2 = p + 1;
 	}
 
-	/* Check if there is a month string */
+	/* Both month and day as numbers */
+	if (is_onlydigits(p1, false) && is_onlydigits(p2, true)) {
+		di->flags |= (F_MONTH | F_DAYOFMONTH);
+		if (strchr(p2, '*') != NULL)
+			di->flags |= F_VARIABLE;
+
+		int m = (int)strtol(p1, NULL, 10);
+		int d = (int)strtol(p2, NULL, 10);
+		if (m > 12 && d > 12) {
+			warnx("%s: invalid month |%d| in date: |%s|",
+			      __func__, m, date);
+			goto error;
+		}
+		if (m > 12)
+			swap(&m, &d);
+
+		di->month = m;
+		di->dayofmonth = d;
+		return true;
+	}
+
+	/* Check if there is an every-month specifier */
+	if ((strcmp(p1, "*") == 0 && is_onlydigits(p2, false)) ||
+	    (strcmp(p2, "*") == 0 && is_onlydigits(p1, false) && (p2 = p1))) {
+		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
+		di->dayofmonth = (int)strtol(p2, NULL, 10);
+		return true;
+	}
+
+	/* Month as a number, then a weekday */
+	if (is_onlydigits(p1, false) &&
+	    check_dayofweek(p2, &len, &di->dayofweek)) {
+		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
+		di->month = (int)strtol(p1, NULL, 10);
+
+		if (strlen(p2) == len)
+			return true;
+		if (parse_index(p2+len, &di->index)) {
+			di->flags |= F_INDEX;
+			return true;
+		}
+
+		warnx("%s: invalid weekday part |%s| in date |%s|",
+		      __func__, p2, date);
+		goto error;
+	}
+
+	/*
+	 * Check if there is a month string.
+	 * NOTE: Need to check month name/string *after* month number,
+	 *       because a national month name can be the *same* as the
+	 *       month number (e.g., 'zh_CN.UTF-8' on macOS), which can
+	 *       confuse the date parsing if this case is checked *before*
+	 *       the month number case.
+	 */
 	if (check_month(p1, &len, &di->month) ||
 	    (check_month(p2, &len, &di->month) && (p2 = p1))) {
 		/* Now p2 is the non-month part */
@@ -214,7 +267,6 @@ determine_style(const char *date, struct dateinfo *di)
 			di->flags |= (F_DAYOFWEEK | F_VARIABLE);
 			if (strlen(p2) == len)
 				return true;
-
 			if (parse_index(p2+len, &di->index)) {
 				di->flags |= F_INDEX;
 				return true;
@@ -224,54 +276,6 @@ determine_style(const char *date, struct dateinfo *di)
 		warnx("%s: invalid non-month part |%s| in date |%s|",
 		      __func__, p2, date);
 		goto error;
-	}
-
-	/* Check if there is an every-month specifier */
-	if ((strcmp(p1, "*") == 0 && is_onlydigits(p2, false)) ||
-	    (strcmp(p2, "*") == 0 && is_onlydigits(p1, false) && (p2 = p1))) {
-		di->flags |= (F_ALLMONTH | F_DAYOFMONTH);
-		di->dayofmonth = (int)strtol(p2, NULL, 10);
-		return true;
-	}
-
-	/* Month as a number, then a weekday */
-	if (is_onlydigits(p1, false) &&
-	    check_dayofweek(p2, &len, &di->dayofweek)) {
-		di->flags |= (F_MONTH | F_DAYOFWEEK | F_VARIABLE);
-		di->month = (int)strtol(p1, NULL, 10);
-		if (strlen(p2) == len)
-			return true;
-
-		if (parse_index(p2+len, &di->index)) {
-			di->flags |= F_INDEX;
-			return true;
-		}
-
-		warnx("%s: invalid weekday part |%s| in date |%s|",
-		      __func__, p2, date);
-		goto error;
-	}
-
-	/* Both the month and date are specified as numbers */
-	if (is_onlydigits(p1, false) && is_onlydigits(p2, true)) {
-		di->flags |= (F_MONTH | F_DAYOFMONTH);
-		if (strchr(p2, '*') != NULL)
-			di->flags |= F_VARIABLE;
-
-		int m = (int)strtol(p1, NULL, 10);
-		int d = (int)strtol(p2, NULL, 10);
-
-		if (m > 12 && d > 12) {
-			warnx("%s: invalid month |%d| in date: |%s|",
-			      __func__, m, date);
-			goto error;
-		}
-
-		if (m > 12)
-			swap(&m, &d);
-		di->month = m;
-		di->dayofmonth = d;
-		return true;
 	}
 
 error:
