@@ -75,6 +75,7 @@ Print lines from today and the previous
 days (backward, past).
 .It Fl d
 Print debug messages.
+This flag may be repeated multiple times to increase the verbosity.
 .It Fl F Ar friday
 Specify which day of the week is
 .Dq Friday

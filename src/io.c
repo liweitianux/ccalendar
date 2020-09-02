@@ -164,7 +164,7 @@ cal_fopen(const char *file)
 }
 
 /*
- * NOTE: input 'line' should have trailing comment and whitespace trimed
+ * NOTE: input 'line' should have trailing comment and whitespace trimmed.
  */
 static bool
 process_token(char *line, bool *skip)
@@ -291,8 +291,8 @@ cal_parse(FILE *in)
 
 	while (cal_readentry(&cfile, &entry, skip)) {
 		if (entry.type == T_TOKEN) {
-			DPRINTF("%s: T_TOKEN: |%s|\n",
-				__func__, entry.token);
+			DPRINTF2("%s: T_TOKEN: |%s|\n",
+				 __func__, entry.token);
 			if (!process_token(entry.token, &skip)) {
 				free(entry.token);
 				return false;
@@ -303,8 +303,8 @@ cal_parse(FILE *in)
 		}
 
 		if (entry.type == T_VARIABLE) {
-			DPRINTF("%s: T_VARIABLE: |%s|=|%s|\n",
-				__func__, entry.variable, entry.value);
+			DPRINTF2("%s: T_VARIABLE: |%s|=|%s|\n",
+				 __func__, entry.variable, entry.value);
 			var_handled = false;
 
 			if (strcasecmp(entry.variable, "LANG") == 0) {
@@ -360,10 +360,10 @@ cal_parse(FILE *in)
 
 		if (entry.type == T_DATE) {
 			desc = entry.description;
-			DPRINTF("----------------\n%s: T_DATE: |%s|\n",
-				__func__, entry.date);
+			DPRINTF2("----------------\n%s: T_DATE: |%s|\n",
+				 __func__, entry.date);
 			for (line = desc->firstline; line; line = line->next)
-				DPRINTF("\t|%s|\n", line->str);
+				DPRINTF3("\t|%s|\n", line->str);
 
 			count = parse_cal_date(entry.date, &flags, cdays,
 					       extradata);
@@ -372,9 +372,9 @@ cal_parse(FILE *in)
 				      entry.date, desc->firstline->str);
 				continue;
 			} else if (count == 0) {
-				DPRINTF("Ignore out-of-range date |%s| "
-					"with content |%s|\n",
-					entry.date, desc->firstline->str);
+				DPRINTF2("Ignore out-of-range date |%s| "
+					 "with content |%s|\n",
+					 entry.date, desc->firstline->str);
 				continue;
 			}
 
@@ -439,7 +439,7 @@ cal_readentry(struct cal_file *cfile, struct cal_entry *entry, bool skip)
 
 		if (skip) {
 			/* skip entries but tokens (e.g., '#endif') */
-			DPRINTF("%s: skip line: |%s|\n", __func__, p);
+			DPRINTF2("%s: skip line: |%s|\n", __func__, p);
 			continue;
 		}
 
@@ -654,7 +654,7 @@ send_mail(FILE *fp)
 	assert(Options.allmode == true);
 
 	if (fseek(fp, 0L, SEEK_END) == -1 || ftell(fp) == 0) {
-		DPRINTF("%s(): no events; skip sending mail\n", __func__);
+		DPRINTF("%s: no events; skip sending mail\n", __func__);
 		return;
 	}
 	if (pipe(pdes) < 0) {

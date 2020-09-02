@@ -72,7 +72,7 @@
 struct cal_options Options = {
 	.time = 0.5,  /* noon */
 	.allmode = false,
-	.debug = false,
+	.debug = 0,
 };
 
 /* paths to search for calendar files for inclusion */
@@ -208,11 +208,11 @@ main(int argc, char *argv[])
 				errx(1, "number of days must be positive");
 			break;
 
-		case 'd': /* debug output of current date */
-			Options.debug = true;
+		case 'd': /* show debug information */
+			Options.debug++;
 			break;
 
-		case 'F': /* Change the time: When does weekend start? */
+		case 'F': /* change when the weekend starts */
 			Friday = (int)strtol(optarg, NULL, 10);
 			break;
 

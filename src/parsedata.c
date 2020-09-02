@@ -339,6 +339,9 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 		return -1;
 	}
 
+	if (Options.debug >= 3)
+		show_dateinfo(&di);
+
 	*flags = di.flags;
 	index = (di.flags & F_INDEX) ? di.index : 0;
 	offset = (di.flags & F_OFFSET) ? di.offset : 0;
@@ -524,8 +527,8 @@ parse_index(const char *s, int *index)
 		}
 	}
 
-	DPRINTF("%s: |%s| -> %d (status=%s)\n",
-		__func__, s, *index, (parsed ? "ok" : "fail"));
+	DPRINTF2("%s: |%s| -> %d (status=%s)\n",
+		 __func__, s, *index, (parsed ? "ok" : "fail"));
 	return parsed;
 }
 

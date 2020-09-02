@@ -56,6 +56,10 @@
 
 #define DPRINTF(...) \
 	if (Options.debug) fprintf(stderr, __VA_ARGS__)
+#define DPRINTF2(...) \
+	if (Options.debug >= 2) fprintf(stderr, __VA_ARGS__)
+#define DPRINTF3(...) \
+	if (Options.debug >= 3) fprintf(stderr, __VA_ARGS__)
 
 
 struct location;
@@ -67,8 +71,8 @@ struct cal_options {
 	int today;  /* R.D. of today to remind events */
 	int day_begin;  /* beginning of date range to remind events */
 	int day_end;  /* end of date range to remind events */
+	int debug;  /* debug log level (higher means more verbose) */
 	bool allmode;  /* whether to process calendars for all users */
-	bool debug;
 };
 
 struct calendar {
