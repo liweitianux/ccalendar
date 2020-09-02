@@ -170,13 +170,6 @@ determine_style(const char *date, struct dateinfo *di)
 			}
 		}
 
-		if (is_onlydigits(date2, false)) {
-			/* Assume month number only */
-			di->flags |= F_MONTH;
-			di->month = (int)strtol(date2, NULL, 10);
-			return true;
-		}
-
 		goto error;
 	}
 
