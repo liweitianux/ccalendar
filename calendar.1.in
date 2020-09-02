@@ -468,6 +468,8 @@ This calendar should be updated yearly by the local system administrator
 so that roving holidays are set correctly for the current year.
 The entries for this calendar have been obtained from the port
 .Pa deskutils/hebcal .
+.It Pa calendar.misc
+Miscellaneous events.
 .It Pa calendar.music
 Musical events, births, and deaths.
 Strongly oriented toward rock 'n' roll and classical.
