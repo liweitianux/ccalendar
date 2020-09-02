@@ -8,6 +8,7 @@
 #ifndef _zh_Hant_TW_UTF_8_chinese_
 #define _zh_Hant_TW_UTF_8_chinese_
 
+CALENDAR=Chinese
 LANG=zh_Hant_TW.UTF-8
 
 /*
@@ -20,7 +21,7 @@ ChineseNewYear		Lunar New Year / Spring Festival (春節)
 
 /*
  * Other holidays
- /
+ */
 01/15		Lantern Festival (元宵節) / Tourism Day (觀光節)
 02/02		Earth God's Birthday (土地公誕辰)
 02/19		Kuan Yin's Birthday (觀音誕辰)

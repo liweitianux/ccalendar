@@ -8,6 +8,7 @@
 #ifndef _zh_Hans_CN_UTF_8_chinese_
 #define _zh_Hans_CN_UTF_8_chinese_
 
+CALENDAR=Chinese
 LANG=zh_Hans_CN.UTF-8
 
 /*
@@ -19,7 +20,7 @@ ChineseNewYear	Chinese New Year / Spring Festival (春节)
 
 /*
  * Other holidays
- /
+ */
 ChineseNewYear-1	Chinese New Year's Eve (除夕)
 01/15		Lantern Festival (元宵节)
 02/02		Zhonghe Festival (中和节)
