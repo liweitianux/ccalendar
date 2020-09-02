@@ -522,7 +522,7 @@ cd_home(const char *home)
 
 	snprintf(path, sizeof(path), "%s/%s", home, calendarHome);
 	if (chdir(path) == -1) {
-		DPRINTF("Cannot enter home directory: '%s'", home);
+		DPRINTF("Cannot enter home directory: '%s'\n", path);
 		return false;
 	}
 
