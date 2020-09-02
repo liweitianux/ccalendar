@@ -60,7 +60,7 @@ dayofweek_from_fixed(int rd)
 
 /*
  * Calculate the fixed date of the day-of-week $dow on or before
- * the fixed date $date.
+ * the fixed date $rd.
  * Ref: Sec.(1.12), Eq.(1.62)
  */
 int
@@ -71,13 +71,24 @@ kday_onbefore(int dow, int rd)
 
 /*
  * Calculate the fixed date of the day-of-week $dow after
- * the fixed date $date.
+ * the fixed date $rd.
  * Ref: Sec.(1.12), Eq.(1.68)
  */
 int
 kday_after(int dow, int rd)
 {
 	return kday_onbefore(dow, rd + 7);
+}
+
+/*
+ * Calculate the fixed date of the day-of-week $dow nearest to
+ * the fixed date $rd.
+ * Ref: Sec.(1.12), Eq.(1.66)
+ */
+int
+kday_nearest(int dow, int rd)
+{
+	return kday_onbefore(dow, rd + 3);
 }
 
 /*

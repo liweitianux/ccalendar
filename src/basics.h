@@ -72,6 +72,7 @@ enum dayofweek {
 
 int	dayofweek_from_fixed(int rd);
 int	kday_after(int dow, int rd);
+int	kday_nearest(int dow, int rd);
 int	kday_onbefore(int dow, int rd);
 int	nth_kday(int n, int dow, struct date *date);
 int	dayofyear_from_fixed(int rd);
