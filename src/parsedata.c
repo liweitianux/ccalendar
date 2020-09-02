@@ -585,6 +585,7 @@ parse_timezone(const char *s, int *result)
 	int offset = hh * 3600 + mm * 60;
 	*result = (sign == '+') ? offset : -offset;
 
+	DPRINTF("%s: parsed |%s| -> %d seconds\n", __func__, s, *result);
 	return true;
 }
 
@@ -750,5 +751,7 @@ parse_time(const char *time, double *t_out)
 		return false;
 
 	*t_out = (hh + mm/60.0 + ss/3600.0) / 24.0;
+
+	DPRINTF("%s: parsed |%s| -> %.3lf day\n", __func__, time, *t_out);
 	return true;
 }
