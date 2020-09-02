@@ -42,7 +42,6 @@
 struct cal_day;
 
 int	fixed_from_julian(const struct date *date);
-int	julian_dayofweek_from_fixed(const struct date *jdate);
 void	julian_from_fixed(int rd, struct date *date);
 bool	julian_leap_year(int year);
 
