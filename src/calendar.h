@@ -76,7 +76,15 @@ struct cal_options {
 	bool allmode;  /* whether to process calendars for all users */
 };
 
+/* IDs of supported calendars */
+enum {
+	CAL_GREGORIAN,
+	CAL_JULIAN,
+	CAL_CHINESE,
+};
+
 struct calendar {
+	int	id;  /* enum ID of the calendar */
 	const char *name;
 	int	(*format_date)(char *buf, size_t size, int rd);
 	int	(*find_days_ymd)(int year, int month, int day,

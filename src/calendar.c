@@ -89,6 +89,7 @@ struct calendar *Calendar;
 /* all supported calendars */
 static struct calendar calendars[] = {
 	{  /* the default */
+		.id = CAL_GREGORIAN,
 		.name = "Gregorian",
 		.format_date = NULL,
 		.find_days_ymd = find_days_ymd,
@@ -97,6 +98,7 @@ static struct calendar calendars[] = {
 		.find_days_mdow = find_days_mdow,
 	},
 	{
+		.id = CAL_JULIAN,
 		.name = "Julian",
 		.format_date = julian_format_date,
 		.find_days_ymd = julian_find_days_ymd,
@@ -105,6 +107,7 @@ static struct calendar calendars[] = {
 		.find_days_mdow = NULL,
 	},
 	{
+		.id = CAL_CHINESE,
 		.name = "Chinese",
 		.format_date = chinese_format_date,
 		.find_days_ymd = chinese_find_days_ymd,
