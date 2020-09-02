@@ -401,7 +401,8 @@ parse_cal_date(const char *date, int *flags, struct cal_day **dayp, char **edp)
 		}
 	}
 
-	warnx("%s: unprocessed date: |%s|", __func__, date);
+	warnx("%s: Unsupported date |%s| in '%s' calendar",
+	      __func__, date, Calendar->name);
 	if (Options.debug)
 		show_dateinfo(&di);
 
