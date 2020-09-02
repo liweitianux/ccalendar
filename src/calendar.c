@@ -174,6 +174,8 @@ main(int argc, char *argv[])
 	struct location loc = { 0 };
 	const char *show_info = NULL;
 	const char *calfile = NULL;
+	const char *calhome = NULL;
+	const char *optstring;
 	FILE *fp = NULL;
 
 	Options.location = &loc;
@@ -181,7 +183,8 @@ main(int argc, char *argv[])
 	Options.today = get_fixed_of_today();
 	loc.zone = get_utc_offset() / (3600.0 * 24.0);
 
-	while ((ch = getopt(argc, argv, "-A:aB:dF:f:hL:l:s:T:t:U:W:")) != -1) {
+	optstring = "-A:aB:dF:f:hH:L:l:s:T:t:U:W:";
+	while ((ch = getopt(argc, argv, optstring)) != -1) {
 		switch (ch) {
 		case '-':		/* backward compatible */
 		case 'a':
@@ -217,6 +220,10 @@ main(int argc, char *argv[])
 			calfile = optarg;
 			if (strcmp(optarg, "-") == 0)
 				calfile = "/dev/stdin";
+			break;
+
+		case 'H': /* calendar home directory */
+			calhome = optarg;
 			break;
 
 		case 'L': /* location */
@@ -258,6 +265,8 @@ main(int argc, char *argv[])
 
 	if (Options.allmode && calfile != NULL)
 		errx(1, "flags -a and -f cannot be used together");
+	if (Options.allmode && calhome != NULL)
+		errx(1, "flags -a and -H cannot be used together");
 
 	if (!L_flag)
 		loc.longitude = loc.zone * 360.0;
@@ -414,9 +423,14 @@ main(int argc, char *argv[])
 		if (fp == NULL)
 			fp = fopen(calendarFile, "r");
 
-		/* try to enter '~/.calendar' */
-		if (cd_home(NULL)) {
-			/* try '~/.calendar/calendar' */
+		if (calhome) {
+			if (chdir(calhome) == -1)
+				errx(1, "Cannot enter home: '%s'", calhome);
+			/* try 'calendar' in home directory */
+			if (fp == NULL)
+				fp = fopen(calendarFile, "r");
+		} else if (cd_home(NULL)) {  /* try to enter '~/.calendar' */
+			/* try 'calendar' in home directory */
 			if (fp == NULL)
 				fp = fopen(calendarFile, "r");
 		} else {
@@ -426,6 +440,7 @@ main(int argc, char *argv[])
 				errx(1, "Cannot enter directory: '%s'",
 				     calendarDirs[1]);
 		}
+
 		/* fallback to '/etc/calendar/default' */
 		if (fp == NULL) {
 			warnx("No user's calendar file; "
@@ -550,7 +565,8 @@ usage(const char *progname)
 	fprintf(stderr,
 		"usage:\n"
 		"%s [-A days] [-a] [-B days] [-d] [-F friday]\n"
-		"\t[-f calendarfile] [-L latitude,longitude[,elevation]]\n"
+		"\t[-f calendar_file] [-H calendar_home]\n"
+		"\t[-L latitude,longitude[,elevation]]\n"
 		"\t[-s chinese|julian|moon|sun] [-T hh:mm[:ss]]\n"
 		"\t[-t [[[CC]YY]MM]DD] [-U ±hh[[:]mm]] [-W days]\n",
 		progname);

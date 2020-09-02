@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd August 30, 2020
+.Dd September 2, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -42,6 +42,7 @@
 .Op Fl d
 .Op Fl F Ar friday
 .Op Fl f Ar calendarfile
+.Op Fl H Ar calendar_home
 .Op Fl h
 .Op Fl L Ar latitude,longitude[,elevation]
 .Op Fl s Ar chinese|julian|moon|sun
@@ -86,6 +87,13 @@ as the default calendar file.
 If specified as
 .Pa - ,
 then read from standard input.
+Note that this flag cannot be used together with the
+.Fl a
+flag.
+.It Fl H Pa calendar_home
+Use
+.Ar calendar_home
+as the calendar home directory.
 Note that this flag cannot be used together with the
 .Fl a
 flag.
@@ -171,7 +179,10 @@ If the calendar file to be included (via the
 directive) is not referenced by a full pathname,
 .Nm
 searches in its home directory
-.Pa ( ~/.calendar )
+.Pa ( ~/.calendar
+or specified by the
+.Fl H
+flag)
 first, then in the
 .Pa @@CALENDAR_ETCDIR@@
 directory, and finally in the
