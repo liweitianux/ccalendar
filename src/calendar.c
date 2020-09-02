@@ -414,12 +414,18 @@ main(int argc, char *argv[])
 		if (fp == NULL)
 			fp = fopen(calendarFile, "r");
 
-		/* enter '~/.calendar' */
-		if (!cd_home(NULL))
-			errx(1, "Cannot enter home directory");
-		/* try '~/.calendar/calendar' */
-		if (fp == NULL)
-			fp = fopen(calendarFile, "r");
+		/* try to enter '~/.calendar' */
+		if (cd_home(NULL)) {
+			/* try '~/.calendar/calendar' */
+			if (fp == NULL)
+				fp = fopen(calendarFile, "r");
+		} else {
+			DPRINTF("Fallback to enter '%s'\n", calendarDirs[1]);
+			/* fallback to '/etc/calendar' as home directory */
+			if (chdir(calendarDirs[1]) == -1)
+				errx(1, "Cannot enter directory: '%s'",
+				     calendarDirs[1]);
+		}
 		/* fallback to '/etc/calendar/default' */
 		if (fp == NULL) {
 			warnx("No user's calendar file; "
