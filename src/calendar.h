@@ -39,6 +39,7 @@
 #define CALENDAR_H_
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifndef __unused
 #define __unused	__attribute__((__unused__))
