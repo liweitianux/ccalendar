@@ -214,6 +214,8 @@ at the end of the calendar file.
 To handle calendars in national code table, specify
 .Dq LANG=<locale>
 in the calendar file, before the national names being used.
+This setting will also make the event date in this calendar file
+be formatted in national names in the output.
 The locale change will be reset at the end of the calendar file.
 .Pp
 To handle the local name of sequences, specify them as
