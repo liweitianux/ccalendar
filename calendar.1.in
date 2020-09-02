@@ -41,7 +41,7 @@
 .Op Fl B Ar num
 .Op Fl d
 .Op Fl F Ar friday
-.Op Fl f Ar calendarfile
+.Op Fl f Ar calendar_file
 .Op Fl H Ar calendar_home
 .Op Fl h
 .Op Fl L Ar latitude,longitude[,elevation]
@@ -79,10 +79,10 @@ Print debug messages.
 Specify which day of the week is
 .Dq Friday
 (the day before the weekend begins).
-Default is 5.
-.It Fl f Pa calendarfile
+The default is 5.
+.It Fl f Pa calendar_file
 Use
-.Pa calendarfile
+.Ar calendar_file
 as the default calendar file.
 If specified as
 .Pa - ,
@@ -394,19 +394,18 @@ NewMoon\fB\et\fRNew moon of every month
 .Sh FILES
 .Bl -tag -width calendar.123456789012 -compact
 .It Pa calendar
-calendar file to find in current directory.
+The calendar file to find in current directory.
 .It Pa ~/.calendar
-.Pa calendar
-HOME directory.
+The default calendar home directory.
 A
 .Xr chdir 2
 is done into this directory if it exists.
 .It Pa ~/.calendar/calendar
-calendar file to use if no calendar file exists in the current directory.
+The calendar file to use if no calendar file exists in the current directory.
 .It Pa ~/.calendar/nomail
-do not send mail if this file exists.
+Do not send mail if this file exists.
 .It Pa @@CALENDAR_ETCDIR@@/default
-system-wide default calendar file, which is used if the
+The system-wide default calendar file, which is used if the
 .Pa ~/.calendar/calendar
 doesn't exist.
 This fallback calendar file is ignored in the
