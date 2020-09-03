@@ -216,12 +216,12 @@ event_print_all(FILE *fp)
 		for (e = dp->events; e != NULL; e = e->next) {
 			fprintf(fp, "%s%c\t", e->date, e->variable ? '*' : ' ');
 			if (e->date_user[0] != '\0')
-				fprintf(fp, "[%s]", e->date_user);
+				fprintf(fp, "[%s] ", e->date_user);
 
 			desc = e->description;
 			for (line = desc->firstline; line; line = line->next) {
 				fprintf(fp, "%s%s%s",
-					(line == desc->firstline) ? " " : "\t",
+					(line == desc->firstline) ? "" : "\t\t",
 					line->str,
 					(line == desc->lastline) ? "" : "\n");
 			}
