@@ -42,6 +42,7 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "calendar.h"
 #include "basics.h"
 #include "ecclesiastical.h"
 #include "gregorian.h"
@@ -85,4 +86,24 @@ easter(int g_year)
 	int paschal_moon = fixed_from_gregorian(&april19) - shifted_epact;
 
 	return kday_after(SUNDAY, paschal_moon);
+}
+
+/*
+ * Calculate the fixed date (RD) of Advent Sunday (the 4th Sunday
+ * before Christmas, equivalent to the Sunday closest to November 30)
+ * in Gregorian year $g_year.
+ * Ref: Sec.(2.5), Eq.(2.42)
+ */
+int
+advent(int g_year)
+{
+	struct date date = { g_year, 11, 30 };
+	int rd;
+
+	if (Calendar->id == CAL_JULIAN)
+		rd = fixed_from_julian(&date);
+	else
+		rd = fixed_from_gregorian(&date);
+
+	return kday_nearest(SUNDAY, rd);
 }

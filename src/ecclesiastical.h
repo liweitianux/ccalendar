@@ -37,6 +37,7 @@
 #ifndef ECCLESIASTICAL_H_
 #define ECCLESIASTICAL_H_
 
+int	advent(int g_year);
 int	easter(int g_year);
 int	orthodox_easter(int g_year);
 
