@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd September 2, 2020
+.Dd September 3, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -229,6 +229,8 @@ The names of the following special days are recognized:
 Catholic Easter.
 .It Paskha
 Orthodox Easter.
+.It Advent
+First Sunday of Advent.
 .It NewMoon
 The lunar New Moon.
 .It FullMoon
@@ -356,7 +358,8 @@ Offset                  ::=     '' | '+' . OffsetNumber | '-' . OffsetNumber
 OffsetNumber            ::=     '0' ... '9' | '00' ... '99' | '000' ... '299' |
                                 '300' ... '359' | '360' ... '365'
 
-SpecialDay              ::=     'Easter' | 'Paskha' | 'ChineseNewYear' |
+SpecialDay              ::=     'Easter' | 'Paskha' | 'Advent' |
+                                'ChineseNewYear' |
                                 'ChineseQingming' | 'ChineseJieqi' |
                                 'NewMoon' | 'FullMoon' |
                                 'MarEquinox' | 'SepEquinox' |

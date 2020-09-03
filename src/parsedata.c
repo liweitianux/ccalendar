@@ -121,7 +121,8 @@ static void	 show_dateinfo(struct dateinfo *di);
  * OffsetNumber		::=	'0' ... '9' | '00' ... '99' | '000' ... '299' |
  *				'300' ... '359' | '360' ... '365'
  *
- * SpecialDay		::=	'Easter' | 'Paskha' | 'ChineseNewYear' |
+ * SpecialDay		::=	'Easter' | 'Paskha' | 'Advent' |
+ *				'ChineseNewYear' |
  *				'ChineseQingming' | 'ChineseJieqi' |
  *				'NewMoon' | 'FullMoon' |
  *				'MarEquinox' | 'SepEquinox' |

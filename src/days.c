@@ -59,6 +59,7 @@ static int	find_days_moon(int sday_id, int offset,
 
 static int	find_days_easter(int, struct cal_day **, char **);
 static int	find_days_paskha(int, struct cal_day **, char **);
+static int	find_days_advent(int, struct cal_day **, char **);
 static int	find_days_cny(int, struct cal_day **, char **);
 static int	find_days_cqingming(int, struct cal_day **, char **);
 static int	find_days_cjieqi(int, struct cal_day **, char **);
@@ -76,6 +77,7 @@ static int	find_days_fullmoon(int, struct cal_day **, char **);
 struct specialday specialdays[] = {
 	SPECIALDAY_INIT(SD_EASTER, "Easter", &find_days_easter),
 	SPECIALDAY_INIT(SD_PASKHA, "Paskha", &find_days_paskha),
+	SPECIALDAY_INIT(SD_ADVENT, "Advent", &find_days_advent),
 	SPECIALDAY_INIT(SD_CNY, "ChineseNewYear", &find_days_cny),
 	SPECIALDAY_INIT(SD_CQINGMING, "ChineseQingming", &find_days_cqingming),
 	SPECIALDAY_INIT(SD_CJIEQI, "ChineseJieqi", &find_days_cjieqi),
@@ -99,6 +101,12 @@ static int
 find_days_paskha(int offset, struct cal_day **dayp, char **edp)
 {
 	return find_days_yearly(SD_PASKHA, offset, dayp, edp);
+}
+
+static int
+find_days_advent(int offset, struct cal_day **dayp, char **edp)
+{
+	return find_days_yearly(SD_ADVENT, offset, dayp, edp);
 }
 
 static int
@@ -162,6 +170,9 @@ find_days_yearly(int sday_id, int offset, struct cal_day **dayp, char **edp)
 			break;
 		case SD_PASKHA:
 			rd = orthodox_easter(y);
+			break;
+		case SD_ADVENT:
+			rd = advent(y);
 			break;
 		case SD_CNY:
 			rd = chinese_new_year(y);
