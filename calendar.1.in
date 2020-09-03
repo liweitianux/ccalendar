@@ -211,6 +211,8 @@ Specify
 in the calendar file to select the calendar to use.
 The calendar will be reset to the default Gregorian calendar
 at the end of the calendar file.
+When a non-default calendar is selected, the matched events will
+be printed with a secondary date formatted in the selected calendar.
 .Pp
 To handle calendars in national code table, specify
 .Dq LANG=<locale>
