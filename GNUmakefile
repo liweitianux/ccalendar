@@ -3,7 +3,7 @@ MAN=		calendar.1
 SRCS=		$(wildcard src/*.c)
 OBJS=		$(SRCS:.c=.o)
 CALFILE=	calendar.default
-DISTFILES=	GNUmakefile LICENSE README.md calendars src \
+DISTFILES=	GNUmakefile LICENSE README.md calendars patchs src \
 		$(CALFILE).in $(MAN).in
 
 PREFIX?=	/usr/local
@@ -44,6 +44,13 @@ COMPILE.c=	$(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 
 .PHONY: all
 all: $(PROG) $(MAN).gz $(CALFILE)
+
+ifeq ($(OS),$(filter $(OS),Linux Darwin))
+.PHONY: patch
+all: patch
+patch:
+	patch -p1 < patchs/calendars-zh-locale.patch
+endif
 
 .PHONY: debug
 debug: $(PROG)

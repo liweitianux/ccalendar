@@ -1,0 +1,72 @@
+From 5f2949c83c96aa54b0b11128f8a39a1206c17621 Mon Sep 17 00:00:00 2001
+From: Aaron LI <aly@aaronly.me>
+Date: Thu, 3 Sep 2020 14:05:46 +0800
+Subject: [PATCH] calendars: Use zh_CN.UTF-8 and zh_TW.UTF-8
+
+The 'zh_CN' and 'zh_TW' locales are actually deprecated in favor of more
+specific locales such as 'zh_Hans_CN', 'zh_Hant_TW', as used in this
+utility.  However, the latter locales are not well supported at the
+moment.  Therefore, revert to use the deprecated 'zh_CN.UTF-8' and
+'zh_TW.UTF-8' locales.
+---
+ calendars/zh_Hans_CN.UTF-8/calendar.chinese   | 2 +-
+ calendars/zh_Hans_CN.UTF-8/calendar.gregorian | 2 +-
+ calendars/zh_Hant_TW.UTF-8/calendar.chinese   | 2 +-
+ calendars/zh_Hant_TW.UTF-8/calendar.gregorian | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/calendars/zh_Hans_CN.UTF-8/calendar.chinese b/calendars/zh_Hans_CN.UTF-8/calendar.chinese
+index 9e34171..a1a4943 100644
+--- a/calendars/zh_Hans_CN.UTF-8/calendar.chinese
++++ b/calendars/zh_Hans_CN.UTF-8/calendar.chinese
+@@ -9,7 +9,7 @@
+ #define _zh_Hans_CN_UTF_8_chinese_
+ 
+ CALENDAR=Chinese
+-LANG=zh_Hans_CN.UTF-8
++LANG=zh_CN.UTF-8
+ 
+ /*
+  * Official public holidays
+diff --git a/calendars/zh_Hans_CN.UTF-8/calendar.gregorian b/calendars/zh_Hans_CN.UTF-8/calendar.gregorian
+index ab54487..d8dc50e 100644
+--- a/calendars/zh_Hans_CN.UTF-8/calendar.gregorian
++++ b/calendars/zh_Hans_CN.UTF-8/calendar.gregorian
+@@ -7,7 +7,7 @@
+ #ifndef _zh_Hans_CN_UTF_8_gregorian_
+ #define _zh_Hans_CN_UTF_8_gregorian_
+ 
+-LANG=zh_Hans_CN.UTF-8
++LANG=zh_CN.UTF-8
+ 
+ DecSolstice=Dongzhi
+ 
+diff --git a/calendars/zh_Hant_TW.UTF-8/calendar.chinese b/calendars/zh_Hant_TW.UTF-8/calendar.chinese
+index c8de519..3790039 100644
+--- a/calendars/zh_Hant_TW.UTF-8/calendar.chinese
++++ b/calendars/zh_Hant_TW.UTF-8/calendar.chinese
+@@ -9,7 +9,7 @@
+ #define _zh_Hant_TW_UTF_8_chinese_
+ 
+ CALENDAR=Chinese
+-LANG=zh_Hant_TW.UTF-8
++LANG=zh_TW.UTF-8
+ 
+ /*
+  * Official public holidays
+diff --git a/calendars/zh_Hant_TW.UTF-8/calendar.gregorian b/calendars/zh_Hant_TW.UTF-8/calendar.gregorian
+index 4688898..58a381a 100644
+--- a/calendars/zh_Hant_TW.UTF-8/calendar.gregorian
++++ b/calendars/zh_Hant_TW.UTF-8/calendar.gregorian
+@@ -7,7 +7,7 @@
+ #ifndef _zh_Hant_TW_UTF_8_gregorian_
+ #define _zh_Hant_TW_UTF_8_gregorian_
+ 
+-LANG=zh_Hant_TW.UTF-8
++LANG=zh_TW.UTF-8
+ 
+ DecSolstice=Dongzhi
+ 
+-- 
+2.28.0
+
