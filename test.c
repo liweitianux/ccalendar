@@ -23,7 +23,10 @@
  * for compatible with calendar.c ... files
  */
 struct cal_options Options;
+struct calendar *Calendar;
 const char *calendarDirs[] = { NULL };
+
+bool set_calendar(const char *name __unused) { return true; }
 
 
 static void
