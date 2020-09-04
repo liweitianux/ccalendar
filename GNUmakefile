@@ -46,7 +46,10 @@ ifeq ($(OS),$(filter $(OS),Linux Darwin))
 .PHONY: patch
 all: patch
 patch:
+ifneq (,$(wildcard ./patchs/calendars-zh-locale.patch))
 	patch -p1 < patchs/calendars-zh-locale.patch
+	rm patchs/calendars-zh-locale.patch
+endif
 endif
 
 .PHONY: debug
