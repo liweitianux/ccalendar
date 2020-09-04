@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd September 3, 2020
+.Dd September 4, 2020
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -531,7 +531,11 @@ The
 utility was significantly enhanced in
 .Fx 9.0
 by
-.An Edwin Groothuis Aq Mt edwin@FreeBSD.org .
+.An Edwin Groothuis Aq Mt edwin@FreeBSD.org ,
+and was later rewritten to support multiple calendars in
+.Dx 5.9
+by
+.An Aaron LI Aq Mt aly@aaronly.me .
 .Sh NOTES
 The new and full moons are happening on the day indicated.
 They can happen in the time period from the early morning to
