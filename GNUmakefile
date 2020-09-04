@@ -38,9 +38,6 @@ ifeq ($(OS),Linux)
 CFLAGS+=	-D_GNU_SOURCE
 endif
 
-# Credit: http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/
-DEPFLAGS=	-MT $@ -MMD -MP -MF $*.d
-COMPILE.c=	$(CC) $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
 
 .PHONY: all
 all: $(PROG) $(MAN).gz $(CALFILE)
@@ -65,16 +62,6 @@ $(MAN).gz: $(MAN)
 	gzip -9c $(MAN) > $@
 CLEANFILES+=	$(MAN) $(MAN).gz $(CALFILE)
 
-%.o: %.c
-%.o: %.c %.d
-	$(COMPILE.c) $(OUTPUT_OPTION) $<
-
-DEPFILES=	$(SRCS:%.c=%.d)
-CLEANFILES+=	$(DEPFILES)
-$(DEPFILES):
-
-include $(wildcard $(DEPFILES))
-
 
 .PHONY: install
 install:
@@ -92,6 +79,8 @@ install:
 .PHONY: clean
 clean:
 	rm -f $(PROG) $(OBJS) $(CLEANFILES)
+
+include autodep.mk
 
 
 .PHONY: archpkg
