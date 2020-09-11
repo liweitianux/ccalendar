@@ -31,8 +31,6 @@ Build and installation:
 1. `make [PREFIX=/usr/local]`
 2. `sudo make install [PREFIX=/usr/local]`
 
-*NOTE*: Use `gmake` on BSD systems.
-
 
 References
 ----------
