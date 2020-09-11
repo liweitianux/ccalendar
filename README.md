@@ -1,7 +1,9 @@
 Chinese Calendar
 ================
 
-A Chinese calendar based on the UNIX calendar(1) utility for BSD & Linux systems.
+A Chinese calendar based on the UNIX calendar(1) utility for BSD, Linux,
+and macOS systems.
+
 The Chinese calendar calculation, as well as the Sun and Moon calculations, is
 implemented with **astronomical algorithms** by referring to
 [Calendrical Calculations: The Ultimate Edition (4th Edition)](http://www.cs.tau.ac.il/~nachum/calendar-book/fourth-edition/)
@@ -17,6 +19,10 @@ Currently, the **Gregorian**, **Julian**, and **Chinese** calendars are supporte
 Some updates in FreeBSD, OpenBSD, NetBSD, and
 [Debian Linux](https://salsa.debian.org/meskes/bsdmainutils)
 have also been integrated.
+
+See also the
+[calendar(1)](https://gitweb.dragonflybsd.org/dragonfly.git/commitdiff/9c697e7d97d6baa26122897c91093020e3ba547b)
+man page.
 
 Welcome to try this utility, report issues, and contribute fixes and improvements :D
 
