@@ -79,6 +79,14 @@ install:
 	find $(CALENDAR_DIR)/ -type d | xargs chmod 0755
 	find $(CALENDAR_DIR)/ -type f | xargs chmod 0644
 
+.PHONY: uninstall
+uninstall:
+	rm -rf \
+		$(PREFIX)/bin/$(PROG) \
+		$(MAN_DIR)/man1/$(MAN).gz \
+		$(CALENDAR_ETCDIR)/default \
+		$(CALENDAR_DIR)
+
 .PHONY: clean
 clean:
 	rm -f $(PROG) $(OBJS) $(CLEANFILES)
