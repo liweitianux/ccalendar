@@ -1,0 +1,14 @@
+---
+language: c
+dist: bionic
+os:
+  - osx
+  - linux
+install:
+  - make
+  - sudo make install
+script:
+  - calendar -s chinese
+  - calendar -s julian
+  - calendar -s moon -L 34.5402,108.9242,417.2
+  - calendar -s sun  -L 34.5402,108.9242,417.2

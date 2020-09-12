@@ -1,5 +1,6 @@
 Chinese Calendar
 ================
+[![Build Status](https://travis-ci.com/liweitianux/ccalendar.svg)](https://travis-ci.com/liweitianux/ccalendar)
 
 A Chinese calendar based on the UNIX calendar(1) utility for BSD, Linux,
 and macOS systems.
