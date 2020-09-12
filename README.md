@@ -21,7 +21,7 @@ Some updates in FreeBSD, OpenBSD, NetBSD, and
 have also been integrated.
 
 See also the
-[calendar(1)](https://gitweb.dragonflybsd.org/dragonfly.git/commitdiff/9c697e7d97d6baa26122897c91093020e3ba547b)
+[calendar(1)](https://www.dragonflybsd.org/cgi/web-man?command=calendar&section=1)
 man page.
 
 Welcome to try this utility, report issues, and contribute fixes and improvements :D
