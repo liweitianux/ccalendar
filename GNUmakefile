@@ -81,11 +81,11 @@ install:
 
 .PHONY: uninstall
 uninstall:
-	rm -rf \
-		$(PREFIX)/bin/$(PROG) \
+	rm -rf  $(PREFIX)/bin/$(PROG) \
 		$(MAN_DIR)/man1/$(MAN).gz \
 		$(CALENDAR_ETCDIR)/default \
 		$(CALENDAR_DIR)
+	rmdir $(CALENDAR_ETCDIR) 2>/dev/null || true
 
 .PHONY: clean
 clean:
