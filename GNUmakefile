@@ -3,7 +3,7 @@ MAN=		calendar.1
 SRCS=		$(wildcard src/*.c)
 OBJS=		$(SRCS:.c=.o)
 CALFILE=	calendar.default
-DISTFILES=	GNUmakefile LICENSE README.md calendars patchs src \
+DISTFILES=	GNUmakefile LICENSE README.md calendars patches src \
 		$(CALFILE).in $(MAN).in
 
 PREFIX?=	/usr/local
@@ -46,9 +46,9 @@ ifeq ($(OS),$(filter $(OS),Linux Darwin))
 .PHONY: patch
 all: patch
 patch:
-ifneq (,$(wildcard ./patchs/calendars-zh-locale.patch))
-	patch -p1 < patchs/calendars-zh-locale.patch
-	rm patchs/calendars-zh-locale.patch
+ifneq (,$(wildcard ./patches/calendars-zh-locale.patch))
+	patch -p1 < patches/calendars-zh-locale.patch
+	rm patches/calendars-zh-locale.patch
 endif
 endif
 
