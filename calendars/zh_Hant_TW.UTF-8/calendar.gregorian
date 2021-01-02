@@ -7,7 +7,7 @@
 #ifndef _zh_Hant_TW_UTF_8_gregorian_
 #define _zh_Hant_TW_UTF_8_gregorian_
 
-LANG=zh_Hant_TW.UTF-8
+LANG=zh_TW.UTF-8
 
 DecSolstice=Dongzhi
 
