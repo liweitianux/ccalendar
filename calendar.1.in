@@ -449,8 +449,7 @@ Calendar of events in Croatia.
 .It Pa calendar.discord
 Discordian calendar (all rites reversed).
 .It Pa calendar.dragonfly
-.Dx
-related events.
+DragonFly related events.
 .It Pa calendar.dutch
 Calendar of events in the Netherlands.
 .It Pa calendar.fictional

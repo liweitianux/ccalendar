@@ -9,7 +9,7 @@
 #define _zh_Hant_TW_UTF_8_chinese_
 
 CALENDAR=Chinese
-LANG=zh_Hant_TW.UTF-8
+LANG=zh_TW.UTF-8
 
 /*
  * Official public holidays

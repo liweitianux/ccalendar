@@ -225,8 +225,8 @@ event_print_all(FILE *fp)
 					line->str,
 					(line == desc->lastline) ? "" : "\n");
 			}
-			if (e->extra)
-				fprintf(fp, " (%s)", e->extra);
+//			if (e->extra)
+//				fprintf(fp, " (%s)", e->extra);
 
 			fputc('\n', fp);
 			fflush(fp);
