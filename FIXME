@@ -1,0 +1,3 @@
+- non-preservation of * with cal formatted dates
+- issue with preservation of ISO characters if last item on the line
+- spelling of CALENDAR in manfile
