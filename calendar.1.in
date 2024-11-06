@@ -28,7 +28,7 @@
 .\"     @(#)calendar.1  8.1 (Berkeley) 6/29/93
 .\" $FreeBSD: head/usr.bin/calendar/calendar.1 314436 2017-02-28 23:42:47Z imp $
 .\"
-.Dd September 14, 2020
+.Dd November 6, 2024
 .Dt CALENDAR 1
 .Os
 .Sh NAME
@@ -373,7 +373,7 @@ SpecialDay              ::=     'Easter' | 'Paskha' | 'Advent' |
 Some possible calendar entries (<tab> characters highlighted as
 .Sq \fB\et\fR ) :
 .Bd -unfilled -offset indent
-CLANEDAR=Gregorian
+CALENDAR=Gregorian
 LANG=C
 Easter=Ostern
 
